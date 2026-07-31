@@ -1,7 +1,7 @@
 # GTM Smart Gate
 
 <p align="center">
-  <img src="frontend/src/assets/images/logo.png" alt="GTM Smart Gate Logo" width="180"/>
+  <img src="frontend/src/assets/icons/logo.png" alt="GTM Smart Gate Logo" width="180"/>
 </p>
 
 <p align="center">
