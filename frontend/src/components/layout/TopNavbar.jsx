@@ -10,18 +10,19 @@ const TopNavbar = () => {
     <header className="top-navbar">
       <div className="global-search">
         <Search size={14} style={{ color: 'var(--color-text-secondary)' }} />
-        <input type="text" placeholder="Global search customers, licenses, audit logs..." />
+        <input type="text" placeholder="Search organizations, users, sites, visitors, audit logs..." />
       </div>
 
       <div className="navbar-right">
-        <div className="platform-status">
+        <div className="platform-status" title="Last Checked 15 sec ago">
           <span className="status-dot"></span>
-          Platform Operational
+          <span>Platform Operational</span>
+          <span style={{ opacity: 0.75, fontWeight: 400, marginLeft: '4px' }}>| 99.99% Availability</span>
         </div>
 
-        <button className="icon-btn" title="Notifications" onClick={() => alert('No unread notifications.')}>
+        <button className="icon-btn" title="Notifications" onClick={() => alert('5 New Platform Notifications')}>
           <Bell size={16} />
-          <span className="notification-dot"></span>
+          <span className="notification-dot" style={{ display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '9px', fontWeight: 700, color: 'white', background: '#D32F2F', borderRadius: '50%', width: '14px', height: '14px', top: '3px', right: '3px' }}>5</span>
         </button>
 
         <button className="icon-btn" title="Toggle Theme" onClick={() => alert('Dark theme toggle placeholder')}>

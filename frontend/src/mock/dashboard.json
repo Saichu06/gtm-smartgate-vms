@@ -1,14 +1,27 @@
 {
-  "totalCustomers": 8,
-  "activeTenants": 6,
-  "trialTenants": 1,
-  "expiredLicenses": 1,
-  "visitorsToday": 22780,
-  "storageConsumed": "1.42 TB",
+  "totalOrganizations": 12,
+  "activeLicenses": {
+    "enterprise": 8,
+    "professional": 3,
+    "trial": 1
+  },
+  "visitorsToday": 24850,
+  "activeSites": 96,
+  "platformUsers": 48,
   "systemHealth": {
-    "apiGateway": { "status": "Operational", "latency": "18ms", "uptime": "99.99%" },
-    "postgresDB": { "status": "Healthy", "connections": "142/500", "cpu": "12%" },
-    "smtpGateway": { "status": "Operational", "queue": 0, "provider": "SendGrid" },
-    "twilioOTP": { "status": "Operational", "deliveryRate": "99.4%" }
-  }
+    "apiGateway": { "status": "Operational", "uptime": "99.99%", "latency": "14 ms", "lastChecked": "12 sec ago" },
+    "authService": { "status": "Operational", "uptime": "99.98%", "latency": "19 ms", "lastChecked": "10 sec ago" },
+    "postgresDB": { "status": "Healthy", "uptime": "100.0%", "latency": "8 ms", "lastChecked": "5 sec ago" },
+    "emailService": { "status": "Operational", "uptime": "99.95%", "latency": "42 ms", "lastChecked": "25 sec ago" },
+    "otpService": { "status": "Degraded", "uptime": "98.50%", "latency": "120 ms", "lastChecked": "15 sec ago" },
+    "storage": { "status": "Operational", "uptime": "99.99%", "latency": "22 ms", "lastChecked": "30 sec ago" }
+  },
+  "platformAlerts": [
+    { "id": 1, "severity": "Critical", "text": "Cognizant India tenant suspended due to unpaid invoice" },
+    { "id": 2, "severity": "Warning", "text": "License expires in 12 days for HCL Technologies" },
+    { "id": 3, "severity": "Warning", "text": "OTP service latency increased (+120ms)" },
+    { "id": 4, "severity": "Information", "text": "SMTP latency increased slightly (+15ms)" },
+    { "id": 5, "severity": "Information", "text": "Automated DB Backup completed successfully" },
+    { "id": 6, "severity": "Information", "text": "Storage approaching 75% threshold on AWS S3" }
+  ]
 }

@@ -2,22 +2,24 @@
  * Sidebar Component
  * Left navigation sidebar with company brand header and grouped navigation links.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Building2, CreditCard, Users, ShieldCheck, FileText, Settings, HelpCircle, LogOut
+  LayoutDashboard, Building2, CreditCard, Users, ShieldCheck, FileText, Settings, HelpCircle, LogOut, User, Sliders, Bell
 } from 'lucide-react';
 import Avatar from '@components/ui/Avatar';
 
+import logoImg from '../../assets/icons/logo.png';
+
 const Sidebar = () => {
   const navigate = useNavigate();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <img src="/assets/image.png" alt="GTM Logo" onError={(e) => { e.target.src = 'https://via.placeholder.com/100x30?text=GTM'; }} />
+        <img src={logoImg} alt="GTM Logo" />
         <div className="sidebar-brand-text">
-          {/* <div className="sidebar-brand-name">GTM Smart Gate</div> */}
           <span className="sidebar-brand-tag">Super Admin</span>
         </div>
       </div>
@@ -28,9 +30,9 @@ const Sidebar = () => {
           <LayoutDashboard size={16} className="nav-icon" /> Dashboard
         </NavLink>
 
-        <div className="nav-group-label">Customer Management</div>
+        <div className="nav-group-label">Organization Management</div>
         <NavLink to="/customers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Building2 size={16} className="nav-icon" /> Customers
+          <Building2 size={16} className="nav-icon" /> Organizations
         </NavLink>
         <NavLink to="/subscriptions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <CreditCard size={16} className="nav-icon" /> Subscriptions
@@ -56,16 +58,31 @@ const Sidebar = () => {
         </button>
       </nav>
 
-      <div className="sidebar-footer">
-        <div className="user-menu" onClick={() => navigate('/login')}>
+      <div className="sidebar-footer position-relative">
+        {showProfileMenu && (
+          <div className="position-absolute bottom-100 start-0 w-100 mb-2 p-2 bg-white border rounded-3 shadow-lg z-3">
+            <button className="btn btn-sm btn-light w-100 text-start d-flex align-items-center gap-2 mb-1" onClick={() => alert('Opening Profile Details')}>
+              <User size={14} /> Profile
+            </button>
+            <button className="btn btn-sm btn-light w-100 text-start d-flex align-items-center gap-2 mb-1" onClick={() => navigate('/settings')}>
+              <Sliders size={14} /> Preferences
+            </button>
+            <button className="btn btn-sm btn-light w-100 text-start d-flex align-items-center gap-2 mb-1" onClick={() => alert('Opening Notification Settings')}>
+              <Bell size={14} /> Notifications
+            </button>
+            <div className="dropdown-divider my-1"></div>
+            <button className="btn btn-sm btn-light text-danger w-100 text-start d-flex align-items-center gap-2" onClick={() => navigate('/login')}>
+              <LogOut size={14} /> Logout
+            </button>
+          </div>
+        )}
+        <div className="user-menu" onClick={() => setShowProfileMenu(!showProfileMenu)}>
           <Avatar name="Vikram Malhotra" size="sm" />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="user-name">Vikram Malhotra</div>
-            <div className="user-email">superadmin@gtm.com</div>
+            <div className="user-role" style={{ fontSize: '10px', color: 'var(--color-primary)', fontWeight: 600 }}>Super Administrator</div>
+            <div className="user-email" style={{ fontSize: '11px', color: 'var(--color-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>superadmin@gtm.com</div>
           </div>
-          <button className="icon-btn" title="Sign Out" onClick={() => navigate('/login')}>
-            <LogOut size={14} />
-          </button>
         </div>
       </div>
     </aside>
