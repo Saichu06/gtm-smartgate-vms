@@ -1,0 +1,6 @@
+[
+  { "id": 101, "name": "Vikram Malhotra", "email": "vikram.m@gtm.com", "role": "Super Admin", "status": "Active", "lastActive": "2 mins ago" },
+  { "id": 102, "name": "Ananya Sharma", "email": "ananya.s@gtm.com", "role": "Support Lead", "status": "Active", "lastActive": "1 hour ago" },
+  { "id": 103, "name": "Rohan Verma", "email": "rohan.v@gtm.com", "role": "Security Auditor", "status": "Active", "lastActive": "3 hours ago" },
+  { "id": 104, "name": "Priya Sundaram", "email": "priya.s@gtm.com", "role": "Billing Manager", "status": "Inactive", "lastActive": "2 days ago" }
+]

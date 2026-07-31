@@ -1,0 +1,19 @@
+{
+  "application": {
+    "title": "GTM Smart Gate Super Admin Portal",
+    "supportEmail": "support@gtm.com",
+    "sessionTimeout": "30 mins",
+    "maintenanceMode": false
+  },
+  "email": {
+    "smtpHost": "smtp.sendgrid.net",
+    "smtpPort": "587",
+    "senderName": "GTM Smart Gate Gatekeeper",
+    "senderEmail": "no-reply@smartgate.gtm.com"
+  },
+  "storage": {
+    "s3Bucket": "gtm-smartgate-visitor-storage-prod",
+    "region": "ap-south-1 (Mumbai)",
+    "retentionDays": 365
+  }
+}

@@ -1,0 +1,6 @@
+[
+  { "id": 1, "name": "Super Admin", "description": "Full uninhibited platform-wide administrative control across all enterprise customer tenants." },
+  { "id": 2, "name": "Support Lead", "description": "Read and edit access for resolving customer gate configuration issues and onboarding." },
+  { "id": 3, "name": "Security Auditor", "description": "Read-only access to immutable security logs and platform user activities." },
+  { "id": 4, "name": "Billing Manager", "description": "Access to customer subscription tiers, contract renewals, and licensing limits." }
+]

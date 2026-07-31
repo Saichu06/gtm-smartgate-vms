@@ -1,0 +1,7 @@
+[
+  { "id": "LOG-8801", "timestamp": "2026-07-31 09:42:15", "actor": "Vikram Malhotra", "action": "CUSTOMER_CREATED", "target": "SRM Institute of Science", "severity": "Info", "ip": "103.21.14.88" },
+  { "id": "LOG-8802", "timestamp": "2026-07-31 08:30:10", "actor": "System Auto-Task", "action": "LICENSE_EXPIRY_WARN", "target": "HCL Technologies", "severity": "Warning", "ip": "127.0.0.1" },
+  { "id": "LOG-8803", "timestamp": "2026-07-31 07:15:44", "actor": "Ananya Sharma", "action": "ADMIN_PASSWORD_RESET", "target": "Cognizant India", "severity": "Info", "ip": "103.21.14.92" },
+  { "id": "LOG-8804", "timestamp": "2026-07-30 18:20:00", "actor": "Vikram Malhotra", "action": "TENANT_SUSPENDED", "target": "Cognizant India", "severity": "Critical", "ip": "103.21.14.88" },
+  { "id": "LOG-8805", "timestamp": "2026-07-30 14:10:12", "actor": "Rohan Verma", "action": "SECURITY_MATRIX_UPDATE", "target": "Platform User Roles", "severity": "Info", "ip": "103.21.15.02" }
+]

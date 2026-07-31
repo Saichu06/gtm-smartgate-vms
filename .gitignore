@@ -1,0 +1,60 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Build outputs
+dist/
+build/
+.output/
+
+# Environment variables — NEVER commit .env files
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+
+# Logs
+logs/
+*.log
+combined.log
+error.log
+
+# Uploads (user-generated files)
+backend/uploads/
+
+# Database dumps
+database/backup/*.sql
+database/backup/*.dump
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor configs
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testing
+coverage/
+.nyc_output/
+
+# Vite
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary
+tmp/
+temp/

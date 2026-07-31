@@ -1,0 +1,14 @@
+{
+  "totalCustomers": 8,
+  "activeTenants": 6,
+  "trialTenants": 1,
+  "expiredLicenses": 1,
+  "visitorsToday": 22780,
+  "storageConsumed": "1.42 TB",
+  "systemHealth": {
+    "apiGateway": { "status": "Operational", "latency": "18ms", "uptime": "99.99%" },
+    "postgresDB": { "status": "Healthy", "connections": "142/500", "cpu": "12%" },
+    "smtpGateway": { "status": "Operational", "queue": 0, "provider": "SendGrid" },
+    "twilioOTP": { "status": "Operational", "deliveryRate": "99.4%" }
+  }
+}
