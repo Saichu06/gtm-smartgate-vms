@@ -1,0 +1,58 @@
+{
+  "organization": {
+    "id": 1,
+    "name": "Apollo Tyres Ltd",
+    "displayName": "Apollo Tyres",
+    "portalName": "Apollo Tyres Visitor Management System",
+    "code": "APOLLO",
+    "subdomain": "apollo",
+    "logo": null,
+    "primaryColor": "#004B87",
+    "secondaryColor": "#E31837",
+    "loginTitle": "Apollo Tyres Corporate Portal",
+    "loginSubtitle": "Sign in with your organization credentials to manage visitors, employees, and gate security.",
+    "footerText": "© 2026 Apollo Tyres Ltd. Powered by GTM Smart Gate SaaS.",
+    "supportEmail": "gate.support@apollotyres.com",
+    "supportPhone": "+91 44 2812 0000",
+    "version": "v4.8.2-enterprise"
+  },
+  "kpis": {
+    "visitorsToday": 1420,
+    "expectedVisitors": 380,
+    "pendingApprovals": 24,
+    "totalEmployees": 1240,
+    "totalSites": 8,
+    "gateActivityCount": 3840
+  },
+  "visitorTrends": [
+    { "day": "Mon", "visitors": 1120, "expected": 1300 },
+    { "day": "Tue", "visitors": 1350, "expected": 1400 },
+    { "day": "Wed", "visitors": 1480, "expected": 1500 },
+    { "day": "Thu", "visitors": 1420, "expected": 1450 },
+    { "day": "Fri", "visitors": 1290, "expected": 1350 },
+    { "day": "Sat", "visitors": 420, "expected": 500 },
+    { "day": "Sun", "visitors": 180, "expected": 200 }
+  ],
+  "visitorTypes": [
+    { "type": "Vendor / Contractor", "count": 620, "percentage": 43, "color": "#004B87" },
+    { "type": "Business Client", "count": 390, "percentage": 27, "color": "#0369A1" },
+    { "type": "Interview Candidate", "count": 210, "percentage": 15, "color": "#ED6C02" },
+    { "type": "VIP Visitor", "count": 120, "percentage": 9, "color": "#2E7D32" },
+    { "type": "Auditor / Government", "count": 80, "percentage": 6, "color": "#7C3AED" }
+  ],
+  "recentVisitors": [
+    { "id": "V-9842", "name": "Karthik Subramanian", "company": "Tata Consultancy Services", "type": "Vendor", "site": "Limda Plant 1", "host": "Rajesh Kumar (IT)", "status": "Checked In", "time": "10:42 AM" },
+    { "id": "V-9841", "name": "Meera Deshmukh", "company": "Bosch India", "type": "Business Client", "site": "Head Office Chennai", "host": "Siddharth N. (Ops)", "status": "Checked In", "time": "10:35 AM" },
+    { "id": "V-9840", "name": "Deepak Sharma", "company": "Schneider Electric", "type": "Auditor", "site": "Limda Plant 2", "host": "Anand R. (Quality)", "time": "10:15 AM", "status": "Expected" },
+    { "id": "V-9839", "name": "Pooja Hegde", "company": "SRM University", "type": "Interview Candidate", "site": "Head Office Chennai", "host": "Priya D. (HR)", "time": "09:50 AM", "status": "Checked Out" }
+  ],
+  "pendingApprovals": [
+    { "id": "REQ-102", "visitorName": "Vikram Sethi", "company": "L&T Heavy Engineering", "type": "Contractor", "host": "Karthik N.", "site": "Limda Plant 1", "scheduledDate": "Today, 02:00 PM" },
+    { "id": "REQ-103", "visitorName": "Sunita Rao", "company": "Deloitte India", "type": "Auditor", "host": "Srinivasan M.", "site": "Head Office Chennai", "scheduledDate": "Today, 03:30 PM" }
+  ],
+  "recentActivity": [
+    { "id": 1, "action": "Pass Issued", "actor": "Security Kiosk K-02", "target": "Karthik Subramanian (TCS)", "time": "5 mins ago", "type": "success" },
+    { "id": 2, "action": "User Created", "actor": "Rajesh Kumar (Corporate Admin)", "target": "Kavita Rao (Receptionist)", "time": "25 mins ago", "type": "primary" },
+    { "id": 3, "action": "Gate Access Warning", "actor": "Gate 4 ANPR Camera", "target": "Unregistered Vehicle TN-09-CB-4412", "time": "1 hour ago", "type": "warning" }
+  ]
+}

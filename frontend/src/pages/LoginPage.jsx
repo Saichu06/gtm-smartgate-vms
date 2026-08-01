@@ -85,61 +85,21 @@ const LoginPage = () => {
             </svg>
           </div>
 
-          {/* Content Hierarchy: 4. Enterprise Feature Cards */}
-          <div className="branding-highlights-grid row g-3">
-            <div className="col-12 col-md-4">
-              <div className="highlight-chip d-flex align-items-center gap-2 p-3 bg-white border rounded shadow-sm">
-                <div className="highlight-icon-wrapper rounded p-2 text-primary" style={{ background: '#EFF6FF' }}>
-                  <ShieldCheck size={18} />
-                </div>
-                <span className="highlight-text fw-semibold text-dark small">Secure</span>
+          {/* Content Hierarchy: 4. Enterprise Feature Cards — pure CSS 3-col grid, no Bootstrap row conflict */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {[
+              { icon: <ShieldCheck size={16} />, label: 'Secure' },
+              { icon: <Cpu size={16} />, label: 'Scalable' },
+              { icon: <Server size={16} />, label: 'Cloud Native' },
+              { icon: <Users size={16} />, label: 'Multi-Tenant' },
+              { icon: <Lock size={16} />, label: 'Role-Based AC' },
+              { icon: <Activity size={16} />, label: 'Real-Time' },
+            ].map(({ icon, label }) => (
+              <div key={label} className="highlight-chip">
+                <div className="highlight-icon-wrapper">{icon}</div>
+                <span className="highlight-text">{label}</span>
               </div>
-            </div>
-
-            <div className="col-12 col-md-4">
-              <div className="highlight-chip d-flex align-items-center gap-2 p-3 bg-white border rounded shadow-sm">
-                <div className="highlight-icon-wrapper rounded p-2 text-primary" style={{ background: '#EFF6FF' }}>
-                  <Cpu size={18} />
-                </div>
-                <span className="highlight-text fw-semibold text-dark small">Scalable</span>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-4">
-              <div className="highlight-chip d-flex align-items-center gap-2 p-3 bg-white border rounded shadow-sm">
-                <div className="highlight-icon-wrapper rounded p-2 text-primary" style={{ background: '#EFF6FF' }}>
-                  <Server size={18} />
-                </div>
-                <span className="highlight-text fw-semibold text-dark small">Cloud Native</span>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-4">
-              <div className="highlight-chip d-flex align-items-center gap-2 p-3 bg-white border rounded shadow-sm">
-                <div className="highlight-icon-wrapper rounded p-2 text-primary" style={{ background: '#EFF6FF' }}>
-                  <Users size={18} />
-                </div>
-                <span className="highlight-text fw-semibold text-dark small">Multi-Tenant</span>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-4">
-              <div className="highlight-chip d-flex align-items-center gap-2 p-3 bg-white border rounded shadow-sm">
-                <div className="highlight-icon-wrapper rounded p-2 text-primary" style={{ background: '#EFF6FF' }}>
-                  <Lock size={18} />
-                </div>
-                <span className="highlight-text fw-semibold text-dark small">Role Based AC</span>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-4">
-              <div className="highlight-chip d-flex align-items-center gap-2 p-3 bg-white border rounded shadow-sm">
-                <div className="highlight-icon-wrapper rounded p-2 text-primary" style={{ background: '#EFF6FF' }}>
-                  <Activity size={18} />
-                </div>
-                <span className="highlight-text fw-semibold text-dark small">Real-Time</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -150,7 +110,7 @@ const LoginPage = () => {
       </div>
 
       {/* 35% Right Login Panel */}
-      <div className="login-form-panel bg-white d-flex flex-column justify-content-center align-items-center p-4 p-md-5">
+      <div className="login-form-panel">
         <div className="login-form-container w-100" style={{ maxWidth: '420px' }}>
           <div className="login-form-header mb-4">
             {/* Single Primary Logo Asset */}
@@ -226,7 +186,7 @@ const LoginPage = () => {
             </div>
 
             <button type="submit" className="enterprise-btn-primary btn btn-primary w-100 fw-semibold d-flex align-items-center justify-content-center gap-2" style={{ height: '48px', borderRadius: '10px', backgroundColor: '#1565C0', borderColor: '#1565C0' }}>
-              <span>Sign In to GTM Portal</span>
+              <span>Sign In</span>
               <ArrowRight size={18} />
             </button>
           </form>
@@ -236,36 +196,32 @@ const LoginPage = () => {
             <span className="bg-white px-3 text-secondary" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>Or continue with</span>
           </div>
 
-          {/* Secondary Auth Methods (Google & OTP) */}
-          <div className="secondary-auth-grid row g-2 mb-3">
-            <div className="col-6">
-              <button 
-                type="button" 
-                className="secondary-auth-btn btn btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2 text-dark bg-white border"
-                style={{ height: '44px', borderRadius: '10px' }}
-                onClick={() => {}}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-                </svg>
-                <span>Google</span>
-              </button>
-            </div>
+          {/* Secondary Auth Methods (Google & OTP) — centered, compact */}
+          <div className="d-flex justify-content-center gap-2 mb-3">
+            <button 
+              type="button" 
+              className="secondary-auth-btn btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2 text-dark bg-white border"
+              style={{ height: '44px', borderRadius: '10px', padding: '0 20px' }}
+              onClick={() => {}}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+              </svg>
+              <span>Google</span>
+            </button>
 
-            <div className="col-6">
-              <button 
-                type="button" 
-                className="secondary-auth-btn btn btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2 text-dark bg-white border"
-                style={{ height: '44px', borderRadius: '10px' }}
-                onClick={() => {}}
-              >
-                <Smartphone size={18} className="text-primary" />
-                <span>Sign in with OTP</span>
-              </button>
-            </div>
+            <button 
+              type="button" 
+              className="secondary-auth-btn btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2 text-dark bg-white border"
+              style={{ height: '44px', borderRadius: '10px', padding: '0 20px' }}
+              onClick={() => {}}
+            >
+              <Smartphone size={18} className="text-primary" />
+              <span>OTP</span>
+            </button>
           </div>
 
           <div className="login-footer-info mt-4 pt-3 border-top text-center small text-secondary">
