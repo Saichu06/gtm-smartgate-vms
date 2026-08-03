@@ -4,13 +4,14 @@
  * Org switcher navigates to the correct company portal or Super Admin detail page based on current location.
  */
 import React, { useState } from 'react';
-import { Search, Bell, Sun, Info, Building2 } from 'lucide-react';
+import { Search, Bell, Sun, Info, Building2, Menu, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Drawer from '@components/navigation/Drawer';
 import { useOrganizations } from '@contexts/OrganizationContext';
 
-const TopNavbar = () => {
+const TopNavbar = ({ onToggleMobileSidebar }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const { organizations, activeOrg, switchOrganization } = useOrganizations();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,10 +22,8 @@ const TopNavbar = () => {
     const orgId = e.target.value;
     switchOrganization(orgId);
     if (isOrgPortal) {
-      // Navigate to the selected org's dashboard in the org portal
       navigate(`/org/${orgId}/dashboard`);
     } else {
-      // Navigate to selected org's detail page in Super Admin portal
       navigate(`/customers/${orgId}`);
     }
   };
@@ -32,7 +31,16 @@ const TopNavbar = () => {
   return (
     <>
       <header className="top-navbar">
-        <div className="d-flex align-items-center gap-3">
+        <div className="d-flex align-items-center gap-2 gap-md-3">
+          {/* Mobile Hamburger Toggle Button (< 992px) */}
+          <button 
+            className="icon-btn d-lg-none border-0 bg-transparent text-dark p-1" 
+            onClick={onToggleMobileSidebar}
+            aria-label="Toggle Navigation Menu"
+          >
+            <Menu size={22} />
+          </button>
+
           {/* Tenant Switcher Dropdown */}
           <div className="d-flex align-items-center gap-2 bg-light border rounded-3 px-2 py-1">
             <Building2 size={15} style={{ color: activeOrg?.primaryColor || 'var(--color-primary)' }} />
@@ -40,7 +48,7 @@ const TopNavbar = () => {
               value={activeOrg?.id}
               onChange={handleOrgSwitch}
               className="border-0 bg-transparent fw-semibold text-dark small outline-none cursor-pointer"
-              style={{ paddingRight: '4px', maxWidth: '200px' }}
+              style={{ paddingRight: '4px', maxWidth: '140px' }}
             >
               {organizations.map((org) => (
                 <option key={org.id} value={org.id}>
@@ -50,11 +58,37 @@ const TopNavbar = () => {
             </select>
           </div>
 
-          <div className="global-search" style={{ width: 280 }}>
+          {/* Desktop Search */}
+          <div className="global-search d-none d-md-flex" style={{ width: 260 }}>
             <Search size={14} style={{ color: 'var(--color-text-secondary)' }} />
-            <input type="text" placeholder="Search visitors, users, sites, audit logs..." />
+            <input type="text" placeholder="Search visitors, users, sites..." />
           </div>
+
+          {/* Mobile Search Icon Button */}
+          <button 
+            className="icon-btn d-md-none border-0 bg-transparent text-secondary"
+            onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+            aria-label="Toggle Mobile Search"
+          >
+            <Search size={18} />
+          </button>
         </div>
+
+        {/* Expandable Mobile Search Overlay */}
+        {isMobileSearchOpen && (
+          <div className="position-absolute top-0 start-0 w-100 h-100 bg-white d-flex align-items-center px-3 gap-2" style={{ zIndex: 10 }}>
+            <Search size={16} className="text-secondary" />
+            <input 
+              type="text" 
+              className="form-control border-0 bg-transparent outline-none flex-grow-1" 
+              placeholder="Search visitors, users, sites..." 
+              autoFocus 
+            />
+            <button className="icon-btn border-0 bg-transparent" onClick={() => setIsMobileSearchOpen(false)}>
+              <X size={18} />
+            </button>
+          </div>
+        )}
 
         <div className="navbar-right">
           <div className="platform-status" title="Last Checked 15 sec ago">

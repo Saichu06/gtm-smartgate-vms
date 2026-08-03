@@ -9,13 +9,13 @@
  * - The portal is isolated — each org's user only sees THEIR data
  */
 import React, { useState } from 'react';
-import { Search, Bell, Sun, Info, Settings, LogOut, User, Shield } from 'lucide-react';
+import { Search, Bell, Sun, Info, Settings, LogOut, User, Shield, Menu } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Drawer from '@components/navigation/Drawer';
 import Avatar from '@components/ui/Avatar';
 import { useOrganizations } from '@contexts/OrganizationContext';
 
-const OrgPortalHeader = () => {
+const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
   const { activeOrg } = useOrganizations();
   const { orgId } = useParams();
   const navigate = useNavigate();
@@ -47,13 +47,22 @@ const OrgPortalHeader = () => {
           borderTop: `3px solid ${primary}`,
         }}
       >
-        {/* Left: Org Identity Block */}
-        <div className="d-flex align-items-center gap-3">
+        {/* Left: Mobile Toggle & Org Identity Block */}
+        <div className="d-flex align-items-center gap-2 gap-md-3">
+          {/* Mobile Hamburger Menu Toggle Button (< 992px) */}
+          <button 
+            className="icon-btn d-lg-none border-0 bg-transparent text-dark p-1" 
+            onClick={onToggleMobileSidebar}
+            aria-label="Toggle Navigation Menu"
+          >
+            <Menu size={22} />
+          </button>
+
           {/* Org Logo or Initials Avatar */}
           <div
             style={{
-              width: 44,
-              height: 44,
+              width: 36,
+              height: 36,
               borderRadius: 'var(--radius-md)',
               background: logo ? '#FFFFFF' : primary,
               display: 'flex',
@@ -104,7 +113,7 @@ const OrgPortalHeader = () => {
           </div>
 
           {/* Search */}
-          <div className="global-search" style={{ width: 260, marginLeft: 16 }}>
+          <div className="global-search d-none d-md-flex" style={{ width: 220, marginLeft: 8 }}>
             <Search size={13} style={{ color: 'var(--color-text-secondary)', flexShrink: 0 }} />
             <input type="text" placeholder={`Search in ${orgName}...`} />
           </div>
@@ -114,7 +123,7 @@ const OrgPortalHeader = () => {
         <div className="navbar-right">
           {/* Status Pill */}
           <div
-            className="platform-status"
+            className="platform-status d-none d-md-flex"
             title="Gate systems operational"
             style={{ borderColor: `${primary}30`, background: `${primary}08` }}
           >

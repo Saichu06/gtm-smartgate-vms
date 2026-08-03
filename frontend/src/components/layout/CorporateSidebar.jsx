@@ -3,22 +3,37 @@
  * Left navigation sidebar for Organization Portal (Corporate Admin & Staff).
  * Displays uploaded logo or primary color avatar badge.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, UserCheck, Users, Briefcase, MapPin,
-  Tag, CheckSquare, BarChart3, Settings, LogOut, User, Sliders, Bell,
+  Tag, CheckSquare, BarChart3, Settings, LogOut, User, Sliders, Bell, X,
 } from 'lucide-react';
 import Avatar from '@components/ui/Avatar';
 import Drawer from '@components/navigation/Drawer';
 import Input from '@components/forms/Input';
 import { useOrganizations } from '@contexts/OrganizationContext';
 
-const CorporateSidebar = () => {
+const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { activeOrg, updateOrganizationAdmin } = useOrganizations();
+
+  // Close sidebar on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isMobileOpen && onCloseMobile) {
+        onCloseMobile();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileOpen, onCloseMobile]);
+
+  const handleNavClick = () => {
+    if (onCloseMobile) onCloseMobile();
+  };
 
   const orgId = activeOrg?.id || 1;
   const orgName = activeOrg?.displayName || activeOrg?.name || 'Organization Portal';
@@ -42,47 +57,56 @@ const CorporateSidebar = () => {
   const path = (page) => `/org/${orgId}/${page}`;
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
       {/* Dynamic Org Brand Header */}
-      <div className="sidebar-brand d-flex align-items-center gap-2 py-3 px-3">
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 'var(--radius-md)',
-            background: logo ? '#FFFFFF' : primaryColor,
-            color: '#FFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: 18,
-            flexShrink: 0,
-            overflow: 'hidden',
-            border: logo ? `1.5px solid ${primaryColor}40` : 'none',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            padding: logo ? 3 : 0,
-          }}
-        >
-          {logo ? (
-            <img src={logo} alt={orgName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          ) : (
-            orgName.charAt(0)
-          )}
-        </div>
-        <div className="sidebar-brand-text" style={{ minWidth: 0 }}>
-          <div className="sidebar-brand-name" style={{ fontSize: 'var(--text-sm)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {orgName}
+      <div className="sidebar-brand d-flex align-items-center justify-content-between py-3 px-3">
+        <div className="d-flex align-items-center gap-2">
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 'var(--radius-md)',
+              background: logo ? '#FFFFFF' : primaryColor,
+              color: '#FFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: 18,
+              flexShrink: 0,
+              overflow: 'hidden',
+              border: logo ? `1.5px solid ${primaryColor}40` : 'none',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              padding: logo ? 3 : 0,
+            }}
+          >
+            {logo ? (
+              <img src={logo} alt={orgName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : (
+              orgName.charAt(0)
+            )}
           </div>
-          <span className="sidebar-brand-tag" style={{ background: `${primaryColor}15`, color: primaryColor, fontSize: '10px' }}>
-            Smart Gate Portal
-          </span>
+          <div className="sidebar-brand-text" style={{ minWidth: 0 }}>
+            <div className="sidebar-brand-name" style={{ fontSize: 'var(--text-sm)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {orgName}
+            </div>
+            <span className="sidebar-brand-tag" style={{ background: `${primaryColor}15`, color: primaryColor, fontSize: '10px' }}>
+              Smart Gate Portal
+            </span>
+          </div>
         </div>
+
+        {/* Mobile Close Button */}
+        {onCloseMobile && (
+          <button className="icon-btn d-lg-none border-0 bg-transparent text-secondary" onClick={onCloseMobile} aria-label="Close mobile menu">
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">
         <div className="nav-group-label">Main</div>
-        <NavLink to={path('dashboard')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+        <NavLink to={path('dashboard')} onClick={handleNavClick} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <LayoutDashboard size={16} className="nav-icon" /> Dashboard
         </NavLink>
 

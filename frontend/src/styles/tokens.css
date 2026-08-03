@@ -89,10 +89,24 @@
   --shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
   --shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 
-  /* ─── Layout ────────────────────────────────────────────── */
-  --sidebar-width:     252px;
-  --header-height:     60px;
-  --content-max-width: 1400px;
+  /* ─── Layout & Breakpoints ──────────────────────────────── */
+  --sidebar-width:          252px;
+  --header-height:          60px;
+  --content-max-width:      1400px;
+  --min-touch-target:       44px;
+
+  /* Responsive Logo Max Heights */
+  --logo-max-height-desktop: 80px;
+  --logo-max-height-tablet:  64px;
+  --logo-max-height-mobile:  48px;
+
+  /* Responsive Drawer Widths */
+  --drawer-width-desktop:    480px;
+  --drawer-width-tablet:     80%;
+  --drawer-width-mobile:     100%;
+
+  /* Breakpoint reference constants for docs/comments */
+  /* Mobile: 0-575px | Small Tablet: 576-767px | Tablet: 768-991px | Desktop: 992-1439px | Large Desktop: 1440px+ */
 
   /* ─── Transitions ───────────────────────────────────────── */
   --transition-fast:   all 0.10s ease;

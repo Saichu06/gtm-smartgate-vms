@@ -336,191 +336,193 @@ const OrganizationsPage = () => {
             )}
           </div>
         ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th style={{ width: 40 }}>
-                  <input
-                    type="checkbox"
-                    checked={selected.size === paged.length && paged.length > 0}
-                    onChange={toggleAll}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </th>
-                <th>Organization</th>
-                <th>Code</th>
-                <th>Industry</th>
-                <th>Corporate Admin</th>
-                <th>Subscription</th>
-                <th style={{ textAlign: 'center' }}>Sites</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th style={{ textAlign: 'center', width: 60 }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paged.map((org) => (
-                <tr
-                  key={org.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/customers/${org.id}`)}
-                  className={selected.has(org.id) ? 'org-row-selected' : ''}
-                >
-                  {/* Checkbox */}
-                  <td onClick={(e) => e.stopPropagation()}>
+          <div className="table-responsive" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 40 }}>
                     <input
                       type="checkbox"
-                      checked={selected.has(org.id)}
-                      onChange={() => toggleOne(org.id)}
+                      checked={selected.size === paged.length && paged.length > 0}
+                      onChange={toggleAll}
                       style={{ cursor: 'pointer' }}
                     />
-                  </td>
+                  </th>
+                  <th>Organization</th>
+                  <th>Code</th>
+                  <th>Industry</th>
+                  <th>Corporate Admin</th>
+                  <th>Subscription</th>
+                  <th style={{ textAlign: 'center' }}>Sites</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th style={{ textAlign: 'center', width: 60 }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paged.map((org) => (
+                  <tr
+                    key={org.id}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/customers/${org.id}`)}
+                    className={selected.has(org.id) ? 'org-row-selected' : ''}
+                  >
+                    {/* Checkbox */}
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selected.has(org.id)}
+                        onChange={() => toggleOne(org.id)}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </td>
 
-                  {/* Organization */}
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                      <div
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 'var(--radius-md)',
-                          background: org.logo ? '#FFFFFF' : org.primaryColor,
-                          border: `1px solid ${org.primaryColor}40`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                          fontWeight: 800,
-                          fontSize: 16,
-                          color: '#FFFFFF',
-                          overflow: 'hidden',
-                          boxShadow: '0 2px 5px rgba(0,0,0,0.08)'
-                        }}
-                      >
-                        {org.logo ? (
-                          <img src={org.logo} alt={org.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 2 }} />
-                        ) : (
-                          org.displayName?.charAt(0) || org.name.charAt(0)
-                        )}
-                      </div>
-                      <div>
+                    {/* Organization */}
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                         <div
                           style={{
-                            fontWeight: 'var(--font-semibold)',
-                            color: 'var(--color-text-primary)',
-                            fontSize: 'var(--text-sm)',
+                            width: 40,
+                            height: 40,
+                            borderRadius: 'var(--radius-md)',
+                            background: org.logo ? '#FFFFFF' : org.primaryColor,
+                            border: `1px solid ${org.primaryColor}40`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            fontWeight: 800,
+                            fontSize: 16,
+                            color: '#FFFFFF',
+                            overflow: 'hidden',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.08)'
                           }}
                         >
-                          {org.name}
-                        </div>
-                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-                          <a
-                            href={`/org/${org.id}/login`}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            /org/{org.id}/login
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Code */}
-                  <td>
-                    <code
-                      style={{
-                        fontSize: 'var(--text-xs)',
-                        background: 'var(--color-bg-muted)',
-                        padding: '2px 6px',
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--color-border)',
-                        color: 'var(--color-text-primary)',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {org.code}
-                    </code>
-                  </td>
-
-                  {/* Industry */}
-                  <td>
-                    <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
-                      {org.industry}
-                    </span>
-                  </td>
-
-                  {/* Corporate Admin */}
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Avatar name={org.corporateAdmin} size="sm" />
-                      <div>
-                        <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)' }}>
-                          {org.corporateAdmin}
-                        </div>
-                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-                          {org.corporateAdminStatus === 'Active' ? (
-                            <span style={{ color: 'var(--color-success)' }}>● Active</span>
+                          {org.logo ? (
+                            <img src={org.logo} alt={org.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 2 }} />
                           ) : (
-                            <span style={{ color: 'var(--color-warning)' }}>● Pending</span>
+                            org.displayName?.charAt(0) || org.name.charAt(0)
                           )}
                         </div>
+                        <div>
+                          <div
+                            style={{
+                              fontWeight: 'var(--font-semibold)',
+                              color: 'var(--color-text-primary)',
+                              fontSize: 'var(--text-sm)',
+                            }}
+                          >
+                            {org.name}
+                          </div>
+                          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+                            <a
+                              href={`/org/${org.id}/login`}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              /org/{org.id}/login
+                            </a>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* Subscription */}
-                  <td><SubscriptionBadge plan={org.plan} /></td>
+                    {/* Code */}
+                    <td>
+                      <code
+                        style={{
+                          fontSize: 'var(--text-xs)',
+                          background: 'var(--color-bg-muted)',
+                          padding: '2px 6px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--color-border)',
+                          color: 'var(--color-text-primary)',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {org.code}
+                      </code>
+                    </td>
 
-                  {/* Sites */}
-                  <td style={{ textAlign: 'center' }}>
-                    <span
-                      style={{
-                        fontWeight: 'var(--font-semibold)',
-                        fontSize: 'var(--text-sm)',
-                        color: 'var(--color-text-primary)',
-                      }}
+                    {/* Industry */}
+                    <td>
+                      <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+                        {org.industry}
+                      </span>
+                    </td>
+
+                    {/* Corporate Admin */}
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Avatar name={org.corporateAdmin} size="sm" />
+                        <div>
+                          <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)' }}>
+                            {org.corporateAdmin}
+                          </div>
+                          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+                            {org.corporateAdminStatus === 'Active' ? (
+                              <span style={{ color: 'var(--color-success)' }}>● Active</span>
+                            ) : (
+                              <span style={{ color: 'var(--color-warning)' }}>● Pending</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Subscription */}
+                    <td><SubscriptionBadge plan={org.plan} /></td>
+
+                    {/* Sites */}
+                    <td style={{ textAlign: 'center' }}>
+                      <span
+                        style={{
+                          fontWeight: 'var(--font-semibold)',
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--color-text-primary)',
+                        }}
+                      >
+                        {org.sites}
+                      </span>
+                    </td>
+
+                    {/* Status */}
+                    <td><StatusBadge status={org.status} /></td>
+
+                    {/* Created */}
+                    <td>
+                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+                        {new Date(org.created).toLocaleDateString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+                    <td
+                      style={{ textAlign: 'center' }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {org.sites}
-                    </span>
-                  </td>
-
-                  {/* Status */}
-                  <td><StatusBadge status={org.status} /></td>
-
-                  {/* Created */}
-                  <td>
-                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-                      {new Date(org.created).toLocaleDateString('en-IN', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </td>
-
-                  {/* Actions */}
-                  <td
-                    style={{ textAlign: 'center' }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <ActionDropdown
-                      organization={org}
-                      onView={handleView}
-                      onEdit={handleEdit}
-                      onCreateAdmin={handleCreateAdmin}
-                      onSuspend={org.status !== 'Suspended' ? handleSuspend : null}
-                      onActivate={org.status === 'Suspended' ? handleActivate : null}
-                      onDelete={handleDelete}
-                      onExport={handleExport}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <ActionDropdown
+                        organization={org}
+                        onView={handleView}
+                        onEdit={handleEdit}
+                        onCreateAdmin={handleCreateAdmin}
+                        onSuspend={org.status !== 'Suspended' ? handleSuspend : null}
+                        onActivate={org.status === 'Suspended' ? handleActivate : null}
+                        onDelete={handleDelete}
+                        onExport={handleExport}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {/* Pagination */}

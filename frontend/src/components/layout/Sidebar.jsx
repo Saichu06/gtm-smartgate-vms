@@ -2,10 +2,10 @@
  * Sidebar Component — Super Admin Navigation
  * Supports custom profile image upload (base64) for Super Admin profile.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Building2, CreditCard, Users, ShieldCheck, FileText, Settings, HelpCircle, LogOut, User, Sliders, Upload, Image as ImageIcon
+  LayoutDashboard, Building2, CreditCard, Users, ShieldCheck, FileText, Settings, HelpCircle, LogOut, User, Sliders, Upload, Image as ImageIcon, X
 } from 'lucide-react';
 import Avatar from '@components/ui/Avatar';
 import Drawer from '@components/navigation/Drawer';
@@ -14,9 +14,20 @@ import Select from '@components/forms/Select';
 
 import logoImg from '../../assets/icons/logo.png';
 
-const Sidebar = () => {
+const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  // Close sidebar on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isMobileOpen && onCloseMobile) {
+        onCloseMobile();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileOpen, onCloseMobile]);
 
   // Drawers state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -97,23 +108,36 @@ const Sidebar = () => {
     setIsPreferencesOpen(false);
   };
 
+  // Helper to handle link click on mobile
+  const handleNavClick = () => {
+    if (onCloseMobile) onCloseMobile();
+  };
+
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <img src={logoImg} alt="GTM Logo" />
-        <div className="sidebar-brand-text">
-          <span className="sidebar-brand-tag">Super Admin</span>
+    <aside className={`sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
+      <div className="sidebar-brand d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center gap-2">
+          <img src={logoImg} alt="GTM Logo" style={{ maxHeight: 'var(--logo-max-height-mobile, 48px)' }} />
+          <div className="sidebar-brand-text">
+            <span className="sidebar-brand-tag">Super Admin</span>
+          </div>
         </div>
+        {/* Mobile Close Button */}
+        {onCloseMobile && (
+          <button className="icon-btn d-lg-none border-0 bg-transparent text-secondary" onClick={onCloseMobile} aria-label="Close mobile menu">
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">
         <div className="nav-group-label">Core</div>
-        <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+        <NavLink to="/dashboard" onClick={handleNavClick} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <LayoutDashboard size={16} className="nav-icon" /> Dashboard
         </NavLink>
 
         <div className="nav-group-label">Organization Management</div>
-        <NavLink to="/customers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+        <NavLink to="/customers" onClick={handleNavClick} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <Building2 size={16} className="nav-icon" /> Organizations
         </NavLink>
         <NavLink to="/subscriptions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>

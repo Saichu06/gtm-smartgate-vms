@@ -21,32 +21,34 @@ const DataTable = ({
       {data.length === 0 ? (
         <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : (
-        <table className="data-table">
-          <thead>
-            <tr>
-              {columns.map((col) => (
-                <th key={col.key || col.header} style={{ width: col.width, textAlign: col.align || 'left' }}>
-                  {col.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, rowIndex) => (
-              <tr
-                key={row.id || rowIndex}
-                onClick={() => onRowClick && onRowClick(row)}
-                style={onRowClick ? { cursor: 'pointer' } : {}}
-              >
+        <div className="table-responsive" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
                 {columns.map((col) => (
-                  <td key={col.key || col.header} style={{ textAlign: col.align || 'left' }}>
-                    {col.render ? col.render(row, rowIndex) : row[col.key]}
-                  </td>
+                  <th key={col.key || col.header} style={{ width: col.width, textAlign: col.align || 'left' }}>
+                    {col.header}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((row, rowIndex) => (
+                <tr
+                  key={row.id || rowIndex}
+                  onClick={() => onRowClick && onRowClick(row)}
+                  style={onRowClick ? { cursor: 'pointer' } : {}}
+                >
+                  {columns.map((col) => (
+                    <td key={col.key || col.header} style={{ textAlign: col.align || 'left' }}>
+                      {col.render ? col.render(row, rowIndex) : row[col.key]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {pagination && <div className="table-pagination">{pagination}</div>}
