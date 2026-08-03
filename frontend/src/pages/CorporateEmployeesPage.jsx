@@ -99,55 +99,57 @@ const CorporateEmployeesPage = () => {
         </div>
 
         {/* Employee Table */}
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Employee ID</th>
-              <th>Department</th>
-              <th>Designation</th>
-              <th>Assigned Site</th>
-              <th>Contact</th>
-              <th>Join Date</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'center' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(e => (
-              <tr key={e.id}>
-                <td>
-                  <div className="d-flex align-items-center gap-2">
-                    <Avatar name={e.name} size="sm" />
-                    <span className="fw-semibold text-dark" style={{ fontSize: 'var(--text-sm)' }}>{e.name}</span>
-                  </div>
-                </td>
-                <td><code style={{ fontSize: 11 }}>{e.id}</code></td>
-                <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.dept}</td>
-                <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.designation}</td>
-                <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.site}</td>
-                <td>
-                  <div style={{ fontSize: 11 }}>
-                    <div className="d-flex align-items-center gap-1"><Mail size={10} /> {e.email}</div>
-                    <div className="d-flex align-items-center gap-1 text-secondary"><Phone size={10} /> {e.phone}</div>
-                  </div>
-                </td>
-                <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.joinDate}</td>
-                <td>
-                  <Badge variant={e.status === 'Active' ? 'success' : e.status === 'On Leave' ? 'warning' : 'neutral'}>
-                    {e.status}
-                  </Badge>
-                </td>
-                <td>
-                  <div className="d-flex gap-1 justify-content-center">
-                    <button className="btn btn-sm btn-light" onClick={() => showToast(`Editing ${e.name}`)}><Edit size={13} /></button>
-                    <button className="btn btn-sm btn-light text-danger" onClick={() => showToast(`${e.name} removed`, 'warning')}><Trash2 size={13} /></button>
-                  </div>
-                </td>
+        <div className="table-responsive" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Employee ID</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Assigned Site</th>
+                <th>Contact</th>
+                <th>Join Date</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(e => (
+                <tr key={e.id}>
+                  <td>
+                    <div className="d-flex align-items-center gap-2">
+                      <Avatar name={e.name} size="sm" />
+                      <span className="fw-semibold text-dark" style={{ fontSize: 'var(--text-sm)' }}>{e.name}</span>
+                    </div>
+                  </td>
+                  <td><code style={{ fontSize: 11 }}>{e.id}</code></td>
+                  <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.dept}</td>
+                  <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.designation}</td>
+                  <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.site}</td>
+                  <td>
+                    <div style={{ fontSize: 11 }}>
+                      <div className="d-flex align-items-center gap-1"><Mail size={10} /> {e.email}</div>
+                      <div className="d-flex align-items-center gap-1 text-secondary"><Phone size={10} /> {e.phone}</div>
+                    </div>
+                  </td>
+                  <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{e.joinDate}</td>
+                  <td>
+                    <Badge variant={e.status === 'Active' ? 'success' : e.status === 'On Leave' ? 'warning' : 'neutral'}>
+                      {e.status}
+                    </Badge>
+                  </td>
+                  <td>
+                    <div className="d-flex gap-1 justify-content-center">
+                      <button className="btn btn-sm btn-light" onClick={() => showToast(`Editing ${e.name}`)}><Edit size={13} /></button>
+                      <button className="btn btn-sm btn-light text-danger" onClick={() => showToast(`${e.name} removed`, 'warning')}><Trash2 size={13} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
 
       {/* Add Employee Drawer */}

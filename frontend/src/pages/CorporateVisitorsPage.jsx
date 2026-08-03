@@ -116,64 +116,66 @@ const CorporateVisitorsPage = () => {
         </div>
 
         {/* Visitor Table */}
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Pass ID</th>
-              <th>Visitor</th>
-              <th>Category</th>
-              <th>Host Employee</th>
-              <th>Gate / Site</th>
-              <th>Purpose</th>
-              <th>Check-In</th>
-              <th>Check-Out</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'center' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((v) => (
-              <tr key={v.id}>
-                <td><code style={{ fontSize: 11 }}>{v.id}</code></td>
-                <td>
-                  <div className="d-flex align-items-center gap-2">
-                    <Avatar name={v.name} size="sm" />
-                    <div>
-                      <div className="fw-semibold text-dark" style={{ fontSize: 'var(--text-sm)' }}>{v.name}</div>
-                      <div className="text-secondary" style={{ fontSize: 11 }}>{v.company}</div>
-                    </div>
-                  </div>
-                </td>
-                <td><Badge variant="neutral">{v.type}</Badge></td>
-                <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{v.host}</td>
-                <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{v.site}</td>
-                <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{v.purpose}</td>
-                <td style={{ fontSize: 'var(--text-sm)' }}>{v.checkin}</td>
-                <td style={{ fontSize: 'var(--text-sm)', color: v.checkout ? 'var(--color-text-secondary)' : 'var(--color-warning)' }}>
-                  {v.checkout || '—'}
-                </td>
-                <td><Badge variant={statusVariant(v.status)}>{v.status}</Badge></td>
-                <td>
-                  <div className="d-flex gap-1 justify-content-center">
-                    <button className="btn btn-sm btn-light" title="View Pass" onClick={() => showToast(`Viewing pass for ${v.name}`, 'info')}>
-                      <Eye size={13} />
-                    </button>
-                    {v.status === 'Checked In' && (
-                      <button className="btn btn-sm btn-light text-danger" title="Check Out" onClick={() => showToast(`${v.name} checked out`, 'success')}>
-                        <XCircle size={13} />
-                      </button>
-                    )}
-                    {v.status === 'Pre-Registered' && (
-                      <button className="btn btn-sm btn-light text-success" title="Check In" onClick={() => showToast(`${v.name} checked in`, 'success')}>
-                        <CheckCircle2 size={13} />
-                      </button>
-                    )}
-                  </div>
-                </td>
+        <div className="table-responsive" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Pass ID</th>
+                <th>Visitor</th>
+                <th>Category</th>
+                <th>Host Employee</th>
+                <th>Gate / Site</th>
+                <th>Purpose</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((v) => (
+                <tr key={v.id}>
+                  <td><code style={{ fontSize: 11 }}>{v.id}</code></td>
+                  <td>
+                    <div className="d-flex align-items-center gap-2">
+                      <Avatar name={v.name} size="sm" />
+                      <div>
+                        <div className="fw-semibold text-dark" style={{ fontSize: 'var(--text-sm)' }}>{v.name}</div>
+                        <div className="text-secondary" style={{ fontSize: 11 }}>{v.company}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><Badge variant="neutral">{v.type}</Badge></td>
+                  <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{v.host}</td>
+                  <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{v.site}</td>
+                  <td className="text-secondary" style={{ fontSize: 'var(--text-sm)' }}>{v.purpose}</td>
+                  <td style={{ fontSize: 'var(--text-sm)' }}>{v.checkin}</td>
+                  <td style={{ fontSize: 'var(--text-sm)', color: v.checkout ? 'var(--color-text-secondary)' : 'var(--color-warning)' }}>
+                    {v.checkout || '—'}
+                  </td>
+                  <td><Badge variant={statusVariant(v.status)}>{v.status}</Badge></td>
+                  <td>
+                    <div className="d-flex gap-1 justify-content-center">
+                      <button className="btn btn-sm btn-light" title="View Pass" onClick={() => showToast(`Viewing pass for ${v.name}`, 'info')}>
+                        <Eye size={13} />
+                      </button>
+                      {v.status === 'Checked In' && (
+                        <button className="btn btn-sm btn-light text-danger" title="Check Out" onClick={() => showToast(`${v.name} checked out`, 'success')}>
+                          <XCircle size={13} />
+                        </button>
+                      )}
+                      {v.status === 'Pre-Registered' && (
+                        <button className="btn btn-sm btn-light text-success" title="Check In" onClick={() => showToast(`${v.name} checked in`, 'success')}>
+                          <CheckCircle2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
 
       {/* Register Visitor Drawer */}

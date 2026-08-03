@@ -85,26 +85,37 @@ const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
           </div>
 
           {/* Org Name + Plan Badge */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'nowrap' }}>
+              <span 
+                style={{ 
+                  fontWeight: 700, 
+                  fontSize: 'var(--text-sm)', 
+                  color: 'var(--color-text-primary)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '90px'
+                }}
+              >
                 {orgName}
               </span>
               <span
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  padding: '2px 7px',
+                  padding: '1px 6px',
                   borderRadius: 'var(--radius-sm)',
                   background: planStyle.bg,
                   color: planStyle.text,
                   letterSpacing: '0.3px',
+                  flexShrink: 0
                 }}
               >
                 {plan}
               </span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
+            <div className="d-none d-sm-block" style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
               <code style={{ fontSize: 10, background: `${primary}12`, color: primary, padding: '1px 5px', borderRadius: 3 }}>
                 {orgCode}
               </code>

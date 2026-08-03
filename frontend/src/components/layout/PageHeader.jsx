@@ -12,13 +12,13 @@ const PageHeader = ({ title, subtitle, breadcrumbs = [], actions }) => {
         <span>GTM Super Admin</span>
         {breadcrumbs.map((item, index) => (
           <React.Fragment key={index}>
-            <ChevronRight size={12} />
+            <ChevronRight size={12} style={{ flexShrink: 0 }} />
             <span>{item}</span>
           </React.Fragment>
         ))}
       </div>
       <div className="page-header-row">
-        <div>
+        <div style={{ minWidth: 0, flex: '1 1 auto' }}>
           <h1 className="page-title">{title}</h1>
           {subtitle && <p className="page-subtitle">{subtitle}</p>}
         </div>
