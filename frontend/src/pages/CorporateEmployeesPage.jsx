@@ -3,7 +3,8 @@
  * Active Directory synced employee list with department filters, search, and add employee flow.
  * Route: /org/:orgId/employees
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Briefcase, PlusCircle, Search, Download, Edit, Trash2, Phone, Mail, UserCheck } from 'lucide-react';
 import OrganizationLayout from '@layouts/OrganizationLayout';
 import Card from '@components/data-display/Card';
@@ -16,32 +17,67 @@ import Select from '@components/forms/Select';
 import Toast from '@components/feedback/Toast';
 import { useOrganizations } from '@contexts/OrganizationContext';
 
-const MOCK_EMPLOYEES = [
-  { id: 'EMP-001', name: 'Ramesh Patel', email: 'ramesh.p@company.com', phone: '+91 98400 11111', dept: 'Plant Engineering', designation: 'Senior Engineer', site: 'Main Gate', status: 'Active', joinDate: '2020-03-15' },
-  { id: 'EMP-002', name: 'Sunita Gupta', email: 'sunita.g@company.com', phone: '+91 98400 22222', dept: 'Administration', designation: 'Executive Assistant', site: 'North Wing', status: 'Active', joinDate: '2018-07-22' },
-  { id: 'EMP-003', name: 'Dr. Arun Kumar', email: 'arun.k@company.com', phone: '+91 98400 33333', dept: 'R&D', designation: 'Chief Scientist', site: 'R&D Block', status: 'Active', joinDate: '2015-01-10' },
-  { id: 'EMP-004', name: 'Anil Sharma', email: 'anil.s@company.com', phone: '+91 98400 44444', dept: 'Finance', designation: 'Finance Manager', site: 'South Block', status: 'Active', joinDate: '2019-09-05' },
-  { id: 'EMP-005', name: 'Rajiv Sen', email: 'rajiv.s@company.com', phone: '+91 98400 55555', dept: 'Maintenance', designation: 'Maintenance Head', site: 'Plant 2', status: 'Active', joinDate: '2017-04-18' },
-  { id: 'EMP-006', name: 'Pooja Iyer', email: 'pooja.i@company.com', phone: '+91 98400 66666', dept: 'HR & Talent', designation: 'HR Business Partner', site: 'HQ Lobby', status: 'Active', joinDate: '2021-11-30' },
-  { id: 'EMP-007', name: 'Deepak Narayan', email: 'deepak.n@company.com', phone: '+91 98400 77777', dept: 'IT Infrastructure', designation: 'IT Manager', site: 'IT Wing', status: 'Active', joinDate: '2016-06-12' },
-  { id: 'EMP-008', name: 'Karthik Mani', email: 'karthik.m@company.com', phone: '+91 98400 88888', dept: 'Plant Engineering', designation: 'Plant Engineer', site: 'Plant 3', status: 'On Leave', joinDate: '2022-03-01' },
-  { id: 'EMP-009', name: 'Anitha Rao', email: 'anitha.r@company.com', phone: '+91 98400 99999', dept: 'HR & Talent', designation: 'Talent Acquisition Lead', site: 'HR Wing', status: 'Active', joinDate: '2023-01-15' },
-  { id: 'EMP-010', name: 'Ranjit Kumar', email: 'ranjit.k@company.com', phone: '+91 98401 11111', dept: 'Finance', designation: 'Finance Analyst', site: 'Finance Dept', status: 'Inactive', joinDate: '2020-08-20' },
-];
-
-const DEPARTMENTS = [...new Set(MOCK_EMPLOYEES.map(e => e.dept))];
+import { getEmployeeSeeds, storageKeys } from '@utils/orgStorage';
 
 const CorporateEmployeesPage = () => {
   const { activeOrg } = useOrganizations();
+  const { orgId } = useParams();
+  const currentOrgId = orgId || activeOrg?.id || 1;
+
+  const [employees, setEmployees] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKeys.employees(currentOrgId)) || '[]');
+      return saved.length > 0 ? saved : getEmployeeSeeds(currentOrgId);
+    } catch {
+      return getEmployeeSeeds(currentOrgId);
+    }
+  });
+
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [addOpen, setAddOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
+  const [form, setForm] = useState({ name: '', email: '', phone: '', dept: 'Technology', designation: '', site: 'Main Gate' });
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKeys.employees(currentOrgId)) || '[]');
+      if (saved.length > 0) setEmployees(saved);
+      else setEmployees(getEmployeeSeeds(currentOrgId));
+    } catch (e) {}
+  }, [currentOrgId]);
+
+  const saveEmployees = (updated) => {
+    setEmployees(updated);
+    try {
+      localStorage.setItem(storageKeys.employees(currentOrgId), JSON.stringify(updated));
+    } catch (e) {}
+  };
+
   const showToast = (msg, type = 'success') => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); };
 
-  const filtered = MOCK_EMPLOYEES.filter(e => {
+  const handleAddSubmit = () => {
+    if (!form.name.trim()) return;
+    const newEmp = {
+      id: `EMP-${Math.floor(100 + Math.random() * 900)}`,
+      name: form.name,
+      email: form.email || `${form.name.toLowerCase().replace(/\s+/g, '.')}@company.com`,
+      phone: form.phone || '+91 98400 00000',
+      dept: form.dept,
+      designation: form.designation || 'Team Member',
+      site: form.site,
+      status: 'Active',
+      joinDate: new Date().toISOString().split('T')[0],
+    };
+    saveEmployees([newEmp, ...employees]);
+    setAddOpen(false);
+    setForm({ name: '', email: '', phone: '', dept: 'Technology', designation: '', site: 'Main Gate' });
+    showToast(`Employee ${newEmp.name} added to host directory!`, 'success');
+  };
+
+  const filtered = employees.filter(e => {
     const q = search.toLowerCase();
     const matchSearch = !search || e.name.toLowerCase().includes(q) || e.email.toLowerCase().includes(q) || e.dept.toLowerCase().includes(q);
     const matchDept = !deptFilter || e.dept === deptFilter;
@@ -49,9 +85,9 @@ const CorporateEmployeesPage = () => {
     return matchSearch && matchDept && matchStatus;
   });
 
-  const active = MOCK_EMPLOYEES.filter(e => e.status === 'Active').length;
-  const onLeave = MOCK_EMPLOYEES.filter(e => e.status === 'On Leave').length;
-  const inactive = MOCK_EMPLOYEES.filter(e => e.status === 'Inactive').length;
+  const active = employees.filter(e => e.status === 'Active').length;
+  const onLeave = employees.filter(e => e.status === 'On Leave').length;
+  const inactive = employees.filter(e => e.status === 'Inactive').length;
 
   return (
     <OrganizationLayout
@@ -61,7 +97,7 @@ const CorporateEmployeesPage = () => {
       {/* KPI Strip */}
       <div className="row g-3 mb-4">
         {[
-          { label: 'Total Employees', value: MOCK_EMPLOYEES.length, color: 'var(--color-primary)' },
+          { label: 'Total Employees', value: employees.length, color: 'var(--color-primary)' },
           { label: 'Active', value: active, color: 'var(--color-success)' },
           { label: 'On Leave', value: onLeave, color: 'var(--color-warning)' },
           { label: 'Inactive', value: inactive, color: 'var(--color-text-secondary)' },
@@ -84,7 +120,7 @@ const CorporateEmployeesPage = () => {
           </div>
           <select className="form-control" value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={{ width: 200, height: 36, padding: '0 10px', fontSize: 'var(--text-sm)', margin: 0 }}>
             <option value="">All Departments</option>
-            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+            {[...new Set(employees.map(e => e.dept))].map(d => <option key={d} value={d}>{d}</option>)}
           </select>
           <select className="form-control" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 140, height: 36, padding: '0 10px', fontSize: 'var(--text-sm)', margin: 0 }}>
             <option value="">All Status</option>
@@ -157,15 +193,14 @@ const CorporateEmployeesPage = () => {
         isOpen={addOpen}
         onClose={() => setAddOpen(false)}
         title="Add New Employee"
-        onSave={() => { showToast('Employee added & synced to Active Directory!'); setAddOpen(false); }}
+        onSave={handleAddSubmit}
       >
-        <Input label="Full Name" placeholder="e.g., Ramesh Patel" />
-        <Input label="Work Email" type="email" placeholder="e.g., ramesh@company.com" />
-        <Input label="Phone Number" placeholder="+91 98400 00000" />
-        <Select label="Department" options={DEPARTMENTS.map(d => ({ label: d, value: d }))} />
-        <Input label="Designation / Job Title" placeholder="e.g., Senior Engineer" />
-        <Input label="Employee ID" placeholder="e.g., EMP-011" />
-        <Input label="Date of Joining" type="date" />
+        <Input label="Full Name" placeholder="e.g., Ramesh Patel" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+        <Input label="Work Email" type="email" placeholder="e.g., ramesh@company.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+        <Input label="Phone Number" placeholder="+91 98400 00000" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+        <Input label="Department" placeholder="e.g., Technology" value={form.dept} onChange={e => setForm({ ...form, dept: e.target.value })} />
+        <Input label="Designation / Job Title" placeholder="e.g., Senior Engineer" value={form.designation} onChange={e => setForm({ ...form, designation: e.target.value })} />
+        <Input label="Assigned Site / Floor" placeholder="e.g., Floor 3 - Tech Hub" value={form.site} onChange={e => setForm({ ...form, site: e.target.value })} />
       </Drawer>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

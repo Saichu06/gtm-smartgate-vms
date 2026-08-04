@@ -38,6 +38,8 @@ const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
   };
   const planStyle = planColors[plan] || planColors.Enterprise;
 
+  const [imgError, setImgError] = useState(false);
+
   return (
     <>
       <header
@@ -64,7 +66,7 @@ const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
               width: 36,
               height: 36,
               borderRadius: 'var(--radius-md)',
-              background: logo ? '#FFFFFF' : primary,
+              background: logo && !imgError ? '#FFFFFF' : primary,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -73,13 +75,13 @@ const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
               fontSize: 18,
               flexShrink: 0,
               overflow: 'hidden',
-              border: logo ? `1.5px solid ${primary}40` : 'none',
+              border: logo && !imgError ? `1.5px solid ${primary}40` : 'none',
               boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              padding: logo ? 3 : 0,
+              padding: logo && !imgError ? 3 : 0,
             }}
           >
-            {logo
-              ? <img src={logo} alt={orgName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            {logo && !imgError
+              ? <img src={logo} alt={orgName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setImgError(true)} />
               : orgName.charAt(0).toUpperCase()
             }
           </div>

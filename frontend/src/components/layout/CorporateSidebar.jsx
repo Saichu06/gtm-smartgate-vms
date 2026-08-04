@@ -1,39 +1,26 @@
 /**
  * CorporateSidebar Component
  * Left navigation sidebar for Organization Portal (Corporate Admin & Staff).
- * Displays uploaded logo or primary color avatar badge.
  */
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, UserCheck, Users, Briefcase, MapPin,
-  Tag, CheckSquare, BarChart3, Settings, LogOut, User, Sliders, Bell, X,
+  Tag, CheckSquare, BarChart3, Settings, LogOut, User, Sliders, X, Tablet,
 } from 'lucide-react';
 import Avatar from '@components/ui/Avatar';
 import Drawer from '@components/navigation/Drawer';
 import Input from '@components/forms/Input';
 import { useOrganizations } from '@contexts/OrganizationContext';
+import { getPendingApprovalCount, getVisitors } from '@utils/orgStorage';
 
 const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { activeOrg, updateOrganizationAdmin } = useOrganizations();
-
-  // Close sidebar on ESC key
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isMobileOpen && onCloseMobile) {
-        onCloseMobile();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isMobileOpen, onCloseMobile]);
-
-  const handleNavClick = () => {
-    if (onCloseMobile) onCloseMobile();
-  };
+  const [pendingCount, setPendingCount] = useState(0);
+  const [visitorCount, setVisitorCount] = useState(0);
 
   const orgId = activeOrg?.id || 1;
   const orgName = activeOrg?.displayName || activeOrg?.name || 'Organization Portal';
@@ -47,37 +34,77 @@ const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
   const [editAdminEmail, setEditAdminEmail] = useState(adminEmail);
   const [editAdminPhone, setEditAdminPhone] = useState(adminPhone);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setEditAdminName(adminName);
     setEditAdminEmail(adminEmail);
     setEditAdminPhone(adminPhone);
   }, [adminName, adminEmail, adminPhone]);
 
-  // Helper to build org-scoped nav paths
+  useEffect(() => {
+    const refreshCounts = () => {
+      setPendingCount(getPendingApprovalCount(orgId));
+      setVisitorCount(getVisitors(orgId).length);
+    };
+    refreshCounts();
+    const interval = setInterval(refreshCounts, 2000);
+    const onChanged = (e) => {
+      if (String(e.detail?.orgId) === String(orgId)) refreshCounts();
+    };
+    window.addEventListener('gtm-visitors-changed', onChanged);
+    window.addEventListener('storage', refreshCounts);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('gtm-visitors-changed', onChanged);
+      window.removeEventListener('storage', refreshCounts);
+    };
+  }, [orgId]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isMobileOpen && onCloseMobile) onCloseMobile();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileOpen, onCloseMobile]);
+
+  const handleNavClick = () => {
+    if (onCloseMobile) onCloseMobile();
+  };
+
   const path = (page) => `/org/${orgId}/${page}`;
+
+  const navItems = [
+    { group: 'Main', items: [
+      { to: path('dashboard'), icon: LayoutDashboard, label: 'Dashboard' },
+    ]},
+    { group: 'Gate Operations', items: [
+      { to: path('visitors'), icon: UserCheck, label: 'Visitor Management', badge: visitorCount > 0 ? visitorCount : null },
+      { to: path('approvals'), icon: CheckSquare, label: 'Approvals', badge: pendingCount > 0 ? pendingCount : null, badgeVariant: 'warning' },
+    ]},
+    { group: 'Access Control', items: [
+      { to: path('users'), icon: Users, label: 'Users' },
+      { to: path('employees'), icon: Briefcase, label: 'Employees' },
+      { to: path('sites'), icon: MapPin, label: 'Sites & Gates' },
+      { to: path('visitor-types'), icon: Tag, label: 'Visitor Types' },
+    ]},
+    { group: 'Analytics & System', items: [
+      { to: path('reports'), icon: BarChart3, label: 'Reports' },
+      { to: path('settings'), icon: Settings, label: 'Portal Settings' },
+    ]},
+  ];
 
   return (
     <aside className={`sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
-      {/* Dynamic Org Brand Header */}
       <div className="sidebar-brand d-flex align-items-center justify-content-between py-3 px-3">
         <div className="d-flex align-items-center gap-2">
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 'var(--radius-md)',
-              background: logo ? '#FFFFFF' : primaryColor,
-              color: '#FFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: 18,
-              flexShrink: 0,
-              overflow: 'hidden',
+              width: 40, height: 40, borderRadius: 'var(--radius-md)',
+              background: logo ? '#FFFFFF' : primaryColor, color: '#FFF',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 800, fontSize: 18, flexShrink: 0, overflow: 'hidden',
               border: logo ? `1.5px solid ${primaryColor}40` : 'none',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              padding: logo ? 3 : 0,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)', padding: logo ? 3 : 0,
             }}
           >
             {logo ? (
@@ -95,8 +122,6 @@ const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
             </span>
           </div>
         </div>
-
-        {/* Mobile Close Button */}
         {onCloseMobile && (
           <button className="icon-btn d-lg-none border-0 bg-transparent text-secondary" onClick={onCloseMobile} aria-label="Close mobile menu">
             <X size={20} />
@@ -104,51 +129,55 @@ const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
         )}
       </div>
 
+      {/* Kiosk quick-launch strip */}
+      <div className="px-3 pb-2">
+        <a
+          href={`/kiosk/${orgId}`}
+          target="_blank"
+          rel="noreferrer"
+          onClick={handleNavClick}
+          className="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-decoration-none"
+          style={{ background: `${primaryColor}10`, border: `1px solid ${primaryColor}30`, fontSize: 12, fontWeight: 600, color: primaryColor }}
+        >
+          <Tablet size={14} /> Open Self-Service Kiosk
+        </a>
+      </div>
+
       <nav className="sidebar-nav">
-        <div className="nav-group-label">Main</div>
-        <NavLink to={path('dashboard')} onClick={handleNavClick} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <LayoutDashboard size={16} className="nav-icon" /> Dashboard
-        </NavLink>
-
-        <div className="nav-group-label">Gate Operations</div>
-        <NavLink to={path('visitors')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <UserCheck size={16} className="nav-icon" /> Visitor Management
-        </NavLink>
-        <NavLink to={path('approvals')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <CheckSquare size={16} className="nav-icon" /> Approvals
-        </NavLink>
-
-        <div className="nav-group-label">Access Control</div>
-        <NavLink to={path('users')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Users size={16} className="nav-icon" /> Users
-        </NavLink>
-        <NavLink to={path('employees')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Briefcase size={16} className="nav-icon" /> Employees
-        </NavLink>
-        <NavLink to={path('sites')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <MapPin size={16} className="nav-icon" /> Sites & Gates
-        </NavLink>
-        <NavLink to={path('visitor-types')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Tag size={16} className="nav-icon" /> Visitor Types
-        </NavLink>
-
-        <div className="nav-group-label">Analytics & System</div>
-        <NavLink to={path('reports')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <BarChart3 size={16} className="nav-icon" /> Reports
-        </NavLink>
-        <NavLink to={path('settings')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Settings size={16} className="nav-icon" /> Portal Settings
-        </NavLink>
+        {navItems.map((section) => (
+          <React.Fragment key={section.group}>
+            <div className="nav-group-label">{section.group}</div>
+            {section.items.map(({ to, icon: Icon, label, badge, badgeVariant }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={handleNavClick}
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              >
+                <Icon size={16} className="nav-icon" />
+                <span style={{ flex: 1 }}>{label}</span>
+                {badge != null && badge > 0 && (
+                  <span style={{
+                    background: badgeVariant === 'warning' ? '#F57C00' : primaryColor,
+                    color: '#fff', fontSize: 10, fontWeight: 700,
+                    borderRadius: 999, padding: '1px 7px', minWidth: 18, textAlign: 'center',
+                  }}>
+                    {badge}
+                  </span>
+                )}
+              </NavLink>
+            ))}
+          </React.Fragment>
+        ))}
       </nav>
 
-      {/* Corporate Admin User Footer */}
       <div className="sidebar-footer position-relative">
         {showProfileMenu && (
           <div className="position-absolute bottom-100 start-0 w-100 mb-2 p-2 bg-white border rounded-3 shadow-lg z-3">
             <button className="btn btn-sm btn-light w-100 text-start d-flex align-items-center gap-2 mb-1" onClick={() => { setShowProfileMenu(false); setIsProfileOpen(true); }}>
               <User size={14} /> My Profile & Preferences
             </button>
-            <button className="btn btn-sm btn-light w-100 text-start d-flex align-items-center gap-2 mb-1" onClick={() => { setShowProfileMenu(false); navigate(path('settings')); }}>
+            <button className="btn btn-sm btn-light w-100 text-start d-flex align-items-center gap-2 mb-1" onClick={() => { setShowProfileMenu(false); navigate(path('settings')); handleNavClick(); }}>
               <Sliders size={14} /> Portal Settings
             </button>
             <div className="dropdown-divider my-1"></div>
@@ -167,7 +196,6 @@ const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
         </div>
       </div>
 
-      {/* Corporate Admin Profile Drawer */}
       <Drawer
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
@@ -179,7 +207,6 @@ const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
             email: editAdminEmail,
             phone: editAdminPhone,
           });
-          alert('Admin profile updated successfully!');
           setIsProfileOpen(false);
         }}
       >
@@ -187,9 +214,6 @@ const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
         <Input label="Work Email Address" value={editAdminEmail} onChange={(e) => setEditAdminEmail(e.target.value)} />
         <Input label="Contact Phone Number" value={editAdminPhone} onChange={(e) => setEditAdminPhone(e.target.value)} />
         <Input label="Role / Designation" value="Corporate Administrator" disabled />
-        <div className="p-2 bg-light rounded-3 text-secondary small mt-2">
-          Updating profile details will persist your admin identity across the organization portal workspace.
-        </div>
       </Drawer>
     </aside>
   );

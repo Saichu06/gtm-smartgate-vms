@@ -18,12 +18,25 @@ import initialUsers from '@mock/corporate_users.json';
 
 const PAGE_SIZE = 6;
 
+const SEED_USERS = [
+  { id: 'USR-001', name: 'Rajesh Kumar', email: 'rajesh.kumar@apollotyres.com', role: 'Corporate Admin', site: 'HQ Main Gate', status: 'Active', employeeId: 'EMP-1001', lastLogin: '10 mins ago', phone: '+91 98400 10023' },
+  { id: 'USR-002', name: 'Gate Officer Vikram', email: 'vikram.security@apollotyres.com', role: 'Gate Security Lead', site: 'Gate A — Main Entrance', status: 'Active', employeeId: 'EMP-2004', lastLogin: '1 hour ago', phone: '+91 98400 20044' },
+];
+
 const CorporateUsersPage = () => {
   const navigate = useNavigate();
   const { orgId } = useParams();
   const id = orgId || 1;
 
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`gtm_corp_users_${id}`) || '[]');
+      return saved.length > 0 ? saved : SEED_USERS;
+    } catch {
+      return SEED_USERS;
+    }
+  });
+
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [siteFilter, setSiteFilter] = useState('');
@@ -31,6 +44,12 @@ const CorporateUsersPage = () => {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(new Set());
   const [toast, setToast] = useState(null);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(`gtm_corp_users_${id}`, JSON.stringify(users));
+    } catch (e) {}
+  }, [users, id]);
 
   const showToast = (msg, type = 'success') => {
     setToast({ message: msg, type });
@@ -144,7 +163,7 @@ const CorporateUsersPage = () => {
             </thead>
             <tbody>
               {paged.map((user) => (
-                <tr key={user.id} onClick={() => navigate(`/org/users/${user.id}`)} style={{ cursor: 'pointer' }}>
+                <tr key={user.id} onClick={() => navigate(`/org/${id}/users/${user.id}`)} style={{ cursor: 'pointer' }}>
                   <td onClick={(e) => e.stopPropagation()}>
                     <input type="checkbox" checked={selected.has(user.id)} onChange={() => toggleOne(user.id)} />
                   </td>
@@ -165,7 +184,7 @@ const CorporateUsersPage = () => {
                   <td><span className="small text-secondary">{user.lastLogin}</span></td>
                   <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                     <div className="d-flex align-items-center justify-content-end gap-1">
-                      <button className="btn btn-sm btn-light border p-1" title="View Details" onClick={() => navigate(`/org/users/${user.id}`)}>
+                      <button className="btn btn-sm btn-light border p-1" title="View Details" onClick={() => navigate(`/org/${id}/users/${user.id}`)}>
                         <Eye size={14} />
                       </button>
                       <button className="btn btn-sm btn-light border p-1 text-primary" title="Reset Password" onClick={() => showToast(`Password reset link emailed to ${user.email}`, 'info')}>

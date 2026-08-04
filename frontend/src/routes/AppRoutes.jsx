@@ -63,6 +63,27 @@ const OrgRoute = ({ element }) => (
   <OrgUrlSyncWrapper>{element}</OrgUrlSyncWrapper>
 );
 
+// ── Visitor Kiosk Module Phase 1 ──────────────────────────────────────────
+import { VisitorProvider } from '../modules/kiosk/context/VisitorContext';
+import WelcomePage from '../modules/kiosk/pages/WelcomePage';
+import MobileLookupPage from '../modules/kiosk/pages/MobileLookupPage';
+import VisitorDetailsPage from '../modules/kiosk/pages/VisitorDetailsPage';
+import EmployeeSelectionPage from '../modules/kiosk/pages/EmployeeSelectionPage';
+import PhotoCapturePage from '../modules/kiosk/pages/PhotoCapturePage';
+import IDCapturePage from '../modules/kiosk/pages/IDCapturePage';
+import ReviewPage from '../modules/kiosk/pages/ReviewPage';
+import WaitingApprovalPage from '../modules/kiosk/pages/WaitingApprovalPage';
+import PassGeneratedPage from '../modules/kiosk/pages/PassGeneratedPage';
+import RejectedPage from '../modules/kiosk/pages/RejectedPage';
+
+/**
+ * KioskRoute — wraps kiosk screens in VisitorProvider using :orgId parameter.
+ */
+const KioskRoute = ({ element }) => {
+  const { orgId } = useParams();
+  return <VisitorProvider orgId={orgId}>{element}</VisitorProvider>;
+};
+
 const AppRoutes = () => {
   return (
     <OrganizationProvider>
@@ -105,6 +126,18 @@ const AppRoutes = () => {
           {/* Analytics & System */}
           <Route path="/org/:orgId/reports"         element={<OrgRoute element={<CorporateReportsPage />} />} />
           <Route path="/org/:orgId/settings"        element={<OrgRoute element={<CorporatePortalSettingsPage />} />} />
+
+          {/* ── Visitor Kiosk Self-Service UI (/kiosk/:orgId/*) ──────────── */}
+          <Route path="/kiosk/:orgId"               element={<KioskRoute element={<WelcomePage />} />} />
+          <Route path="/kiosk/:orgId/mobile"        element={<KioskRoute element={<MobileLookupPage />} />} />
+          <Route path="/kiosk/:orgId/details"       element={<KioskRoute element={<VisitorDetailsPage />} />} />
+          <Route path="/kiosk/:orgId/employee"      element={<KioskRoute element={<EmployeeSelectionPage />} />} />
+          <Route path="/kiosk/:orgId/photo"         element={<KioskRoute element={<PhotoCapturePage />} />} />
+          <Route path="/kiosk/:orgId/id-proof"      element={<KioskRoute element={<IDCapturePage />} />} />
+          <Route path="/kiosk/:orgId/review"        element={<KioskRoute element={<ReviewPage />} />} />
+          <Route path="/kiosk/:orgId/waiting"       element={<KioskRoute element={<WaitingApprovalPage />} />} />
+          <Route path="/kiosk/:orgId/pass"          element={<KioskRoute element={<PassGeneratedPage />} />} />
+          <Route path="/kiosk/:orgId/rejected"      element={<KioskRoute element={<RejectedPage />} />} />
 
           {/* ── Catch-all redirects ────────────────────────────────────── */}
           <Route path="/org/:orgId"                 element={<OrgRoute element={<Navigate to="dashboard" replace />} />} />

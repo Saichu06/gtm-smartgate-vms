@@ -53,7 +53,12 @@ const CorporatePortalSettingsPage = () => {
   const [displayName, setDisplayName] = useState(activeOrg?.displayName || activeOrg?.name || '');
   const [primaryColor, setPrimaryColor] = useState(activeOrg?.primaryColor || '#1565C0');
   const [secondaryColor, setSecondaryColor] = useState(activeOrg?.secondaryColor || '#0D47A1');
+  const [accentColor, setAccentColor] = useState(activeOrg?.accentColor || '#FFD700');
   const [loginTagline, setLoginTagline] = useState(activeOrg?.loginTagline || 'Secure. Smart. Seamless.');
+  const [welcomeTitle, setWelcomeTitle] = useState(activeOrg?.welcomeTitle || `Welcome to ${activeOrg?.displayName || activeOrg?.name || 'Apollo Tyres'}`);
+  const [welcomeSubtitle, setWelcomeSubtitle] = useState(activeOrg?.welcomeSubtitle || 'Register as a visitor and receive your digital gate access pass in under 2 minutes.');
+  const [kioskBackground, setKioskBackground] = useState(activeOrg?.kioskBackground || '');
+  const [watermark, setWatermark] = useState(activeOrg?.watermark || `${(activeOrg?.displayName || 'ENTERPRISE').toUpperCase()} VISITOR PASS`);
   const [logoPreview, setLogoPreview] = useState(activeOrg?.logo || null);
 
   // Sync state whenever activeOrg changes or updates
@@ -62,10 +67,15 @@ const CorporatePortalSettingsPage = () => {
       setDisplayName(activeOrg.displayName || activeOrg.name || '');
       setPrimaryColor(activeOrg.primaryColor || '#1565C0');
       setSecondaryColor(activeOrg.secondaryColor || '#0D47A1');
+      setAccentColor(activeOrg.accentColor || '#FFD700');
       setLoginTagline(activeOrg.loginTagline || 'Secure. Smart. Seamless.');
+      setWelcomeTitle(activeOrg.welcomeTitle || `Welcome to ${activeOrg.displayName || activeOrg.name || 'Apollo Tyres'}`);
+      setWelcomeSubtitle(activeOrg.welcomeSubtitle || 'Register as a visitor and receive your digital gate access pass in under 2 minutes.');
+      setKioskBackground(activeOrg.kioskBackground || '');
+      setWatermark(activeOrg.watermark || `${(activeOrg.displayName || 'ENTERPRISE').toUpperCase()} VISITOR PASS`);
       setLogoPreview(activeOrg.logo || null);
     }
-  }, [activeOrg?.id, activeOrg?.displayName, activeOrg?.primaryColor, activeOrg?.secondaryColor, activeOrg?.loginTagline, activeOrg?.logo]);
+  }, [activeOrg]);
 
   const showToast = (msg, type = 'success') => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3500); };
 
@@ -91,10 +101,15 @@ const CorporatePortalSettingsPage = () => {
       displayName,
       primaryColor,
       secondaryColor,
+      accentColor,
       loginTagline,
+      welcomeTitle,
+      welcomeSubtitle,
+      kioskBackground,
+      watermark,
       logo: logoPreview,
     });
-    showToast('Organization branding updated live! Colors & logo applied.', 'success');
+    showToast('Branding updated! Applied live to Portal, Kiosk & Visitor Passes.', 'success');
   };
 
   // Notification toggles

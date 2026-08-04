@@ -37,23 +37,46 @@ export const OrganizationProvider = ({ children }) => {
     }
   };
 
-  /** Update logo, colors, tagline, or firstLogin Setup status for an org */
+  /** Update branding model & apply global CSS variables */
   const updateOrganizationBranding = (orgId, brandingData) => {
     setOrganizations((prev) =>
-      prev.map((o) =>
-        o.id === parseInt(orgId, 10)
-          ? {
-              ...o,
-              ...(brandingData.logo !== undefined && { logo: brandingData.logo }),
-              ...(brandingData.primaryColor && { primaryColor: brandingData.primaryColor }),
-              ...(brandingData.secondaryColor && { secondaryColor: brandingData.secondaryColor }),
-              ...(brandingData.displayName && { displayName: brandingData.displayName }),
-              ...(brandingData.loginTagline !== undefined && { loginTagline: brandingData.loginTagline }),
-              ...(brandingData.portalTitle && { portalTitle: brandingData.portalTitle }),
-              ...(brandingData.isFirstLoginDone !== undefined && { isFirstLoginDone: brandingData.isFirstLoginDone }),
+      prev.map((o) => {
+        if (o.id === parseInt(orgId, 10)) {
+          const updated = {
+            ...o,
+            ...brandingData,
+            branding: {
+              ...(o.branding || {}),
+              ...(brandingData.branding || {}),
+              logo: brandingData.logo || o.logo,
+              gtmLogo: brandingData.gtmLogo || o.gtmLogo,
+              primaryColor: brandingData.primaryColor || o.primaryColor,
+              secondaryColor: brandingData.secondaryColor || o.secondaryColor,
+              accentColor: brandingData.accentColor || o.accentColor,
+              displayName: brandingData.displayName || o.displayName,
+              welcomeTitle: brandingData.welcomeTitle || o.welcomeTitle,
+              welcomeSubtitle: brandingData.welcomeSubtitle || o.welcomeSubtitle,
+              kioskBackground: brandingData.kioskBackground || o.kioskBackground,
+              watermark: brandingData.watermark || o.watermark,
+              updatedAt: new Date().toISOString(),
             }
-          : o
-      )
+          };
+
+          // Apply CSS custom properties globally
+          const p = updated.primaryColor || '#1565C0';
+          const s = updated.secondaryColor || '#0D47A1';
+          const a = updated.accentColor || '#FFD700';
+
+          document.documentElement.style.setProperty('--org-primary', p);
+          document.documentElement.style.setProperty('--org-secondary', s);
+          document.documentElement.style.setProperty('--org-accent', a);
+          document.documentElement.style.setProperty('--kiosk-primary', p);
+          document.documentElement.style.setProperty('--kiosk-secondary', s);
+
+          return updated;
+        }
+        return o;
+      })
     );
   };
 
