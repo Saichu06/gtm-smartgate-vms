@@ -51,6 +51,40 @@ export const searchVisitorByPhone = async (phone) => {
 };
 
 /**
+ * Helper to request next pass number centrally configured by Corporate Admin
+ */
+export const requestNextPassNumber = (orgId = '1', orgCode = 'APL') => {
+  const key = `gtm_pass_config_${orgId}`;
+  let passConfig = null;
+  try {
+    passConfig = JSON.parse(localStorage.getItem(key) || 'null');
+  } catch (e) {
+    passConfig = null;
+  }
+
+  const prefix = passConfig?.prefix || `${orgCode}-GP`;
+  const currentNum = parseInt(passConfig?.currentNum || '42', 10);
+  const nextNum = currentNum + 1;
+  const numStr = String(nextNum).padStart(4, '0');
+  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+  const internalPassNumber = `${prefix}-${dateStr}-${numStr}`;
+  const displayGatePassNumber = `Gate Pass #${numStr}`;
+
+  // Update current counter in localStorage
+  if (passConfig) {
+    passConfig.currentNum = numStr;
+    localStorage.setItem(key, JSON.stringify(passConfig));
+  }
+
+  return {
+    passNumber: internalPassNumber,
+    displayPassNumber: displayGatePassNumber,
+    counter: numStr,
+  };
+};
+
+/**
  * Create or update a pending visitor registration (called once from ReviewPage).
  */
 export const submitRegistration = async (visitorData, orgId = '1', options = {}) => {
@@ -65,11 +99,14 @@ export const submitRegistration = async (visitorData, orgId = '1', options = {})
       : null;
 
   const hostName = visitorData.host?.name || null;
-  const passId = status === 'Checked In' ? `VMS-${Date.now().toString(36).toUpperCase()}` : null;
+  const passInfo = requestNextPassNumber(orgId, options.orgCode || 'APL');
+  const passId = status === 'Checked In' ? passInfo.passNumber : null;
+  const displayPassNumber = status === 'Checked In' ? passInfo.displayPassNumber : null;
 
   const record = {
     id: visitId,
     passId,
+    displayPassNumber,
     name: `${visitorData.firstName || ''} ${visitorData.lastName || ''}`.trim() || 'Kiosk Visitor',
     company: visitorData.company || 'Walk-in',
     host: visitorData.host || hostName || 'Reception Desk',
@@ -98,6 +135,7 @@ export const submitRegistration = async (visitorData, orgId = '1', options = {})
     success: true,
     visitId,
     passId,
+    displayPassNumber,
     gate: record.site,
     meetingLocation: visitorData.host ? `${visitorData.host.floor || visitorData.host.site}` : 'Reception Lobby',
     validUntil: new Date(Date.now() + 8 * 60 * 60 * 1000).toLocaleTimeString('en-IN', {

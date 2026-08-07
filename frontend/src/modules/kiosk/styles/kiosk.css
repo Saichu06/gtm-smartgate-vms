@@ -16,9 +16,33 @@
 
 .kiosk-shell * { box-sizing: border-box; }
 
+/* ─── PRINT ONLY VISITOR BADGE MEDIA QUERY ───────────────── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-visitor-badge, .printable-visitor-badge * {
+    visibility: visible;
+  }
+  .printable-visitor-badge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 2px solid #000 !important;
+    box-shadow: none !important;
+  }
+  .kiosk-header, .kiosk-footer, .kiosk-btn, button, nav {
+    display: none !important;
+  }
+}
+
 /* ─── Page Transition ─────────────────────────────────────── */
 .kiosk-page {
   flex: 1;
+  min-height: 0;          /* critical for flex-child scrolling */
+  overflow-y: auto;       /* allow page content to scroll */
   display: flex;
   flex-direction: column;
   animation: kioskFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);

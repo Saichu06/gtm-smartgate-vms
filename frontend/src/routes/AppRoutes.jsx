@@ -74,6 +74,7 @@ import IDCapturePage from '../modules/kiosk/pages/IDCapturePage';
 import ReviewPage from '../modules/kiosk/pages/ReviewPage';
 import WaitingApprovalPage from '../modules/kiosk/pages/WaitingApprovalPage';
 import PassGeneratedPage from '../modules/kiosk/pages/PassGeneratedPage';
+import GatePassAssignmentPage from '../modules/kiosk/pages/GatePassAssignmentPage';
 import RejectedPage from '../modules/kiosk/pages/RejectedPage';
 
 /**
@@ -128,15 +129,23 @@ const AppRoutes = () => {
           <Route path="/org/:orgId/settings"        element={<OrgRoute element={<CorporatePortalSettingsPage />} />} />
 
           {/* ── Visitor Kiosk Self-Service UI (/kiosk/:orgId/*) ──────────── */}
+          {/* Screen 1: Mobile Verification */}
           <Route path="/kiosk/:orgId"               element={<KioskRoute element={<WelcomePage />} />} />
-          <Route path="/kiosk/:orgId/mobile"        element={<KioskRoute element={<MobileLookupPage />} />} />
+          <Route path="/kiosk/:orgId/mobile"        element={<KioskRoute element={<WelcomePage />} />} />
+          {/* Screen 2: Visitor Details */}
           <Route path="/kiosk/:orgId/details"       element={<KioskRoute element={<VisitorDetailsPage />} />} />
-          <Route path="/kiosk/:orgId/employee"      element={<KioskRoute element={<EmployeeSelectionPage />} />} />
-          <Route path="/kiosk/:orgId/photo"         element={<KioskRoute element={<PhotoCapturePage />} />} />
-          <Route path="/kiosk/:orgId/id-proof"      element={<KioskRoute element={<IDCapturePage />} />} />
-          <Route path="/kiosk/:orgId/review"        element={<KioskRoute element={<ReviewPage />} />} />
-          <Route path="/kiosk/:orgId/waiting"       element={<KioskRoute element={<WaitingApprovalPage />} />} />
+          {/* Screen 3: Identity Verification */}
+          <Route path="/kiosk/:orgId/identity"      element={<KioskRoute element={<IDCapturePage />} />} />
+          {/* Screen 4A: Gate Pass Assignment (Physical Pass Selector) */}
+          <Route path="/kiosk/:orgId/gate-pass"     element={<KioskRoute element={<GatePassAssignmentPage />} />} />
+          {/* Screen 4B: Visitor Badge + Print */}
           <Route path="/kiosk/:orgId/pass"          element={<KioskRoute element={<PassGeneratedPage />} />} />
+          {/* Legacy route aliases (backward compat) */}
+          <Route path="/kiosk/:orgId/employee"      element={<KioskRoute element={<VisitorDetailsPage />} />} />
+          <Route path="/kiosk/:orgId/photo"         element={<KioskRoute element={<IDCapturePage />} />} />
+          <Route path="/kiosk/:orgId/id-proof"      element={<KioskRoute element={<IDCapturePage />} />} />
+          <Route path="/kiosk/:orgId/review"        element={<KioskRoute element={<IDCapturePage />} />} />
+          <Route path="/kiosk/:orgId/waiting"       element={<KioskRoute element={<WaitingApprovalPage />} />} />
           <Route path="/kiosk/:orgId/rejected"      element={<KioskRoute element={<RejectedPage />} />} />
 
           {/* ── Catch-all redirects ────────────────────────────────────── */}

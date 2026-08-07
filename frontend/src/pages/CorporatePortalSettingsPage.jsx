@@ -6,7 +6,8 @@
  */
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Settings, Bell, Shield, Palette, Globe, Mail, Save, ToggleLeft, ToggleRight, Upload, Image as ImageIcon } from 'lucide-react';
+import { Settings, Bell, Shield, Palette, Globe, Mail, Save, ToggleLeft, ToggleRight, Upload, Image as ImageIcon, Tag, Plus, Trash2, Edit2, CheckCircle, XCircle } from 'lucide-react';
+import { getGatePasses, createGatePass, updateGatePass, deleteGatePass } from '../modules/kiosk/services/gatePassApi';
 import OrganizationLayout from '@layouts/OrganizationLayout';
 import Card from '@components/data-display/Card';
 import Button from '@components/ui/Button';
@@ -34,11 +35,13 @@ const Toggle = ({ value, onChange, label, desc }) => (
 );
 
 const TABS = [
-  { id: 'general', label: 'General', icon: Settings },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'security', label: 'Security & Access', icon: Shield },
-  { id: 'branding', label: 'Portal Branding', icon: Palette },
-  { id: 'integrations', label: 'Integrations', icon: Globe },
+  { id: 'general',     label: 'General',              icon: Settings },
+  { id: 'notifications', label: 'Notifications',       icon: Bell },
+  { id: 'security',   label: 'Security & Access',      icon: Shield },
+  { id: 'branding',   label: 'Portal Branding',        icon: Palette },
+  { id: 'passConfig', label: 'Visitor Pass Config',    icon: Shield },
+  { id: 'gatePasses', label: 'Gate Pass Management',   icon: Tag },
+  { id: 'integrations', label: 'Integrations',         icon: Globe },
 ];
 
 const CorporatePortalSettingsPage = () => {
@@ -48,6 +51,50 @@ const CorporatePortalSettingsPage = () => {
 
   const [activeTab, setActiveTab] = useState('general');
   const [toast, setToast] = useState(null);
+
+  // Gate Pass Management state
+  const [gatePasses, setGatePasses] = React.useState([]);
+  const [newPassName, setNewPassName] = React.useState('');
+  const [newPassGate, setNewPassGate] = React.useState('Gate A');
+  const [editingPassId, setEditingPassId] = React.useState(null);
+  const [editPassName, setEditPassName] = React.useState('');
+  const [editPassGate, setEditPassGate] = React.useState('');
+
+  React.useEffect(() => {
+    if (id) setGatePasses(getGatePasses(id));
+  }, [id, activeTab]);
+
+  const refreshPasses = () => setGatePasses(getGatePasses(id));
+
+  const handleAddPass = () => {
+    if (!newPassName.trim()) return;
+    createGatePass(id, { name: newPassName.trim(), gate: newPassGate.trim() || 'Gate A' });
+    setNewPassName('');
+    setNewPassGate('Gate A');
+    refreshPasses();
+    showToast('Gate pass created successfully!', 'success');
+  };
+
+  const handleUpdatePass = (passId) => {
+    updateGatePass(id, passId, { name: editPassName, gate: editPassGate });
+    setEditingPassId(null);
+    refreshPasses();
+    showToast('Gate pass updated!', 'success');
+  };
+
+  const handleTogglePassStatus = (pass) => {
+    const nextStatus = pass.status === 'inactive' ? 'available' : 'inactive';
+    updateGatePass(id, pass.id, { status: nextStatus });
+    refreshPasses();
+    showToast(`Gate pass ${nextStatus === 'inactive' ? 'disabled' : 'enabled'}.`, 'success');
+  };
+
+  const handleDeletePass = (passId) => {
+    if (!window.confirm('Delete this gate pass permanently?')) return;
+    deleteGatePass(id, passId);
+    refreshPasses();
+    showToast('Gate pass deleted.', 'success');
+  };
 
   // Branding Form State
   const [displayName, setDisplayName] = useState(activeOrg?.displayName || activeOrg?.name || '');
@@ -60,6 +107,16 @@ const CorporatePortalSettingsPage = () => {
   const [kioskBackground, setKioskBackground] = useState(activeOrg?.kioskBackground || '');
   const [watermark, setWatermark] = useState(activeOrg?.watermark || `${(activeOrg?.displayName || 'ENTERPRISE').toUpperCase()} VISITOR PASS`);
   const [logoPreview, setLogoPreview] = useState(activeOrg?.logo || null);
+
+  // Visitor Pass Configuration State
+  const defaultPrefix = activeOrg?.code ? `${activeOrg.code}-GP` : 'APL-GP';
+  const [passPrefix, setPassPrefix] = useState(activeOrg?.passConfig?.prefix || defaultPrefix);
+  const [passStartingNum, setPassStartingNum] = useState(activeOrg?.passConfig?.startingNum || '0001');
+  const [passCurrentNum, setPassCurrentNum] = useState(activeOrg?.passConfig?.currentNum || '0042');
+  const [passFormat, setPassFormat] = useState(activeOrg?.passConfig?.format || '{PREFIX}-{YYYYMMDD}-{COUNTER}');
+  const [passResetPolicy, setPassResetPolicy] = useState(activeOrg?.passConfig?.resetPolicy || 'Daily');
+  const [printTemplate, setPrintTemplate] = useState(activeOrg?.passConfig?.printTemplate || 'Standard A6 Badge');
+  const [qrTemplate, setQrTemplate] = useState(activeOrg?.passConfig?.qrTemplate || 'Encrypted JSON Payload');
 
   // Sync state whenever activeOrg changes or updates
   React.useEffect(() => {
@@ -74,6 +131,16 @@ const CorporatePortalSettingsPage = () => {
       setKioskBackground(activeOrg.kioskBackground || '');
       setWatermark(activeOrg.watermark || `${(activeOrg.displayName || 'ENTERPRISE').toUpperCase()} VISITOR PASS`);
       setLogoPreview(activeOrg.logo || null);
+
+      if (activeOrg.passConfig) {
+        setPassPrefix(activeOrg.passConfig.prefix || defaultPrefix);
+        setPassStartingNum(activeOrg.passConfig.startingNum || '0001');
+        setPassCurrentNum(activeOrg.passConfig.currentNum || '0042');
+        setPassFormat(activeOrg.passConfig.format || '{PREFIX}-{YYYYMMDD}-{COUNTER}');
+        setPassResetPolicy(activeOrg.passConfig.resetPolicy || 'Daily');
+        setPrintTemplate(activeOrg.passConfig.printTemplate || 'Standard A6 Badge');
+        setQrTemplate(activeOrg.passConfig.qrTemplate || 'Encrypted JSON Payload');
+      }
     }
   }, [activeOrg]);
 
@@ -110,6 +177,22 @@ const CorporatePortalSettingsPage = () => {
       logo: logoPreview,
     });
     showToast('Branding updated! Applied live to Portal, Kiosk & Visitor Passes.', 'success');
+  };
+
+  // Save Visitor Pass Configuration Live
+  const handleSavePassConfig = () => {
+    const passConfigData = {
+      prefix: passPrefix,
+      startingNum: passStartingNum,
+      currentNum: passCurrentNum,
+      format: passFormat,
+      resetPolicy: passResetPolicy,
+      printTemplate,
+      qrTemplate,
+    };
+    updateOrganizationBranding(id, { passConfig: passConfigData });
+    localStorage.setItem(`gtm_pass_config_${id}`, JSON.stringify(passConfigData));
+    showToast('Visitor Pass Configuration updated successfully!', 'success');
   };
 
   // Notification toggles
@@ -337,6 +420,112 @@ const CorporatePortalSettingsPage = () => {
             </Card>
           )}
 
+          {/* Visitor Pass Configuration */}
+          {activeTab === 'passConfig' && (
+            <Card title="Visitor Pass Configuration & Numbering Rules">
+              <div className="row g-3">
+                {/* Live Pass Format Preview */}
+                <div className="col-12">
+                  <div className="p-3 rounded-3 mb-3" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                    <div className="small fw-semibold text-secondary mb-1">Pass Number Format Preview</div>
+                    <div className="d-flex align-items-center gap-3">
+                      <div className="font-monospace fw-bold text-primary fs-4">
+                        {passPrefix}-{new Date().toISOString().slice(0, 10).replace(/-/g, '')}-{passCurrentNum.padStart(4, '0')}
+                      </div>
+                      <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+                        Format Validated
+                      </span>
+                    </div>
+                    <div className="small text-muted mt-1">
+                      Kiosk will request next sequential pass number dynamically from central service using this configuration.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-12 col-md-4">
+                  <Input
+                    label="Pass Prefix"
+                    value={passPrefix}
+                    onChange={(e) => setPassPrefix(e.target.value)}
+                    placeholder="e.g. APL-GP"
+                  />
+                </div>
+                <div className="col-12 col-md-4">
+                  <Input
+                    label="Starting Number"
+                    value={passStartingNum}
+                    onChange={(e) => setPassStartingNum(e.target.value)}
+                    placeholder="0001"
+                  />
+                </div>
+                <div className="col-12 col-md-4">
+                  <Input
+                    label="Current Counter Number"
+                    value={passCurrentNum}
+                    onChange={(e) => setPassCurrentNum(e.target.value)}
+                    placeholder="0042"
+                  />
+                </div>
+
+                <div className="col-12 col-md-6">
+                  <Input
+                    label="Number Format Pattern"
+                    value={passFormat}
+                    onChange={(e) => setPassFormat(e.target.value)}
+                    placeholder="{PREFIX}-{YYYYMMDD}-{COUNTER}"
+                  />
+                </div>
+
+                <div className="col-12 col-md-6">
+                  <Select
+                    label="Counter Reset Policy"
+                    value={passResetPolicy}
+                    onChange={(e) => setPassResetPolicy(e.target.value)}
+                    options={[
+                      { label: 'Daily (Resets at midnight)', value: 'Daily' },
+                      { label: 'Monthly (Resets 1st of month)', value: 'Monthly' },
+                      { label: 'Never (Continuous sequential)', value: 'Never' },
+                    ]}
+                  />
+                </div>
+
+                <div className="col-12 col-md-6">
+                  <Select
+                    label="Print Pass Badge Template"
+                    value={printTemplate}
+                    onChange={(e) => setPrintTemplate(e.target.value)}
+                    options={[
+                      { label: 'Standard Enterprise A6 Badge', value: 'Standard A6 Badge' },
+                      { label: 'Thermal Sticky Badge (4x3")', value: 'Thermal Sticky Badge' },
+                      { label: 'Lanyard PVC Card Format', value: 'Lanyard PVC Card' },
+                    ]}
+                  />
+                </div>
+
+                <div className="col-12 col-md-6">
+                  <Select
+                    label="QR Code Security Payload"
+                    value={qrTemplate}
+                    onChange={(e) => setQrTemplate(e.target.value)}
+                    options={[
+                      { label: 'Encrypted JSON Payload (Default)', value: 'Encrypted JSON Payload' },
+                      { label: 'Pass ID Raw String', value: 'Pass ID Raw String' },
+                      { label: 'Encrypted Token Payload', value: 'Encrypted Token Payload' },
+                    ]}
+                  />
+                </div>
+
+                <div className="col-12">
+                  <div className="d-flex justify-content-end mt-3">
+                    <Button variant="primary" onClick={handleSavePassConfig}>
+                      <Save size={14} /> Save Pass Configuration
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Notifications */}
           {activeTab === 'notifications' && (
             <div className="d-flex flex-column gap-3">
@@ -363,6 +552,169 @@ const CorporatePortalSettingsPage = () => {
               <div className="d-flex justify-content-end">
                 <Button variant="primary" onClick={() => showToast('Security settings updated!')}><Save size={14} /> Save Security Config</Button>
               </div>
+            </div>
+          )}
+
+          {/* Gate Pass Management */}
+          {activeTab === 'gatePasses' && (
+            <div className="d-flex flex-column gap-3">
+              <Card title="Gate Pass Inventory">
+                <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 16 }}>
+                  Manage the physical visitor gate passes for <strong>{activeOrg?.displayName || activeOrg?.name}</strong>.
+                  The kiosk only consumes passes created here — it never creates, edits, or deletes passes.
+                </p>
+
+                {/* Add New Pass */}
+                <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                  <div style={{ flex: '2 1 160px' }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: '#64748B', display: 'block', marginBottom: 4 }}>PASS NAME</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Gate Pass 6"
+                      value={newPassName}
+                      onChange={e => setNewPassName(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddPass()}
+                    />
+                  </div>
+                  <div style={{ flex: '1 1 120px' }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: '#64748B', display: 'block', marginBottom: 4 }}>GATE</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Gate A"
+                      value={newPassGate}
+                      onChange={e => setNewPassGate(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    className="btn btn-primary d-flex align-items-center gap-2"
+                    onClick={handleAddPass}
+                    disabled={!newPassName.trim()}
+                  >
+                    <Plus size={16} /> Add Pass
+                  </button>
+                </div>
+
+                {/* Pass List */}
+                {gatePasses.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '32px 0', color: '#94A3B8' }}>
+                    <Tag size={36} style={{ marginBottom: 12, opacity: 0.4 }} />
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>No gate passes created yet.</div>
+                    <div style={{ fontSize: 12 }}>Add your first gate pass above.</div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {gatePasses.map(pass => {
+                      const statusColors = {
+                        available:   { bg: '#F0FDF4', color: '#166534', border: '#BBF7D0', label: 'Available' },
+                        assigned:    { bg: '#EFF6FF', color: '#1E40AF', border: '#BFDBFE', label: 'Assigned' },
+                        maintenance: { bg: '#FFFBEB', color: '#92400E', border: '#FDE68A', label: 'Maintenance' },
+                        lost:        { bg: '#FEF2F2', color: '#991B1B', border: '#FECACA', label: 'Lost' },
+                        inactive:    { bg: '#F8FAFC', color: '#64748B', border: '#E2E8F0', label: 'Inactive' },
+                      };
+                      const sc = statusColors[pass.status] || statusColors.inactive;
+                      const isEditing = editingPassId === pass.id;
+
+                      return (
+                        <div
+                          key={pass.id}
+                          style={{
+                            padding: '14px 18px',
+                            background: '#FAFAFA',
+                            border: '1px solid #E2E8F0',
+                            borderRadius: 12,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            flexWrap: 'wrap',
+                            opacity: pass.status === 'inactive' ? 0.6 : 1,
+                          }}
+                        >
+                          <div style={{ width: 36, height: 36, borderRadius: 8, background: sc.bg, border: `1px solid ${sc.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Tag size={16} style={{ color: sc.color }} />
+                          </div>
+
+                          {isEditing ? (
+                            <>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={editPassName}
+                                onChange={e => setEditPassName(e.target.value)}
+                                style={{ width: 160 }}
+                              />
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={editPassGate}
+                                onChange={e => setEditPassGate(e.target.value)}
+                                style={{ width: 100 }}
+                              />
+                              <button className="btn btn-success btn-sm" onClick={() => handleUpdatePass(pass.id)}>Save</button>
+                              <button className="btn btn-secondary btn-sm" onClick={() => setEditingPassId(null)}>Cancel</button>
+                            </>
+                          ) : (
+                            <>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>{pass.name}</div>
+                                <div style={{ fontSize: 12, color: '#64748B' }}>{pass.gate}</div>
+                              </div>
+                              <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
+                                {sc.label}
+                              </span>
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                {pass.status !== 'assigned' && (
+                                  <button
+                                    className="btn btn-outline-secondary btn-sm"
+                                    title="Edit"
+                                    onClick={() => { setEditingPassId(pass.id); setEditPassName(pass.name); setEditPassGate(pass.gate); }}
+                                  >
+                                    <Edit2 size={13} />
+                                  </button>
+                                )}
+                                <button
+                                  className={`btn btn-sm ${pass.status === 'inactive' ? 'btn-outline-success' : 'btn-outline-warning'}`}
+                                  title={pass.status === 'inactive' ? 'Enable' : 'Disable'}
+                                  onClick={() => handleTogglePassStatus(pass)}
+                                  disabled={pass.status === 'assigned'}
+                                >
+                                  {pass.status === 'inactive' ? <CheckCircle size={13} /> : <XCircle size={13} />}
+                                </button>
+                                <button
+                                  className="btn btn-outline-danger btn-sm"
+                                  title="Delete"
+                                  onClick={() => handleDeletePass(pass.id)}
+                                  disabled={pass.status === 'assigned'}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </Card>
+
+              <Card title="Status Reference">
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'Available', bg: '#F0FDF4', color: '#166534', border: '#BBF7D0', desc: 'Ready to be issued to a visitor' },
+                    { label: 'Assigned',  bg: '#EFF6FF', color: '#1E40AF', border: '#BFDBFE', desc: 'Currently held by an active visitor' },
+                    { label: 'Maintenance', bg: '#FFFBEB', color: '#92400E', border: '#FDE68A', desc: 'Under maintenance' },
+                    { label: 'Lost',      bg: '#FEF2F2', color: '#991B1B', border: '#FECACA', desc: 'Reported as lost' },
+                    { label: 'Inactive',  bg: '#F8FAFC', color: '#64748B', border: '#E2E8F0', desc: 'Permanently disabled' },
+                  ].map(s => (
+                    <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: s.bg, border: `1px solid ${s.border}`, borderRadius: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: s.color }}>{s.label}</span>
+                      <span style={{ fontSize: 11, color: s.color, opacity: 0.7 }}>— {s.desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </div>
           )}
 

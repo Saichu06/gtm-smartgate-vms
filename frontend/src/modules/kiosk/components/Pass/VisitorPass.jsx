@@ -1,76 +1,51 @@
 /**
- * VisitorPass — Enterprise Visitor Badge Generator Component.
- * Supports dynamic pass templates (Visitor Pass, Contractor Pass, Vendor Pass, VIP Pass, Interview Pass),
- * dual logo header (Company Logo Top-Left, GTM Smart Gate Logo Top-Right),
- * QR Code verification payload, and print/export hooks.
+ * VisitorPass — Enterprise Visitor Badge Generator Component (PPT Spec Compliant).
+ * Features:
+ * - Top Left: Organization Logo
+ * - Top Right: GTM Smart Gate Logo
+ * - Center: VISITOR PASS Title, Photo, Name, Company, Purpose, Visitor Type, Host, Visit Date, Visit Time, Gate, Gate Pass Number, QR Code, Status ("VALID TODAY")
+ * - Footer: Powered by GTM Smart Gate
+ * - Print-ready CSS (@media print) hiding shell navigation, buttons, and footers.
  */
 import React from 'react';
 import { QrCode, ShieldCheck, Zap, User, MapPin, Clock, Calendar, Building2, CheckCircle2 } from 'lucide-react';
 import { useVisitor } from '../../context/VisitorContext';
+import gtmLogo from '../../../../assets/icons/logo.png';
 
-// Standard GTM Smart Gate Logo Data URI for pass header Top Right
-const GTM_SMARTGATE_LOGO_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 44"><rect width="180" height="44" rx="8" fill="%230F172A"/><path d="M15 12L25 22L15 32M25 12L35 32" stroke="%2338BDF8" stroke-width="3" stroke-linecap="round"/><text x="44" y="27" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="%23FFFFFF">GTM <tspan fill="%2338BDF8">SMART GATE</tspan></text></svg>`;
-
-const TEMPLATE_STYLES = {
-  'Visitor Pass':     { bg: 'linear-gradient(135deg, #1565C0, #0D47A1)', label: 'VISITOR ACCESS PASS', badgeBg: '#E3F2FD', badgeColor: '#0D47A1' },
-  'Contractor Pass':  { bg: 'linear-gradient(135deg, #E65100, #EF6C00)', label: 'CONTRACTOR ACCESS PASS', badgeBg: '#FFF3E0', badgeColor: '#E65100' },
-  'Vendor Pass':      { bg: 'linear-gradient(135deg, #2E7D32, #1B5E20)', label: 'VENDOR PERMIT BADGE', badgeBg: '#E8F5E9', badgeColor: '#1B5E20' },
-  'VIP Pass':         { bg: 'linear-gradient(135deg, #6A1B9A, #4A148C)', label: 'VIP EXECUTIVE PASS', badgeBg: '#F3E5F5', badgeColor: '#4A148C' },
-  'Interview Pass':   { bg: 'linear-gradient(135deg, #00838F, #006064)', label: 'CANDIDATE ENTRY PASS', badgeBg: '#E0F7FA', badgeColor: '#006064' },
-};
-
-const VisitorPass = ({ passData, template, onPrint }) => {
+const VisitorPass = ({ passData, template }) => {
   const { org } = useVisitor();
   const primary   = org?.primaryColor   || '#1565C0';
   const secondary = org?.secondaryColor || '#0F172A';
   const orgLogo   = org?.logo || org?.logoLight;
   const orgName   = org?.displayName || org?.name || 'Apollo Tyres';
-  const watermark = org?.watermark || `${orgName.toUpperCase()} ENTERPRISE PASS`;
 
-  const activeTemplate = template || org?.kioskConfig?.visitorPassTemplate || 'Visitor Pass';
-  const styleConfig = TEMPLATE_STYLES[activeTemplate] || TEMPLATE_STYLES['Visitor Pass'];
+  const displayPassNumber = passData?.displayPassNumber || `Gate Pass #${(passData?.passId || '').slice(-4) || '0043'}`;
+  const fullPassId = passData?.passId || 'APL-GP-20260807-0043';
 
   // Encrypted / Structured QR payload string
   const qrPayload = JSON.stringify({
-    vId: passData?.visitId || 'VIS-9982',
-    pId: passData?.passId || 'VMS-APOLLO-9842',
-    oId: org?.id || 1,
-    hId: passData?.host?.id || 'EMP001',
-    ts: passData?.timestamp || new Date().toISOString(),
-    chk: 'VERIFIED_OK',
+    passId: fullPassId,
+    visitorId: passData?.visitId || 'VIS-9982',
+    orgId: org?.id || 1,
+    date: new Date().toISOString().slice(0, 10),
+    status: 'VALID TODAY',
   });
 
+  const currentDateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const currentTimeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
   return (
-    <div className="kiosk-pass-wrapper" style={{ position: 'relative', width: '100%', maxWidth: 640, margin: '0 auto' }}>
+    <div className="kiosk-pass-wrapper" style={{ position: 'relative', width: '100%', maxWidth: 660, margin: '0 auto' }}>
       
       {/* Enterprise Dual-Logo Header Pass Container */}
-      <div style={{
+      <div className="printable-visitor-badge" style={{
         background: '#FFFFFF',
         borderRadius: 24,
-        border: `2px solid ${primary}30`,
+        border: `3px solid ${primary}`,
         boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
         overflow: 'hidden',
         position: 'relative',
       }}>
-        
-        {/* Background Watermark */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%) rotate(-25deg)',
-          fontSize: 32,
-          fontWeight: 900,
-          color: 'rgba(0,0,0,0.03)',
-          letterSpacing: 4,
-          pointerEvents: 'none',
-          whiteSpace: 'nowrap',
-          textTransform: 'uppercase',
-          width: '100%',
-          textAlign: 'center',
-        }}>
-          {watermark}
-        </div>
 
         {/* ── TOP DUAL LOGO HEADER ─────────────────────────────────────── */}
         <div style={{
@@ -78,7 +53,7 @@ const VisitorPass = ({ passData, template, onPrint }) => {
           padding: '18px 24px',
           display: 'flex',
           alignItems: 'center',
-          justify: 'space-between',
+          justifyContent: 'space-between',
           borderBottom: `4px solid ${primary}`,
         }}>
           {/* Top Left: Organization Logo */}
@@ -87,7 +62,7 @@ const VisitorPass = ({ passData, template, onPrint }) => {
               <img
                 src={orgLogo}
                 alt={orgName}
-                style={{ height: 38, maxWidth: 160, objectFit: 'contain' }}
+                style={{ height: 42, maxWidth: 180, objectFit: 'contain' }}
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.style.display = 'none';
@@ -103,28 +78,46 @@ const VisitorPass = ({ passData, template, onPrint }) => {
             )}
           </div>
 
-          {/* Center Badge: Template Type */}
+          {/* Center Badge Title */}
           <div style={{
-            background: styleConfig.badgeBg,
-            color: styleConfig.badgeColor,
-            fontWeight: 800,
-            fontSize: 11,
-            letterSpacing: '1px',
-            padding: '4px 12px',
+            background: '#F0FDF4',
+            color: '#2E7D32',
+            fontWeight: 900,
+            fontSize: 12,
+            letterSpacing: '1.5px',
+            padding: '6px 16px',
             borderRadius: 999,
+            border: '1px solid #BBF7D0',
             textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
           }}>
-            {activeTemplate}
+            <ShieldCheck size={14} /> VALID TODAY
           </div>
 
           {/* Top Right: GTM Smart Gate Logo */}
           <div>
             <img
-              src={GTM_SMARTGATE_LOGO_SVG}
+              src={gtmLogo}
               alt="GTM Smart Gate"
-              style={{ height: 32, objectFit: 'contain' }}
+              style={{ height: 40, objectFit: 'contain', background: '#fff', padding: '4px 10px', borderRadius: 8 }}
             />
           </div>
+        </div>
+
+        {/* ── PASS TITLE STRIP ────────────────────────────────────────── */}
+        <div style={{
+          background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+          color: '#FFFFFF',
+          textAlign: 'center',
+          padding: '10px 0',
+          fontSize: 18,
+          fontWeight: 900,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+        }}>
+          VISITOR PASS
         </div>
 
         {/* ── PASS BODY CONTENT ────────────────────────────────────────── */}
@@ -135,7 +128,7 @@ const VisitorPass = ({ passData, template, onPrint }) => {
             {/* Visitor Photo Frame */}
             <div style={{ textCenter: 'center' }}>
               <div style={{
-                width: 140, height: 160, borderRadius: 16,
+                width: 144, height: 168, borderRadius: 16,
                 overflow: 'hidden', border: `3px solid ${primary}`,
                 boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
                 position: 'relative', background: '#F8FAFC'
@@ -149,47 +142,57 @@ const VisitorPass = ({ passData, template, onPrint }) => {
                 )}
               </div>
               <div style={{
-                marginTop: 8, background: '#F0FDF4', color: '#2E7D32',
-                border: '1px solid #BBF7D0', borderRadius: 8, padding: '3px 8px',
-                fontSize: 11, fontWeight: 700, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4
+                marginTop: 8, background: '#EFF6FF', color: primary,
+                border: `1px solid ${primary}30`, borderRadius: 8, padding: '4px 8px',
+                fontSize: 11, fontWeight: 800, textAlign: 'center'
               }}>
-                <CheckCircle2 size={12} /> ID VERIFIED
+                {displayPassNumber}
               </div>
             </div>
 
             {/* Visitor Info Details */}
             <div style={{ flex: 1, minWidth: 220 }}>
               
-              <div style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', lineHeight: 1.2 }}>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#0F172A', lineHeight: 1.2 }}>
                 {passData?.name || 'Visitor Name'}
               </div>
               
-              <div style={{ fontSize: 14, color: primary, fontWeight: 700, marginTop: 4 }}>
+              <div style={{ fontSize: 15, color: primary, fontWeight: 700, marginTop: 4 }}>
                 {passData?.company || 'Walk-in Visitor'}
               </div>
 
               <div style={{
                 display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16,
-                background: '#F8FAFC', padding: 14, borderRadius: 14, border: '1px solid #E2E8F0'
+                background: '#F8FAFC', padding: 16, borderRadius: 16, border: '1px solid #E2E8F0'
               }}>
-                <div>
-                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>HOST EMPLOYEE</span>
-                  <strong style={{ fontSize: 13, color: '#0F172A' }}>{passData?.host?.name || passData?.host || 'Reception'}</strong>
-                </div>
-
                 <div>
                   <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>PURPOSE</span>
                   <strong style={{ fontSize: 13, color: '#0F172A' }}>{passData?.purpose || 'Business Visit'}</strong>
                 </div>
 
                 <div>
-                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>GATE / SITE</span>
+                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>VISITOR TYPE</span>
+                  <strong style={{ fontSize: 13, color: '#0F172A' }}>{passData?.visitorType || 'Business Visitor'}</strong>
+                </div>
+
+                <div>
+                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>HOST EMPLOYEE</span>
+                  <strong style={{ fontSize: 13, color: '#0F172A' }}>{passData?.host?.name || passData?.host || 'Reception Desk'}</strong>
+                </div>
+
+                <div>
+                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>GATE / LOCATION</span>
                   <strong style={{ fontSize: 13, color: '#0F172A' }}>{passData?.gate || 'Gate A Main Kiosk'}</strong>
                 </div>
 
                 <div>
-                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>VALID UNTIL</span>
-                  <strong style={{ fontSize: 13, color: '#2E7D32' }}>{passData?.validUntil || '06:00 PM Today'}</strong>
+                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>VISIT DATE</span>
+                  <strong style={{ fontSize: 13, color: '#0F172A' }}>{currentDateStr}</strong>
+                </div>
+
+                <div>
+                  <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, display: 'block' }}>VISIT TIME</span>
+                  <strong style={{ fontSize: 13, color: '#0F172A' }}>{currentTimeStr}</strong>
                 </div>
               </div>
 
@@ -205,27 +208,27 @@ const VisitorPass = ({ passData, template, onPrint }) => {
               
               {/* QR Code Container */}
               <div style={{
-                width: 72, height: 72, background: '#FFFFFF', border: '2px solid #0F172A',
+                width: 76, height: 76, background: '#FFFFFF', border: '2px solid #0F172A',
                 borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
               }}>
-                <QrCode size={52} style={{ color: '#0F172A' }} />
+                <QrCode size={56} style={{ color: '#0F172A' }} />
               </div>
 
               <div>
-                <div style={{ fontFamily: 'monospace', fontSize: 16, fontWeight: 800, color: '#0F172A', letterSpacing: 1 }}>
-                  {passData?.passId || 'VMS-APOLLO-9842'}
+                <div style={{ fontFamily: 'monospace', fontSize: 15, fontWeight: 800, color: '#0F172A', letterSpacing: 1 }}>
+                  {fullPassId}
                 </div>
-                <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
                   Scan at turnstile barrier or gate officer device
                 </div>
               </div>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>ISSUE DATE & TIME</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} · {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+              <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>STATUS</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#2E7D32' }}>
+                VALID TODAY
               </div>
             </div>
 
@@ -235,14 +238,14 @@ const VisitorPass = ({ passData, template, onPrint }) => {
 
         {/* ── PASS FOOTER BRANDING ─────────────────────────────────────── */}
         <div style={{
-          background: '#F1F5F9', padding: '10px 24px', borderTop: '1px solid #E2E8F0',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: '#64748B'
+          background: '#0F172A', padding: '12px 24px', color: '#FFFFFF',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-            <ShieldCheck size={14} style={{ color: '#2E7D32' }} /> Authorized Enterprise Access Badge
+            <ShieldCheck size={14} style={{ color: '#38BDF8' }} /> Authorized Enterprise Visitor Badge
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
-            <Zap size={11} style={{ color: primary }} /> Powered by <strong>GTM Smart Gate</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+            <Zap size={13} style={{ color: '#38BDF8' }} /> Powered by <strong>GTM Smart Gate</strong>
           </div>
         </div>
 
