@@ -16,14 +16,12 @@ import Button from '@components/ui/Button';
 import Toast from '@components/feedback/Toast';
 import { useOrganizations } from '@contexts/OrganizationContext';
 import {
-  getVisitors,
-  updateVisitor,
   formatHostName,
   isVisitorInDateRange,
   formatVisitorDateTime,
   getUniqueHosts,
-  getOrgEmployees,
 } from '@utils/orgStorage';
+import { visitorApi, employeeApi } from '@services/vmsApi';
 
 const priorityVariant = { Normal: 'neutral', High: 'warning', Urgent: 'danger', Low: 'info' };
 
@@ -52,21 +50,26 @@ const CorporateApprovalsPage = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [toast, setToast] = useState(null);
 
-  const loadApprovals = useCallback(() => {
-    setAllVisitors(getVisitors(currentOrgId));
+  const loadApprovals = useCallback(async () => {
+    if (!currentOrgId) return;
+    try {
+      const res = await visitorApi.getVisitors(currentOrgId);
+      if (res.success && Array.isArray(res.data)) setAllVisitors(res.data);
+    } catch (err) {
+      console.error('Failed to load visitors:', err);
+    }
   }, [currentOrgId]);
+
+  const [orgEmployees, setOrgEmployees] = useState([]);
 
   useEffect(() => {
     loadApprovals();
-    const interval = setInterval(loadApprovals, 2000);
-    const onChanged = (e) => {
-      if (String(e.detail?.orgId) === String(currentOrgId)) loadApprovals();
-    };
-    window.addEventListener('gtm-visitors-changed', onChanged);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('gtm-visitors-changed', onChanged);
-    };
+    employeeApi.getEmployees(currentOrgId)
+      .then(res => { if (res.success) setOrgEmployees(res.data || []); })
+      .catch(() => {});
+    // Poll every 10 seconds for new approvals
+    const interval = setInterval(loadApprovals, 10000);
+    return () => clearInterval(interval);
   }, [currentOrgId, loadApprovals]);
 
   const showToast = (msg, type = 'success') => {
@@ -114,40 +117,34 @@ const CorporateApprovalsPage = () => {
 
   const hostOptions = useMemo(() => {
     const fromVisitors = getUniqueHosts(allVisitors);
-    const fromEmployees = getOrgEmployees(currentOrgId).map(e => ({ id: e.id, name: e.name }));
+    const fromEmployees = orgEmployees.map(e => ({ id: e.id, name: e.name }));
     const map = new Map();
     [...fromEmployees, ...fromVisitors].forEach(h => map.set(h.id, h.name));
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [allVisitors, currentOrgId]);
+  }, [allVisitors, orgEmployees]);
 
-  const saveVisitorUpdate = (visitorId, updatedFields) => {
-    updateVisitor(currentOrgId, visitorId, updatedFields);
-    loadApprovals();
+
+
+  const handleApprove = async (visitor) => {
+    try {
+      await visitorApi.approveVisitor(visitor.id);
+      await loadApprovals();
+      setExpandedId(null);
+      showToast(`${visitor.name} approved and checked in!`, 'success');
+    } catch (err) {
+      showToast('Failed to approve visitor. Please try again.', 'danger');
+    }
   };
 
-  const handleApprove = (visitor) => {
-    const passId = `VMS-${Math.floor(1000 + Math.random() * 9000)}`;
-    const now = new Date();
-    const checkin = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-    saveVisitorUpdate(visitor.id, {
-      status: 'Checked In',
-      passId,
-      checkin,
-      processedAt: now.toISOString(),
-      approvedBy: activeOrg?.corporateAdmin || 'Corporate Admin',
-    });
-    setExpandedId(null);
-    showToast(`${visitor.name} approved! Pass ${passId} issued.`, 'success');
-  };
-
-  const handleReject = (visitor) => {
-    saveVisitorUpdate(visitor.id, {
-      status: 'Rejected',
-      processedAt: new Date().toISOString(),
-      approvedBy: activeOrg?.corporateAdmin || 'Corporate Admin',
-    });
-    setExpandedId(null);
-    showToast(`${visitor.name}'s visit has been declined.`, 'warning');
+  const handleReject = async (visitor) => {
+    try {
+      await visitorApi.rejectVisitor(visitor.id);
+      await loadApprovals();
+      setExpandedId(null);
+      showToast(`${visitor.name}'s visit has been declined.`, 'warning');
+    } catch (err) {
+      showToast('Failed to reject visitor. Please try again.', 'danger');
+    }
   };
 
   const urgent = pendingApprovals.filter(a => a.priority === 'Urgent').length;

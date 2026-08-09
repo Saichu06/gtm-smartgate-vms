@@ -103,8 +103,17 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
   const handleSavePreferences = () => {
     try {
       localStorage.setItem('gtm_superadmin_preferences', JSON.stringify(preferences));
+      if (preferences.theme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        document.body.style.backgroundColor = '#1e1e2d';
+        document.body.style.color = '#ffffff';
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+        document.body.style.backgroundColor = '';
+        document.body.style.color = '';
+      }
     } catch (e) { console.warn(e); }
-    alert('Super Admin preferences saved!');
+    alert('Super Admin preferences saved and applied!');
     setIsPreferencesOpen(false);
   };
 

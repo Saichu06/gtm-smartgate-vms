@@ -12,10 +12,30 @@ import Drawer from '@components/navigation/Drawer';
 import Input from '@components/forms/Input';
 import Select from '@components/forms/Select';
 
-import usersData from '@mock/users.json';
+const INITIAL_PLATFORM_USERS = [
+  { id: 'usr_1', name: 'Super Admin', email: 'admin@gtmsmartgate.com', role: 'Super Admin', status: 'Active', lastActive: 'Just now' },
+  { id: 'usr_2', name: 'Support Engineer', email: 'support@gtmsmartgate.com', role: 'Support Lead', status: 'Active', lastActive: '2 hours ago' },
+];
 
 const PlatformUsersPage = () => {
+  const [users, setUsers] = useState(INITIAL_PLATFORM_USERS);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', role: 'Super Admin' });
+
+  const handleInvite = () => {
+    if (!form.name.trim()) return;
+    const newUser = {
+      id: `usr_${Date.now()}`,
+      name: form.name,
+      email: form.email,
+      role: form.role,
+      status: 'Active',
+      lastActive: 'Just now',
+    };
+    setUsers([newUser, ...users]);
+    setIsInviteOpen(false);
+    setForm({ name: '', email: '', role: 'Super Admin' });
+  };
 
   const columns = [
     { header: 'Full Name', key: 'name', render: (row) => <strong>{row.name}</strong> },
@@ -30,9 +50,6 @@ const PlatformUsersPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
           <Button variant="secondary" size="xs" onClick={() => alert(`Reset email sent to ${row.email}`)}>
             Reset Pass
-          </Button>
-          <Button variant="secondary" size="xs" onClick={() => setIsInviteOpen(true)}>
-            Edit
           </Button>
         </div>
       ),
@@ -49,22 +66,21 @@ const PlatformUsersPage = () => {
         </Button>
       }
     >
-      <DataTable columns={columns} data={usersData} />
+      <DataTable columns={columns} data={users} />
 
       <Drawer
         isOpen={isInviteOpen}
         onClose={() => setIsInviteOpen(false)}
         title="Invite Platform User"
-        onSave={() => {
-          alert('Invitation sent successfully!');
-          setIsInviteOpen(false);
-        }}
+        onSave={handleInvite}
       >
-        <Input label="Full Name" required placeholder="e.g. Ramesh Kumar" />
-        <Input label="Work Email" required type="email" placeholder="ramesh.k@gtm.com" />
+        <Input label="Full Name" required placeholder="e.g. Ramesh Kumar" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+        <Input label="Work Email" required type="email" placeholder="ramesh.k@gtm.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
         <Select
           label="Platform Role Assignment"
           required
+          value={form.role}
+          onChange={e => setForm({ ...form, role: e.target.value })}
           options={[
             { label: 'Super Admin', value: 'Super Admin' },
             { label: 'Support Lead', value: 'Support Lead' },

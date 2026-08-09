@@ -1,0 +1,2468 @@
+{
+  "auto_prefixs": {
+    "rowCount": 0,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "site_prefix",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "user_prefix",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "emp_prefix",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_deleted",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      }
+    ],
+    "sampleRows": []
+  },
+  "company_details": {
+    "rowCount": 2,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "company_code",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "company_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "registration_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "address1",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "address2",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "city",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "state",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "pincode",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "contact_person",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "contact_mobno",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "contact_email",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "landline",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_count",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "user_count",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "logo",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "logo_type",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "logo_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_deleted",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "welcome_msg",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "primary_color",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "secondary_color",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "company_code": "C001",
+        "company_name": "ProConnect Supply Chain",
+        "registration_no": "REG12345",
+        "address1": "56 Nehru Nagar",
+        "address2": null,
+        "city": "Chennai",
+        "state": "Tamil Nadu",
+        "pincode": 600094,
+        "contact_person": "Admin",
+        "contact_mobno": "9876543210",
+        "contact_email": "info@proconnect.in",
+        "landline": "0441234567",
+        "site_count": 1,
+        "user_count": 10,
+        "logo": "data:image/png;base64,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",
+        "logo_type": null,
+        "logo_path": null,
+        "is_deleted": false,
+        "welcome_msg": "Welcome to ProConnect",
+        "comp_type": "Corporate",
+        "primary_color": null,
+        "secondary_color": null
+      },
+      {
+        "id": "4",
+        "company_code": "BEL-HQ",
+        "company_name": "Bharat Electronics Limited",
+        "registration_no": null,
+        "address1": "Outer Ring Road, Nagavara, Bengaluru",
+        "address2": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": 560045,
+        "contact_person": null,
+        "contact_mobno": "+91 80 2503 9300",
+        "contact_email": "gate.support@bel.co.in",
+        "landline": null,
+        "site_count": 0,
+        "user_count": 0,
+        "logo": "data:image/png;base64,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",
+        "logo_type": null,
+        "logo_path": null,
+        "is_deleted": false,
+        "welcome_msg": "Welcome to Bharat Electronics Limited",
+        "comp_type": null,
+        "primary_color": "#1565C0",
+        "secondary_color": "#0D47A1"
+      }
+    ]
+  },
+  "conf_other_service_details": {
+    "rowCount": 3,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "services",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "service_time",
+        "data_type": "time without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "no_of_count",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "booking_code",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_deleted",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "services": "Coffee",
+        "service_time": "10:30:00",
+        "no_of_count": 80,
+        "booking_code": "PC_CONF_ROOM_1",
+        "comp_id": "1",
+        "site_id": "1",
+        "is_deleted": false
+      },
+      {
+        "id": "2",
+        "services": "Lunch",
+        "service_time": "13:00:00",
+        "no_of_count": 80,
+        "booking_code": "PC_CONF_ROOM_1",
+        "comp_id": "1",
+        "site_id": "1",
+        "is_deleted": false
+      },
+      {
+        "id": "3",
+        "services": "Snacks",
+        "service_time": "11:00:00",
+        "no_of_count": 30,
+        "booking_code": "PC_CONF_ROOM_2",
+        "comp_id": "1",
+        "site_id": "1",
+        "is_deleted": false
+      }
+    ]
+  },
+  "conference_details": {
+    "rowCount": 0,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "name_of_resource",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "department_req",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "emp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "type_of_meeting",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "external_vendor_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "no_of_external",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "total_no_member",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "req_projector",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "meeting_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "start_time",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "booking_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "user_code",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "reason",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "end_time",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "is_deleted",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      }
+    ],
+    "sampleRows": []
+  },
+  "emp_bookingdetails": {
+    "rowCount": 3,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "emp_code",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "visitor_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "coming_from",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "person_to_meet",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "no_of_person",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "visitors_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "booking_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "emp_code": "UC4",
+        "visitor_name": "Rajesh",
+        "coming_from": "Bugs Free",
+        "person_to_meet": "Manivel",
+        "no_of_person": 4,
+        "visitors_type": "Maintenance",
+        "mobile_no": "7904844406",
+        "email": "rajesh@gmail.in",
+        "booking_date": "2020-01-28T18:30:00.000Z",
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "2",
+        "emp_code": "EC3",
+        "visitor_name": "Nitin",
+        "coming_from": "Gtm",
+        "person_to_meet": "yuvaraj",
+        "no_of_person": 1,
+        "visitors_type": "Personal",
+        "mobile_no": "9940143570",
+        "email": "nitin@gmail.com",
+        "booking_date": "2020-02-03T18:30:00.000Z",
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "3",
+        "emp_code": "EC4",
+        "visitor_name": "Rahul",
+        "coming_from": "Gears Tech",
+        "person_to_meet": "nitin",
+        "no_of_person": 1,
+        "visitors_type": "Official",
+        "mobile_no": "7904844406",
+        "email": "rahul@gmail.in",
+        "booking_date": "2020-02-17T18:30:00.000Z",
+        "site_id": "2",
+        "comp_id": "1"
+      }
+    ]
+  },
+  "emp_vehicledetails": {
+    "rowCount": 0,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "emp_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "checkin_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "checkout_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      }
+    ],
+    "sampleRows": []
+  },
+  "employee_details": {
+    "rowCount": 6,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "employee_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "employee_name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_no",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "designation",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "department",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "column_name": "vehicle",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "column_name": "vehicle_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "it_alert",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "column_name": "admin_alert",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "employee_code": "EC1",
+        "employee_name": "Naveen",
+        "email": "naveen@proconnect.in",
+        "mobile_no": "7846464544",
+        "designation": "HR",
+        "department": "HR",
+        "active": true,
+        "vehicle": true,
+        "vehicle_type": "Two Wheeler",
+        "vehicle_no": "TN12AA7278",
+        "status": null,
+        "site_id": "1",
+        "comp_id": "1",
+        "it_alert": true,
+        "admin_alert": true
+      },
+      {
+        "id": "2",
+        "employee_code": "EC2",
+        "employee_name": "Manivel",
+        "email": "manivel@proconnect.in",
+        "mobile_no": "7904844406",
+        "designation": "manager",
+        "department": "Accounts",
+        "active": true,
+        "vehicle": true,
+        "vehicle_type": "Four Wheeler",
+        "vehicle_no": "TN06TZ3456",
+        "status": null,
+        "site_id": "1",
+        "comp_id": "1",
+        "it_alert": true,
+        "admin_alert": true
+      },
+      {
+        "id": "3",
+        "employee_code": "EC3",
+        "employee_name": "Yuvaraj",
+        "email": "yuvaraj@proconnect.in",
+        "mobile_no": "9940143570",
+        "designation": "HR",
+        "department": "HR",
+        "active": true,
+        "vehicle": true,
+        "vehicle_type": "Two Wheeler",
+        "vehicle_no": "TN06TY2345",
+        "status": null,
+        "site_id": "1",
+        "comp_id": "1",
+        "it_alert": true,
+        "admin_alert": true
+      }
+    ]
+  },
+  "gate_privileges": {
+    "rowCount": 6,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "code": "Visitor Verification"
+      },
+      {
+        "id": "2",
+        "code": "Visitor Details"
+      },
+      {
+        "id": "3",
+        "code": "Capture Image"
+      }
+    ]
+  },
+  "gateuser_details": {
+    "rowCount": 30,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "privileges_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "19",
+        "user_id": "7",
+        "privileges_id": "1",
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "20",
+        "user_id": "7",
+        "privileges_id": "2",
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "21",
+        "user_id": "7",
+        "privileges_id": "3",
+        "site_id": "1",
+        "comp_id": "1"
+      }
+    ]
+  },
+  "multicompany_details": {
+    "rowCount": 0,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mulcomp_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mulcomp_name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "level",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_no",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      }
+    ],
+    "sampleRows": []
+  },
+  "pass_details": {
+    "rowCount": 21,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "pass_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "pass_desc",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "passcategory_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "info1",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "info2",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "2",
+        "pass_code": "PC2",
+        "pass_desc": "Maintanence",
+        "passcategory_id": "2",
+        "info1": "Maintanence",
+        "info2": "Maintenance",
+        "active": true,
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "3",
+        "pass_code": "PC3",
+        "pass_desc": "Auditor",
+        "passcategory_id": "3",
+        "info1": "Auditor",
+        "info2": "Auditor",
+        "active": true,
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "4",
+        "pass_code": "PC4",
+        "pass_desc": "Personal",
+        "passcategory_id": "4",
+        "info1": "Personal",
+        "info2": "Personal",
+        "active": true,
+        "site_id": "1",
+        "comp_id": "1"
+      }
+    ]
+  },
+  "passcategory_details": {
+    "rowCount": 5,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "category",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "category": "Official"
+      },
+      {
+        "id": "2",
+        "category": "Maintenance"
+      },
+      {
+        "id": "3",
+        "category": "Auditor"
+      }
+    ]
+  },
+  "permanent_employee": {
+    "rowCount": 1,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "visitor_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "coming_from",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "person_to_meet",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "visitors_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "laptop",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "model",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "serial_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "pass_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "checkin_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "checkout_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "visitor_name": "John Doe",
+        "mobile_no": "9876543210",
+        "coming_from": "Chennai",
+        "person_to_meet": "Karuppaiya",
+        "visitors_type": "Contractor",
+        "image_type": "image/png",
+        "image_path": "/files/john.png",
+        "image_name": "john.png",
+        "idproof_type": "Aadhar",
+        "idproof_path": "/files/aadhar.pdf",
+        "idproof_name": "aadhar.pdf",
+        "laptop": 1,
+        "model": "Dell",
+        "serial_no": "SN12345",
+        "vehicle_type": "Two-wheeler",
+        "vehicle_no": "TN01AB1234",
+        "pass_id": null,
+        "checkin_date": "2026-08-02T03:30:00.000Z",
+        "checkout_date": "2026-08-02T11:30:00.000Z",
+        "status": "active",
+        "site_id": "1",
+        "comp_id": "1"
+      }
+    ]
+  },
+  "refresh_tokens": {
+    "rowCount": 11,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('smartgate.refresh_tokens_id_seq'::regclass)"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "token_hash",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "expires_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "revoked",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": 1,
+        "user_id": 25,
+        "token_hash": "2dd7bf56eb61795dbeaa32f9c479676b3ed33f2233b3685360884d96593226d2",
+        "expires_at": "2026-08-16T10:12:32.096Z",
+        "revoked": true,
+        "created_at": "2026-08-09T10:12:32.098Z"
+      },
+      {
+        "id": 2,
+        "user_id": 25,
+        "token_hash": "5856fbf657c2fa77ade68b287679bb94355b35b2e318f5e7413e4b029c1fe180",
+        "expires_at": "2026-08-16T10:27:33.023Z",
+        "revoked": false,
+        "created_at": "2026-08-09T10:27:33.027Z"
+      },
+      {
+        "id": 3,
+        "user_id": 25,
+        "token_hash": "b1d91e583a8a52de7e45edf4623998a7b5115d9cd8ec73fefc0c582c127f0859",
+        "expires_at": "2026-08-16T10:31:46.877Z",
+        "revoked": false,
+        "created_at": "2026-08-09T10:31:46.878Z"
+      }
+    ]
+  },
+  "resource_masters": {
+    "rowCount": 3,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "room_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "room_code",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "capacity",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "projector_available",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "room_name": "Garuda",
+        "room_code": "RC1",
+        "capacity": 100,
+        "projector_available": true,
+        "comp_id": "1",
+        "site_id": "1"
+      },
+      {
+        "id": "2",
+        "room_name": "Phoenix",
+        "room_code": "RC2",
+        "capacity": 50,
+        "projector_available": false,
+        "comp_id": "1",
+        "site_id": "1"
+      },
+      {
+        "id": "3",
+        "room_name": "Parrot",
+        "room_code": "RC3",
+        "capacity": 250,
+        "projector_available": true,
+        "comp_id": "1",
+        "site_id": "1"
+      }
+    ]
+  },
+  "roleinfos": {
+    "rowCount": 6,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "code",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_deleted",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "3",
+        "code": "RA",
+        "name": "SECURITY DESK",
+        "is_deleted": false
+      },
+      {
+        "id": "4",
+        "code": "GU",
+        "name": "GATE USER",
+        "is_deleted": false
+      },
+      {
+        "id": "5",
+        "code": "RB",
+        "name": "RESOURCE BOOKING",
+        "is_deleted": false
+      }
+    ]
+  },
+  "sites": {
+    "rowCount": 4,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "site_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "site_name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "address1",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "address2",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "city",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "state",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "pincode",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_deleted",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "site_code": "SC1",
+        "site_name": "PC Corporate Office",
+        "address1": "56 Nehru Nagar, Industrial Estate",
+        "address2": null,
+        "city": "Chennai",
+        "state": "Tamil Nadu",
+        "pincode": 600094,
+        "comp_id": "1",
+        "is_deleted": false
+      },
+      {
+        "id": "2",
+        "site_code": "SC2",
+        "site_name": "PC Branch Delhi",
+        "address1": "Connaught Place",
+        "address2": null,
+        "city": "Delhi",
+        "state": "Delhi",
+        "pincode": 110001,
+        "comp_id": "1",
+        "is_deleted": false
+      },
+      {
+        "id": "3",
+        "site_code": "SC3",
+        "site_name": "PC Branch Kolkata",
+        "address1": "Park Street",
+        "address2": null,
+        "city": "Kolkata",
+        "state": "West Bengal",
+        "pincode": 700016,
+        "comp_id": "1",
+        "is_deleted": false
+      }
+    ]
+  },
+  "store_details": {
+    "rowCount": 4,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "site_code",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "address1",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "address2",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "city",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "state",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "contact_person",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "landline",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "contact_mobno",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "contact_email",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "''::character varying"
+      },
+      {
+        "column_name": "pincode",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "gstno",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_deleted",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "column_name": "active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "site_code": "SC1",
+        "site_name": "PC Corporate Office",
+        "address1": "56, nehru nagar, industrial estate",
+        "address2": "thiruvanmiyur",
+        "city": "chennai",
+        "state": "tamilnadu",
+        "contact_person": "undefined",
+        "landline": "044435678967",
+        "contact_mobno": "8765774830",
+        "contact_email": "prosc1@proconnect.in",
+        "pincode": 600094,
+        "comp_id": "1",
+        "gstno": "AS5674FF76435",
+        "is_deleted": false,
+        "active": true
+      },
+      {
+        "id": "2",
+        "site_code": "SC2",
+        "site_name": "Chennai_ADC",
+        "address1": "Jandus Building, Plot No 33 A, 2nd Floor,",
+        "address2": "South Phase, Thiru.Vi.Ka Industrial Estate,",
+        "city": "Chennai",
+        "state": "Tamilnadu",
+        "contact_person": "undefined",
+        "landline": "30649100",
+        "contact_mobno": "9945678342",
+        "contact_email": "sales@proconnect.co.in",
+        "pincode": 600032,
+        "comp_id": "1",
+        "gstno": "GST1352533",
+        "is_deleted": false,
+        "active": true
+      },
+      {
+        "id": "3",
+        "site_code": "SC3",
+        "site_name": "Delhi_ADC",
+        "address1": "Khasra Nos.23/20 & 23/29 In Village, Libaspur, ",
+        "address2": "Adadi Known As Ambey  Garden, ",
+        "city": "New Delhi",
+        "state": "New Delhi",
+        "contact_person": "undefined",
+        "landline": "6282466",
+        "contact_mobno": "9312999085",
+        "contact_email": "sales@proconnect.co.in",
+        "pincode": 110042,
+        "comp_id": "1",
+        "gstno": "GST5677543",
+        "is_deleted": false,
+        "active": true
+      }
+    ]
+  },
+  "user_details": {
+    "rowCount": 24,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "user_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "user_name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "password",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "role_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "first_login",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "user_code": "su",
+        "user_name": "su",
+        "password": "SU@$007",
+        "email": "nikil@gmail.com",
+        "mobile_no": "9788393441",
+        "role_id": "1",
+        "active": true,
+        "site_id": null,
+        "comp_id": null,
+        "first_login": true
+      },
+      {
+        "id": "2",
+        "user_code": "UC1",
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@proconnect.in",
+        "mobile_no": "7865789472",
+        "role_id": "2",
+        "active": true,
+        "site_id": null,
+        "comp_id": "1",
+        "first_login": true
+      },
+      {
+        "id": "3",
+        "user_code": "UC2",
+        "user_name": "security",
+        "password": "security",
+        "email": "security@proconnect.in",
+        "mobile_no": "9745776454",
+        "role_id": "3",
+        "active": true,
+        "site_id": "1",
+        "comp_id": "1",
+        "first_login": true
+      }
+    ]
+  },
+  "users": {
+    "rowCount": 0,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('smartgate.users_id_seq'::regclass)"
+      },
+      {
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      }
+    ],
+    "sampleRows": []
+  },
+  "vehicle_entry": {
+    "rowCount": 0,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_number",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "entry_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "entry_time",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "driver_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "no_of_pass",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "img_vehicle",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "user_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_in_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+      }
+    ],
+    "sampleRows": []
+  },
+  "vehicle_master": {
+    "rowCount": 2,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_model",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "no_of_seat",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "rc_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "fc_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "insurance_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "driver_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "driver_con_number",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "owner_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "owner_con_number",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "vehicle_no": "TN02TC4576",
+        "vehicle_type": "Car",
+        "vehicle_model": "Maruti Suzuki Swift",
+        "no_of_seat": 4,
+        "rc_no": "TN02TC4576",
+        "fc_no": "67835693763",
+        "insurance_date": "2023-06-24T18:30:00.000Z",
+        "driver_name": "Ganesh",
+        "driver_con_number": "9654378936",
+        "owner_name": "Roshan",
+        "owner_con_number": "7567488993",
+        "email": "roshan@gmail.com",
+        "comp_id": "1",
+        "site_id": "1"
+      },
+      {
+        "id": "2",
+        "vehicle_no": "TN08UZ7943",
+        "vehicle_type": "Van",
+        "vehicle_model": "407",
+        "no_of_seat": 12,
+        "rc_no": "TN08UZ7943",
+        "fc_no": "654345647735",
+        "insurance_date": "2023-04-01T18:30:00.000Z",
+        "driver_name": "Lokesh",
+        "driver_con_number": "8765321780",
+        "owner_name": "Santhosh",
+        "owner_con_number": "7569876546",
+        "email": "santhosh@gmail.com",
+        "comp_id": "1",
+        "site_id": "1"
+      }
+    ]
+  },
+  "visitor_details": {
+    "rowCount": 1,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "otp",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "visitor_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "coming_from",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "person_to_meet",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "visitors_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "laptop",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "model",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "serial_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "pass_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "checkin_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "checkout_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "otp_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "mulcomp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "empbook_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "mobile_no": "9876543210",
+        "otp": 1234,
+        "visitor_name": "John Doe",
+        "coming_from": "Chennai",
+        "person_to_meet": "Karuppaiya",
+        "visitors_type": "Guest",
+        "image_type": "image/png",
+        "image_path": "/files/john.png",
+        "image_name": "john.png",
+        "idproof_type": "Aadhar",
+        "idproof_path": "/files/aadhar.pdf",
+        "idproof_name": "aadhar.pdf",
+        "laptop": 1,
+        "model": "Dell",
+        "serial_no": "SN12345",
+        "vehicle_type": "Two-wheeler",
+        "vehicle_no": "TN01AB1234",
+        "pass_id": null,
+        "checkin_date": "2026-08-02T03:30:00.000Z",
+        "checkout_date": "2026-08-02T11:30:00.000Z",
+        "status": "checked_in",
+        "site_id": "1",
+        "comp_id": "1",
+        "otp_date": "2026-08-02T13:45:34.130Z",
+        "mulcomp_id": "1",
+        "empbook_id": "1"
+      }
+    ]
+  },
+  "visitor_masters": {
+    "rowCount": 20,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "visitor_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "visitor_desc",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "time_count",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "hrs_count",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      }
+    ],
+    "sampleRows": [
+      {
+        "id": "1",
+        "visitor_code": "VC1",
+        "visitor_desc": "Official",
+        "time_count": 2,
+        "hrs_count": "hrs",
+        "active": true,
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "2",
+        "visitor_code": "VC2",
+        "visitor_desc": "Maintenance",
+        "time_count": 8,
+        "hrs_count": "hrs",
+        "active": true,
+        "site_id": "1",
+        "comp_id": "1"
+      },
+      {
+        "id": "3",
+        "visitor_code": "VC3",
+        "visitor_desc": "Auditor",
+        "time_count": 1,
+        "hrs_count": "hrs",
+        "active": true,
+        "site_id": "1",
+        "comp_id": "1"
+      }
+    ]
+  },
+  "visitor_trans": {
+    "rowCount": 0,
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "otp",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "visitor_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "coming_from",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "person_to_meet",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "visitors_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "guest_type",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "idproof_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "laptop",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "model",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "serial_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "vehicle_no",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "pass_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "checkin_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "checkout_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "site_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "comp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "otp_date",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "mulcomp_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "sampleRows": []
+  }
+}

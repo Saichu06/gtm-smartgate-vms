@@ -17,16 +17,21 @@ import { useOrganizations } from '@contexts/OrganizationContext';
 const CreateCorporateAdminPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { organizations, updateOrganizationAdmin } = useOrganizations();
-  const org = organizations.find((o) => o.id === parseInt(id, 10) || o.id === id) || organizations[0];
+  const { organizations, activeOrg, updateOrganizationAdmin } = useOrganizations();
+  
+  const org = organizations.find(
+    (o) => String(o.id) === String(id) || String(o.internalId) === String(id)
+  ) || activeOrg || organizations[0];
 
   const [showPassword, setShowPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const [adminForm, setAdminForm] = useState({
     firstName: 'Siddharth',
     lastName: 'Narayanan',
-    email: `siddharth@${org.subdomain || 'org'}.com`,
+    email: org?.corporateAdminEmail || `admin@${org?.subdomain || 'org'}.com`,
     phone: '+91 98400 11223',
     employeeId: 'EMP-9042',
     designation: 'Chief Security Officer & VP Infra',
@@ -37,9 +42,21 @@ const CreateCorporateAdminPage = () => {
     sendCredentials: true,
   });
 
-  const handleSubmit = () => {
-    updateOrganizationAdmin(org.id, adminForm);
-    setIsSuccess(true);
+  const hasExistingAdmin = org?.corporateAdmin && org.corporateAdmin !== 'Pending Assignment';
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      if (updateOrganizationAdmin) {
+        await updateOrganizationAdmin(org.id, adminForm);
+      }
+      setIsSuccess(true);
+    } catch (err) {
+      setError(err?.message || 'Failed to provision administrator account.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (isSuccess) {
@@ -107,18 +124,29 @@ const CreateCorporateAdminPage = () => {
       }
     >
       <FormContainer
-        title={`Corporate Administrator Setup — ${org.name}`}
+        title={`Corporate Administrator Setup — ${org?.name}`}
         footer={
           <div className="d-flex justify-content-end gap-2 w-100">
-            <Button variant="secondary" onClick={() => navigate(`/customers/${org.id}`)}>
+            <Button variant="secondary" onClick={() => navigate(`/customers/${org.id}`)} disabled={submitting}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleSubmit}>
-              <UserPlus size={14} /> Create Administrator
+            <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
+              <UserPlus size={14} /> {submitting ? 'Provisioning…' : 'Create Administrator'}
             </Button>
           </div>
         }
       >
+        {hasExistingAdmin && (
+          <div className="alert alert-warning py-2 mb-4" style={{ fontSize: 13, borderRadius: 8 }}>
+            ⚠️ <strong>Existing Corporate Admin:</strong> {org.corporateAdmin} ({org.corporateAdminEmail}). Updating this form will reassign the primary Corporate Admin role for this organization.
+          </div>
+        )}
+
+        {error && (
+          <div className="alert alert-danger py-2 mb-4" style={{ fontSize: 13, borderRadius: 8 }}>
+            ⚠️ {error}
+          </div>
+        )}
         <div className="form-row">
           <Input 
             label="First Name" 

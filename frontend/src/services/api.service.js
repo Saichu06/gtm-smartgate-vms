@@ -1,6 +1,7 @@
 /**
  * Axios API Service Instance
- * Base Axios client with interceptors for auth tokens and error handling.
+ * Base Axios client with request interceptors for Authorization Bearer tokens
+ * and automatic 401 response refresh token retry interceptor.
  */
 import axios from 'axios';
 import { API_URL } from '@constants/api';
@@ -11,24 +12,87 @@ const apiService = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Request interceptor — attach JWT access token
+// Request interceptor — attach access token or kiosk token
 apiService.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('gtm_access_token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    const token = localStorage.getItem('gtm_access_token') || localStorage.getItem('gtm_kiosk_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle 401 / global errors
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Response interceptor — handle 401 token refresh retry flow
 apiService.interceptors.response.use(
   (response) => response.data,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('gtm_access_token');
-      window.location.href = '/login';
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return apiService(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem('gtm_refresh_token');
+      if (!refreshToken) {
+        isRefreshing = false;
+        localStorage.removeItem('gtm_access_token');
+        localStorage.removeItem('gtm_refresh_token');
+        localStorage.removeItem('gtm_user');
+        return Promise.reject(error.response?.data || error);
+      }
+
+      try {
+        const res = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+        if (res.data?.success && res.data?.data?.accessToken) {
+          const { accessToken, refreshToken: newRefreshToken } = res.data.data;
+          localStorage.setItem('gtm_access_token', accessToken);
+          if (newRefreshToken) {
+            localStorage.setItem('gtm_refresh_token', newRefreshToken);
+          }
+          apiService.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          processQueue(null, accessToken);
+          isRefreshing = false;
+          return apiService(originalRequest);
+        }
+      } catch (refreshErr) {
+        processQueue(refreshErr, null);
+        isRefreshing = false;
+        localStorage.removeItem('gtm_access_token');
+        localStorage.removeItem('gtm_refresh_token');
+        localStorage.removeItem('gtm_user');
+        window.location.href = '/login';
+        return Promise.reject(refreshErr);
+      }
     }
+
     return Promise.reject(error.response?.data || error);
   }
 );

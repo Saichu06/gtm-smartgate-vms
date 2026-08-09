@@ -4,13 +4,12 @@
  * identity document proof view, check-in/check-out actions, and manual visitor registration.
  * Route: /org/:orgId/visitors
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  UserCheck, PlusCircle, Search, Download, Eye, CheckCircle2,
-  Clock, XCircle, Filter, RefreshCw, QrCode, Shield, Phone, Mail, Car, MapPin, Tag, ChevronDown, ChevronUp, Printer
+  UserCheck, PlusCircle, Search, Eye, CheckCircle2,
+  XCircle, Filter, QrCode, Shield, Tag, ChevronDown, ChevronUp, RefreshCw
 } from 'lucide-react';
-import { releaseGatePass } from '../modules/kiosk/services/gatePassApi';
 import OrganizationLayout from '@layouts/OrganizationLayout';
 import Card from '@components/data-display/Card';
 import Badge from '@components/ui/Badge';
@@ -21,7 +20,7 @@ import Select from '@components/forms/Select';
 import Toast from '@components/feedback/Toast';
 import VisitorPass from '../modules/kiosk/components/Pass/VisitorPass';
 import { useOrganizations } from '@contexts/OrganizationContext';
-import { getVisitors, saveVisitors, getOrgEmployees } from '@utils/orgStorage';
+import { visitorApi, employeeApi } from '@services/vmsApi';
 
 const CorporateVisitorsPage = () => {
   const { activeOrg } = useOrganizations();
@@ -41,73 +40,63 @@ const CorporateVisitorsPage = () => {
     name: '', company: '', host: '', hostId: '', purpose: '', phone: '', email: '', type: 'Business Visitor', site: 'Gate A — Kiosk'
   });
 
-  const [allVisitors, setAllVisitors] = useState(() => getVisitors(currentOrgId));
+  const [allVisitors, setAllVisitors] = useState([]);
   const [orgEmployees, setOrgEmployees] = useState([]);
+  const [loadingVisitors, setLoadingVisitors] = useState(false);
 
-  const refreshVisitors = () => setAllVisitors(getVisitors(currentOrgId));
+  const refreshVisitors = useCallback(async () => {
+    if (!currentOrgId) return;
+    setLoadingVisitors(true);
+    try {
+      const res = await visitorApi.getVisitors(currentOrgId);
+      if (res.success && Array.isArray(res.data)) setAllVisitors(res.data);
+    } catch (err) {
+      console.error('Failed to load visitors:', err);
+    } finally {
+      setLoadingVisitors(false);
+    }
+  }, [currentOrgId]);
 
   useEffect(() => {
     refreshVisitors();
-    setOrgEmployees(getOrgEmployees(currentOrgId));
-    const interval = setInterval(refreshVisitors, 2000);
-    const onChanged = (e) => {
-      if (String(e.detail?.orgId) === String(currentOrgId)) refreshVisitors();
-    };
-    window.addEventListener('gtm-visitors-changed', onChanged);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('gtm-visitors-changed', onChanged);
-    };
-  }, [currentOrgId]);
-
-  const saveVisitorsLocal = (updated) => {
-    setAllVisitors(updated);
-    saveVisitors(currentOrgId, updated);
-  };
+    employeeApi.getEmployees(currentOrgId)
+      .then(res => { if (res.success) setOrgEmployees(res.data || []); })
+      .catch(() => {});
+  }, [currentOrgId, refreshVisitors]);
 
   const showToast = (msg, type = 'success') => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); };
 
-  const handleRegisterSubmit = () => {
+  const handleRegisterSubmit = async () => {
     if (!form.name.trim()) return;
     const selectedHost = orgEmployees.find(e => e.id === form.hostId);
-    const newRecord = {
-      id: `VIS-${Math.floor(1000 + Math.random() * 9000)}`,
-      passId: `VMS-${Math.floor(1000 + Math.random() * 9000)}`,
-      name: form.name,
-      company: form.company || 'Walk-in',
-      phone: form.phone || '+91 98000 00000',
-      email: form.email || `${form.name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-      host: selectedHost ? selectedHost.name : form.host || 'Reception',
-      hostId: form.hostId || null,
-      site: form.site,
-      purpose: form.purpose || 'General Meeting',
-      checkin: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
-      checkout: null,
-      status: 'Checked In',
-      type: form.type,
-      registeredVia: 'Admin Manual Entry',
-      timestamp: new Date().toISOString(),
-    };
-    const updated = [newRecord, ...allVisitors];
-    saveVisitorsLocal(updated);
-    setRegisterOpen(false);
-    setForm({ name: '', company: '', host: '', hostId: '', purpose: '', phone: '', email: '', type: 'Business Visitor', site: 'Gate A — Kiosk' });
-    showToast(`Visitor pass created for ${newRecord.name}!`, 'success');
+    try {
+      await visitorApi.registerVisitor({
+        name: form.name,
+        phone: form.phone || '',
+        company: form.company || 'Walk-in',
+        personToMeet: selectedHost ? selectedHost.name : (form.host || 'Reception'),
+        visitorType: form.type,
+        purpose: form.purpose || 'General Meeting',
+        companyId: currentOrgId,
+        siteId: null,
+      });
+      await refreshVisitors();
+      setRegisterOpen(false);
+      setForm({ name: '', company: '', host: '', hostId: '', purpose: '', phone: '', email: '', type: 'Business Visitor', site: 'Gate A — Kiosk' });
+      showToast(`Visitor pass created for ${form.name}!`, 'success');
+    } catch (err) {
+      showToast('Failed to register visitor. Please try again.', 'danger');
+    }
   };
 
-  const handleCheckOut = (id, name) => {
-    const visitor = allVisitors.find(v => v.id === id);
-    // Release the physical gate pass back to available pool
-    if (visitor?.gatePassId) {
-      releaseGatePass(currentOrgId, visitor.gatePassId);
+  const handleCheckOut = async (id, name) => {
+    try {
+      await visitorApi.checkoutVisitor(id);
+      await refreshVisitors();
+      showToast(`${name} has checked out. Gate pass released.`, 'neutral');
+    } catch (err) {
+      showToast('Failed to check out visitor. Please try again.', 'danger');
     }
-    const updated = allVisitors.map(v => v.id === id ? {
-      ...v,
-      status: 'Checked Out',
-      checkout: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-    } : v);
-    saveVisitorsLocal(updated);
-    showToast(`${name} has checked out. Gate pass released.`, 'neutral');
   };
 
   const hostLabel = (h) => (typeof h === 'object' ? h?.name : h) || '—';

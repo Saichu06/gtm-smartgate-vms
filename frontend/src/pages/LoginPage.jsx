@@ -6,14 +6,40 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Cpu, Server, Users, Activity, Lock, ArrowRight, Eye, EyeOff, Smartphone } from 'lucide-react';
 import logoImg from '../assets/icons/logo.png';
+import { authApi } from '@services/vmsApi';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('superadmin@gtm.com');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await authApi.login(email, password);
+      if (res.success && res.data) {
+        const { accessToken, refreshToken, user } = res.data;
+        localStorage.setItem('gtm_access_token', accessToken);
+        localStorage.setItem('gtm_refresh_token', refreshToken);
+        localStorage.setItem('gtm_user', JSON.stringify(user));
+        if (user.firstLoginRequired) {
+          navigate('/first-login');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        setError('Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      setError(err?.error?.message || err?.message || 'Invalid email or password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -135,7 +161,8 @@ const LoginPage = () => {
                 id="email"
                 type="email"
                 className="enterprise-input form-control"
-                defaultValue="superadmin@gtm.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="name@company.com"
                 style={{ height: '48px', borderRadius: '10px' }}
@@ -151,8 +178,10 @@ const LoginPage = () => {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   className="enterprise-input form-control pe-5"
-                  defaultValue="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  placeholder="Enter your password"
                   style={{ height: '48px', borderRadius: '10px' }}
                 />
                 <button
@@ -165,6 +194,12 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
+
+            {error && (
+              <div className="alert alert-danger py-2 mb-3" style={{ fontSize: 13, borderRadius: 8 }}>
+                ⚠️ {error}
+              </div>
+            )}
 
             <div className="login-options-row d-flex align-items-center justify-content-between mb-4 small">
               <label className="remember-me-label form-check-label d-flex align-items-center gap-2 text-secondary cursor-pointer">
@@ -185,9 +220,14 @@ const LoginPage = () => {
               </a>
             </div>
 
-            <button type="submit" className="enterprise-btn-primary btn btn-primary w-100 fw-semibold d-flex align-items-center justify-content-center gap-2" style={{ height: '48px', borderRadius: '10px', backgroundColor: '#1565C0', borderColor: '#1565C0' }}>
-              <span>Sign In</span>
-              <ArrowRight size={18} />
+            <button
+              type="submit"
+              disabled={loading}
+              className="enterprise-btn-primary btn btn-primary w-100 fw-semibold d-flex align-items-center justify-content-center gap-2"
+              style={{ height: '48px', borderRadius: '10px', backgroundColor: '#1565C0', borderColor: '#1565C0' }}
+            >
+              <span>{loading ? 'Signing in…' : 'Sign In'}</span>
+              {!loading && <ArrowRight size={18} />}
             </button>
           </form>
 

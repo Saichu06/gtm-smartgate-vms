@@ -12,8 +12,8 @@ import React, { useState } from 'react';
 import { Search, Bell, Sun, Info, Settings, LogOut, User, Shield, Menu } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Drawer from '@components/navigation/Drawer';
-import Avatar from '@components/ui/Avatar';
 import { useOrganizations } from '@contexts/OrganizationContext';
+import { visitorApi } from '@services/vmsApi';
 
 const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
   const { activeOrg } = useOrganizations();
@@ -39,6 +39,21 @@ const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
   const planStyle = planColors[plan] || planColors.Enterprise;
 
   const [imgError, setImgError] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  React.useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const res = await visitorApi.getVisitors(id, { status: 'Awaiting Approval' });
+        if (res.success && Array.isArray(res.data)) {
+          setUnreadCount(res.data.length);
+        }
+      } catch (e) {}
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 5000);
+    return () => clearInterval(interval);
+  }, [id]);
 
   return (
     <>
@@ -60,31 +75,40 @@ const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
             <Menu size={22} />
           </button>
 
-          {/* Org Logo or Initials Avatar */}
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 'var(--radius-md)',
-              background: logo && !imgError ? '#FFFFFF' : primary,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: 18,
-              flexShrink: 0,
-              overflow: 'hidden',
-              border: logo && !imgError ? `1.5px solid ${primary}40` : 'none',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              padding: logo && !imgError ? 3 : 0,
-            }}
-          >
-            {logo && !imgError
-              ? <img src={logo} alt={orgName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setImgError(true)} />
-              : orgName.charAt(0).toUpperCase()
-            }
-          </div>
+          {/* Org Logo / Initials */}
+          {logo && !imgError ? (
+            <img
+              src={logo}
+              alt={orgName}
+              style={{
+                maxHeight: 'var(--logo-max-height-mobile, 36px)',
+                maxWidth: 120,
+                objectFit: 'contain',
+                borderRadius: 'var(--radius-sm)',
+              }}
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 'var(--radius-md)',
+                background: primary,
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: 16,
+                flexShrink: 0,
+                boxShadow: `0 2px 8px ${primary}40`,
+              }}
+            >
+              {orgName.charAt(0)}
+            </div>
+          )}
+
 
           {/* Org Name + Plan Badge */}
           <div style={{ minWidth: 0 }}>
@@ -147,17 +171,19 @@ const OrgPortalHeader = ({ onToggleMobileSidebar }) => {
           {/* Notifications */}
           <button className="icon-btn" title="Notifications" onClick={() => setIsNotifOpen(true)}>
             <Bell size={16} />
-            <span
-              className="notification-dot"
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '9px', fontWeight: 700, color: 'white',
-                background: '#D32F2F', borderRadius: '50%',
-                width: '14px', height: '14px', top: '3px', right: '3px',
-              }}
-            >
-              3
-            </span>
+            {unreadCount > 0 && (
+              <span
+                className="notification-dot"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '9px', fontWeight: 700, color: 'white',
+                  background: '#D32F2F', borderRadius: '50%',
+                  width: '14px', height: '14px', top: '3px', right: '3px',
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           {/* User Avatar Menu */}

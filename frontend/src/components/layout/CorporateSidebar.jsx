@@ -12,7 +12,7 @@ import Avatar from '@components/ui/Avatar';
 import Drawer from '@components/navigation/Drawer';
 import Input from '@components/forms/Input';
 import { useOrganizations } from '@contexts/OrganizationContext';
-import { getPendingApprovalCount, getVisitors } from '@utils/orgStorage';
+import { visitorApi } from '@services/vmsApi';
 
 const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
   const navigate = useNavigate();
@@ -41,22 +41,19 @@ const CorporateSidebar = ({ isMobileOpen, onCloseMobile }) => {
   }, [adminName, adminEmail, adminPhone]);
 
   useEffect(() => {
-    const refreshCounts = () => {
-      setPendingCount(getPendingApprovalCount(orgId));
-      setVisitorCount(getVisitors(orgId).length);
+    const refreshCounts = async () => {
+      if (!orgId) return;
+      try {
+        const res = await visitorApi.getVisitors(orgId);
+        if (res.success && Array.isArray(res.data)) {
+          setPendingCount(res.data.filter(v => v.status === 'Awaiting Approval').length);
+          setVisitorCount(res.data.filter(v => v.status === 'Checked In').length);
+        }
+      } catch {}
     };
     refreshCounts();
-    const interval = setInterval(refreshCounts, 2000);
-    const onChanged = (e) => {
-      if (String(e.detail?.orgId) === String(orgId)) refreshCounts();
-    };
-    window.addEventListener('gtm-visitors-changed', onChanged);
-    window.addEventListener('storage', refreshCounts);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('gtm-visitors-changed', onChanged);
-      window.removeEventListener('storage', refreshCounts);
-    };
+    const interval = setInterval(refreshCounts, 30000);
+    return () => clearInterval(interval);
   }, [orgId]);
 
   useEffect(() => {

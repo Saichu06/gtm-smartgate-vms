@@ -1,147 +1,96 @@
 /**
- * Kiosk API — org-scoped mock backend with localStorage persistence.
+ * Kiosk API Client — Connected directly to Express REST API / PostgreSQL backend
  */
-import {
-  getOrgEmployees,
-  mapEmployeeForKiosk,
-  upsertVisitor,
-  updateVisitor,
-  getVisitors,
-} from '@utils/orgStorage';
-
-const delay = (ms = 800) => new Promise((r) => setTimeout(r, ms));
+import apiService from '@services/api.service';
+import { API_URL } from '@constants/api';
 
 export const searchEmployees = async (query, orgId = '1') => {
-  await delay(400);
-  const employees = getOrgEmployees(orgId)
-    .filter((e) => e.status !== 'Inactive' && e.status !== 'On Leave')
-    .map((emp, i) => mapEmployeeForKiosk(emp, i));
-
-  if (!query.trim()) return employees;
-
-  const q = query.toLowerCase();
-  return employees.filter(
-    (e) =>
-      e.name.toLowerCase().includes(q) ||
-      e.department.toLowerCase().includes(q) ||
-      e.designation.toLowerCase().includes(q)
-  );
+  try {
+    const queryParam = query ? `?search=${encodeURIComponent(query)}` : '';
+    const res = await apiService.get(`/employees${queryParam}`);
+    if (res.success && Array.isArray(res.data)) {
+      return res.data.map((emp, i) => ({
+        id: emp.id,
+        name: emp.name,
+        designation: emp.designation || 'Staff',
+        department: emp.dept || 'General',
+        floor: emp.site || 'Main Office',
+        availability: 'available',
+        color: '#1565C0',
+        email: emp.email,
+        phone: emp.phone,
+      }));
+    }
+    return [];
+  } catch (err) {
+    console.error('Employee search API error:', err);
+    throw new Error('Unable to connect to backend');
+  }
 };
 
 export const searchVisitorByPhone = async (phone) => {
-  await delay(600);
-  if (phone === '9876543210' || phone === '9999999999') {
-    return {
-      found: true,
-      visitor: {
-        phone: '9876543210',
-        firstName: 'Rajesh',
-        lastName: 'Patel',
-        company: 'Partner Corp',
-        email: 'rajesh.patel@partner.com',
-        purpose: 'Business Meeting',
-        vehicleNumber: 'TN 01 AB 1234',
-        visitorType: 'Business Visitor',
-        expectedDuration: '2 Hours',
-        isReturning: true,
-      },
-    };
-  }
-  return { found: false, visitor: null };
-};
-
-/**
- * Helper to request next pass number centrally configured by Corporate Admin
- */
-export const requestNextPassNumber = (orgId = '1', orgCode = 'APL') => {
-  const key = `gtm_pass_config_${orgId}`;
-  let passConfig = null;
   try {
-    passConfig = JSON.parse(localStorage.getItem(key) || 'null');
-  } catch (e) {
-    passConfig = null;
+    const res = await apiService.get(`/visitors?mobile=${encodeURIComponent(phone)}`);
+    if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+      const v = res.data[0];
+      return {
+        found: true,
+        visitor: {
+          phone: v.phone,
+          firstName: v.name.split(' ')[0] || v.name,
+          lastName: v.name.split(' ').slice(1).join(' ') || '',
+          company: v.company,
+          email: v.email || '',
+          visitorType: v.type,
+          isReturning: true,
+        },
+      };
+    }
+    return { found: false, visitor: null };
+  } catch (err) {
+    console.error('Visitor lookup error:', err);
+    return { found: false, visitor: null };
   }
-
-  const prefix = passConfig?.prefix || `${orgCode}-GP`;
-  const currentNum = parseInt(passConfig?.currentNum || '42', 10);
-  const nextNum = currentNum + 1;
-  const numStr = String(nextNum).padStart(4, '0');
-  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-
-  const internalPassNumber = `${prefix}-${dateStr}-${numStr}`;
-  const displayGatePassNumber = `Gate Pass #${numStr}`;
-
-  // Update current counter in localStorage
-  if (passConfig) {
-    passConfig.currentNum = numStr;
-    localStorage.setItem(key, JSON.stringify(passConfig));
-  }
-
-  return {
-    passNumber: internalPassNumber,
-    displayPassNumber: displayGatePassNumber,
-    counter: numStr,
-  };
 };
 
-/**
- * Create or update a pending visitor registration (called once from ReviewPage).
- */
 export const submitRegistration = async (visitorData, orgId = '1', options = {}) => {
-  await delay(600);
-
-  const visitId = visitorData.visitId || `VIS-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-  const approvalRequired = options.approvalRequired !== false;
-  const status = approvalRequired ? 'Awaiting Approval' : 'Checked In';
-  const checkinTime =
-    status === 'Checked In'
-      ? new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-      : null;
-
-  const hostName = visitorData.host?.name || null;
-  const passInfo = requestNextPassNumber(orgId, options.orgCode || 'APL');
-  const passId = status === 'Checked In' ? passInfo.passNumber : null;
-  const displayPassNumber = status === 'Checked In' ? passInfo.displayPassNumber : null;
-
-  const record = {
-    id: visitId,
-    passId,
-    displayPassNumber,
-    // Physical gate pass assigned by the kiosk on Screen 4
-    gatePass: visitorData.assignedPass?.name || null,
-    gatePassId: visitorData.assignedPass?.id || null,
-    gatePassGate: visitorData.assignedPass?.gate || null,
+  const apiPayload = {
+    phone: visitorData.phone || '',
+    otp: visitorData.otp || '1234',
     name: `${visitorData.firstName || ''} ${visitorData.lastName || ''}`.trim() || 'Kiosk Visitor',
     company: visitorData.company || 'Walk-in',
-    host: visitorData.host || hostName || 'Reception Desk',
-    hostId: visitorData.host?.id || null,
-    site: options.siteName || visitorData.assignedPass?.gate || 'Gate A — Self-Service Kiosk',
-    purpose: visitorData.purpose || 'Business Visit',
-    expectedDuration: visitorData.expectedDuration || '',
-    checkin: checkinTime,
-    checkout: null,
-    status,
-    type: visitorData.visitorType || 'Business Visitor',
-    email: visitorData.email || '',
-    phone: visitorData.phone || '',
-    vehicle: visitorData.vehicleNumber || '',
-    photo: visitorData.photoDataUrl || null,
+    personToMeet: typeof visitorData.host === 'object' ? visitorData.host?.name : (visitorData.host || 'Reception Desk'),
+    visitorType: visitorData.visitorType || 'Business Visitor',
+    imageType: 'BASE64',
+    photoDataUrl: visitorData.photoDataUrl || null,
+    imageName: `visitor_${Date.now()}.png`,
     idType: visitorData.idType || 'Aadhaar',
     idImageUrl: visitorData.idImageUrl || null,
-    registeredVia: 'Self-Service Kiosk',
-    priority: 'Normal',
-    timestamp: new Date().toISOString(),
+    idproofName: `id_${Date.now()}.png`,
+    laptop: visitorData.hasLaptop || false,
+    laptopModel: visitorData.laptopModel || null,
+    serialNo: visitorData.laptopSerial || null,
+    vehicleType: visitorData.vehicleType || null,
+    vehicleNo: visitorData.vehicleNumber || null,
+    gatePassId: visitorData.assignedPass?.id || null,
+    companyId: orgId,
+    siteId: visitorData.siteId || null,
   };
 
-  upsertVisitor(orgId, record);
+  const res = await apiService.post('/visitors', apiPayload);
 
+  if (!res.success || !res.data) {
+    throw new Error('Unable to connect to backend or register visitor');
+  }
+
+  const record = res.data;
   return {
     success: true,
-    visitId,
-    passId,
-    displayPassNumber,
-    gate: record.site,
-    meetingLocation: visitorData.host ? `${visitorData.host.floor || visitorData.host.site}` : 'Reception Lobby',
+    visitId: record.id,
+    passId: record.passId,
+    displayPassNumber: record.gatePass || `Pass #${record.id}`,
+    gate: visitorData.assignedPass?.gate || 'Main Gate',
+    meetingLocation: visitorData.host ? `${visitorData.host.floor || visitorData.host.site || 'Lobby'}` : 'Reception Lobby',
     validUntil: new Date(Date.now() + 8 * 60 * 60 * 1000).toLocaleTimeString('en-IN', {
       hour: '2-digit',
       minute: '2-digit',
@@ -150,59 +99,37 @@ export const submitRegistration = async (visitorData, orgId = '1', options = {})
   };
 };
 
-/**
- * Finalize approval — updates existing record, never creates a duplicate.
- */
 export const finalizeApproval = async (orgId, visitId, approved) => {
-  await delay(800);
-
   if (!approved) {
-    updateVisitor(orgId, visitId, { status: 'Rejected' });
-    return { approved: false };
+    const res = await apiService.post(`/visitors/${visitId}/reject`);
+    return { approved: false, data: res.data };
   }
-
-  const passId = `VMS-${Date.now().toString(36).toUpperCase()}`;
-  const checkin = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-  const updated = updateVisitor(orgId, visitId, { status: 'Checked In', passId, checkin });
-
+  const res = await apiService.post(`/visitors/${visitId}/approve`);
   return {
     approved: true,
-    passId,
-    visitId,
-    gate: updated?.site || 'Gate A — Self-Service Kiosk',
-    validUntil: new Date(Date.now() + 8 * 60 * 60 * 1000).toLocaleTimeString('en-IN', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    record: updated,
+    passId: res.data?.passId,
+    visitId: res.data?.id,
+    record: res.data,
   };
 };
 
 export const checkApprovalStatus = async (orgId, visitId) => {
-  await delay(400);
+  const res = await apiService.get(`/visitors/${visitId}`);
+  if (!res.success || !res.data) return { approved: null, pending: true };
 
-  const record = getVisitors(orgId).find((v) => v.id === visitId);
-  if (!record) return { approved: null, pending: true };
-
+  const record = res.data;
   if (record.status === 'Checked In') {
     return {
       approved: true,
       passId: record.passId,
       visitId: record.id,
-      gate: record.site,
-      validUntil: new Date(Date.now() + 8 * 60 * 60 * 1000).toLocaleTimeString('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
       record,
     };
   }
-
   if (record.status === 'Rejected') {
     return { approved: false, record };
   }
 
-  // Still awaiting — portal admin must approve/reject
   return { approved: null, pending: true, record };
 };
 

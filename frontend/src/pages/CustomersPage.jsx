@@ -494,11 +494,13 @@ const OrganizationsPage = () => {
                     {/* Created */}
                     <td>
                       <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-                        {new Date(org.created).toLocaleDateString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {isNaN(new Date(org.created).getTime())
+                          ? 'Recently'
+                          : new Date(org.created).toLocaleDateString('en-IN', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
                       </span>
                     </td>
 

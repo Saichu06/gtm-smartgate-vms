@@ -19,6 +19,8 @@ import PlatformUsersPage from '@pages/PlatformUsersPage';
 import RolesPage from '@pages/RolesPage';
 import AuditLogsPage from '@pages/AuditLogsPage';
 import SettingsPage from '@pages/SettingsPage';
+import DatabaseTestPage from '@pages/DatabaseTestPage';
+
 
 // ── Organization Portal — Phase 1 ─────────────────────────────────────────
 import CorporateLoginPage from '@pages/CorporateLoginPage';
@@ -93,7 +95,10 @@ const AppRoutes = () => {
           {/* ── GTM Super Admin Portal ─────────────────────────────────── */}
           <Route path="/login"                      element={<LoginPage />} />
           <Route path="/dashboard"                  element={<DashboardPage />} />
+          <Route path="/dev/database text"          element={<DatabaseTestPage />} />
+          <Route path="/dev/database"               element={<DatabaseTestPage />} />
           <Route path="/customers"                  element={<OrganizationsPage />} />
+
           <Route path="/customers/new"              element={<CreateOrganizationWizard />} />
           <Route path="/customers/create"           element={<CreateOrganizationWizard />} />
           <Route path="/customers/:id"              element={<CustomerDetailsPage />} />

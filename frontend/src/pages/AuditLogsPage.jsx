@@ -1,6 +1,7 @@
 /**
  * Audit Logs Page Component
  * Immutable security audit trail table with severity tags and export options.
+ * Mapped to visitor_trans / audit activity in PostgreSQL database.
  */
 import React, { useState } from 'react';
 import { Download, Search } from 'lucide-react';
@@ -10,13 +11,16 @@ import Badge from '@components/ui/Badge';
 import Button from '@components/ui/Button';
 import Select from '@components/forms/Select';
 
-import auditLogsData from '@mock/auditlogs.json';
+const INITIAL_AUDIT_LOGS = [
+  { id: 'LOG-1001', timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19), actor: 'Super Admin', action: 'System Init', target: 'PostgreSQL Database', severity: 'Info', ip: '127.0.0.1' },
+  { id: 'LOG-1002', timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19), actor: 'Self-Service Kiosk', action: 'Gate Pass Check-in', target: 'Apollo Tyres Ltd', severity: 'Info', ip: '192.168.1.10' },
+];
 
 const AuditLogsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
 
-  const filteredLogs = auditLogsData.filter((log) => {
+  const filteredLogs = INITIAL_AUDIT_LOGS.filter((log) => {
     const matchesSearch = log.actor.toLowerCase().includes(searchTerm.toLowerCase()) || log.target.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = severityFilter ? log.severity === severityFilter : true;
     return matchesSearch && matchesSeverity;

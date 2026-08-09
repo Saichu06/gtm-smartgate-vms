@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShieldCheck, Eye, EyeOff, LogIn, Mail, Lock, CheckCircle2 } from 'lucide-react';
 import { useOrganizations } from '@contexts/OrganizationContext';
+import { authApi } from '@services/vmsApi';
 
 const CorporateLoginPage = () => {
   const navigate = useNavigate();
@@ -15,26 +16,26 @@ const CorporateLoginPage = () => {
   const { organizations, activeOrg } = useOrganizations();
 
   // Find org strictly based on URL param or activeOrg
-  const targetOrg = organizations.find((o) => o.id === parseInt(orgId, 10)) || activeOrg || organizations[0];
-  const id = targetOrg.id;
+  const targetOrg = organizations.find(
+    (o) => String(o.id) === String(orgId) || String(o.internalId) === String(orgId)
+  ) || activeOrg || (organizations.length > 0 ? organizations[0] : null);
 
-  const primaryColor = targetOrg.primaryColor || '#1565C0';
-  const orgName = targetOrg.displayName || targetOrg.name;
-  const tagline = targetOrg.loginTagline || 'Secure. Smart. Seamless.';
-  const logo = targetOrg.logo;
+  const id = targetOrg?.id || orgId;
+  const primaryColor = targetOrg?.primaryColor || '#1565C0';
+  const orgName = targetOrg?.displayName || targetOrg?.name || 'Organization';
+  const tagline = targetOrg?.loginTagline || 'Secure. Smart. Seamless.';
+  const logo = targetOrg?.logo;
 
-  const [email, setEmail] = useState(targetOrg.corporateAdminEmail || `admin@${targetOrg.subdomain || 'org'}.com`);
-  const [password, setPassword] = useState('TempPassword@2026');
+  const [email, setEmail] = useState(targetOrg?.corporateAdminEmail || `admin@proconnect.in`);
+  const [password, setPassword] = useState('admin');
   const [showPassword, setShowPassword] = useState(false);
-  
-  // Default simulate check to true if password hasn't been set up yet for this org
-  const [isFirstLogin, setIsFirstLogin] = useState(!targetOrg.isFirstLoginDone);
+  const [rememberMe, setRememberMe] = useState(true);
 
-  // Sync isFirstLogin state whenever targetOrg changes
   useEffect(() => {
-    setIsFirstLogin(!targetOrg.isFirstLoginDone);
-    setEmail(targetOrg.corporateAdminEmail || `admin@${targetOrg.subdomain || 'org'}.com`);
-  }, [targetOrg.id, targetOrg.isFirstLoginDone, targetOrg.corporateAdminEmail]);
+    if (targetOrg && targetOrg.corporateAdminEmail) {
+      setEmail(targetOrg.corporateAdminEmail);
+    }
+  }, [targetOrg?.id, targetOrg?.corporateAdminEmail]);
 
   // Set page title dynamically
   useEffect(() => {
@@ -43,14 +44,42 @@ const CorporateLoginPage = () => {
     return () => { document.title = prevTitle; };
   }, [orgName]);
 
-  const handleSignIn = (e) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    if (isFirstLogin) {
-      navigate(`/org/${id}/first-login`);
-    } else {
-      navigate(`/org/${id}/dashboard`);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await authApi.login(email, password);
+      if (res.success && res.data) {
+        const { accessToken, refreshToken, user } = res.data;
+        
+        // Remember Me session logic
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem('gtm_access_token', accessToken);
+        storage.setItem('gtm_refresh_token', refreshToken);
+        storage.setItem('gtm_user', JSON.stringify(user));
+        
+        // Always mirror current token to localStorage for active session API calls
+        localStorage.setItem('gtm_access_token', accessToken);
+
+        if (user.firstLoginRequired) {
+          navigate(`/org/${id}/first-login`);
+        } else {
+          navigate(`/org/${id}/dashboard`);
+        }
+      } else {
+        setError('Login failed. Invalid credentials.');
+      }
+    } catch (err) {
+      setError(err?.error?.message || err?.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="login-shell d-flex flex-column flex-lg-row min-vh-100 w-100 bg-light">
@@ -86,14 +115,11 @@ const CorporateLoginPage = () => {
                   background: primaryColor, 
                   color: '#FFF', 
                   display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  fontWeight: 800, 
                   fontSize: 26,
                   boxShadow: `0 6px 18px ${primaryColor}30`,
                 }}
               >
-                {orgName.charAt(0).toUpperCase()}
+                {orgName ? orgName.charAt(0).toUpperCase() : 'O'}
               </div>
               <h3 className="fw-bold mb-0 text-dark">{orgName}</h3>
             </div>
@@ -170,7 +196,7 @@ const CorporateLoginPage = () => {
                   fontSize: 22,
                 }}
               >
-                {orgName.charAt(0)}
+                {orgName ? orgName.charAt(0).toUpperCase() : 'O'}
               </div>
             )}
             <h5 className="fw-bold text-dark mb-1">{orgName}</h5>
@@ -184,7 +210,14 @@ const CorporateLoginPage = () => {
             <p className="text-secondary small mb-0">Enter your corporate credentials for <strong>{orgName}</strong>.</p>
           </div>
 
+          {error && (
+            <div className="alert alert-danger p-2 small mb-3 text-center" role="alert">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSignIn} className="d-flex flex-column gap-3">
+
             <div>
               <label className="form-label small fw-semibold text-dark">Corporate Email</label>
               <div className="position-relative">
@@ -232,12 +265,12 @@ const CorporateLoginPage = () => {
               <input 
                 type="checkbox" 
                 className="form-check-input" 
-                id="firstLoginCheck" 
-                checked={isFirstLogin} 
-                onChange={(e) => setIsFirstLogin(e.target.checked)} 
+                id="rememberMeCheck" 
+                checked={rememberMe} 
+                onChange={(e) => setRememberMe(e.target.checked)} 
               />
-              <label className="form-check-label small text-secondary cursor-pointer" htmlFor="firstLoginCheck">
-                Simulate First-Time Login (Password Setup Flow)
+              <label className="form-check-label small text-secondary cursor-pointer" htmlFor="rememberMeCheck">
+                Remember Me (Keep Active Session)
               </label>
             </div>
 
@@ -246,12 +279,12 @@ const CorporateLoginPage = () => {
               className="btn text-white w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 shadow-sm"
               style={{ background: primaryColor, border: 'none', minHeight: 'var(--min-touch-target, 44px)' }}
             >
-              <LogIn size={16} /> Sign In to {targetOrg.code || 'Portal'}
+              <LogIn size={16} /> Sign In to {targetOrg?.code || 'Portal'}
             </button>
           </form>
 
           <div className="text-center mt-4 pt-3 border-top text-secondary small">
-            Need access? Contact <strong>{targetOrg.corporateAdmin}</strong> or system administrator.
+            Need access? Contact <strong>{targetOrg?.corporateAdmin || 'Administrator'}</strong> or system administrator.
           </div>
         </div>
       </div>

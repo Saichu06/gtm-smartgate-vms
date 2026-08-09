@@ -21,5 +21,8 @@
     "npm": ">=10.0.0"
   },
   "author": "GTM Solutions Inc.",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "concurrently": "^10.0.4"
+  }
 }

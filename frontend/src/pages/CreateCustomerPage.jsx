@@ -31,6 +31,8 @@ const CreateOrganizationWizard = () => {
   const { addOrganization } = useOrganizations();
   const [step, setStep] = useState(1);
   const [createdOrg, setCreatedOrg] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -73,12 +75,24 @@ const CreateOrganizationWizard = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 5) {
       setStep(step + 1);
     } else {
-      const newOrg = addOrganization(formData);
-      setCreatedOrg(newOrg);
+      setSubmitting(true);
+      setSubmitError(null);
+      try {
+        const newOrg = await addOrganization(formData);
+        if (newOrg && newOrg.id) {
+          setCreatedOrg(newOrg);
+        } else {
+          setSubmitError('Organization was created but could not retrieve its ID. Please check the Organizations list.');
+        }
+      } catch (err) {
+        setSubmitError(err?.error?.message || err?.message || 'Failed to create organization. Please try again.');
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -162,21 +176,28 @@ const CreateOrganizationWizard = () => {
           'Step 5: Final Review & Confirmation'
         }
         footer={
-          <div className="d-flex align-items-center justify-content-between w-100">
-            <div>
-              {step > 1 && (
-                <Button variant="secondary" onClick={handleBack}>
-                  <ArrowLeft size={14} /> Back
+          <div style={{ width: '100%' }}>
+            {submitError && (
+              <div className="alert alert-danger py-2 mb-2" style={{ fontSize: 13 }}>
+                ⚠️ {submitError}
+              </div>
+            )}
+            <div className="d-flex align-items-center justify-content-between w-100">
+              <div>
+                {step > 1 && (
+                  <Button variant="secondary" onClick={handleBack} disabled={submitting}>
+                    <ArrowLeft size={14} /> Back
+                  </Button>
+                )}
+              </div>
+              <div className="d-flex gap-2">
+                <Button variant="secondary" onClick={() => alert('Draft saved successfully!')} disabled={submitting}>
+                  <Save size={14} /> Save Draft
                 </Button>
-              )}
-            </div>
-            <div className="d-flex gap-2">
-              <Button variant="secondary" onClick={() => alert('Draft saved successfully!')}>
-                <Save size={14} /> Save Draft
-              </Button>
-              <Button variant="primary" onClick={handleNext}>
-                {step === 5 ? 'Create Organization' : 'Continue'} <ArrowRight size={14} />
-              </Button>
+                <Button variant="primary" onClick={handleNext} disabled={submitting}>
+                  {submitting ? '⏳ Creating…' : step === 5 ? 'Create Organization' : 'Continue'} {!submitting && <ArrowRight size={14} />}
+                </Button>
+              </div>
             </div>
           </div>
         }

@@ -15,7 +15,7 @@ import { ArrowLeft, ArrowRight, Tag, CheckCircle2, AlertTriangle } from 'lucide-
 import KioskHeader from '../components/Common/KioskHeader';
 import KioskFooter from '../components/Common/KioskFooter';
 import { useVisitor } from '../context/VisitorContext';
-import { getAvailablePasses, assignGatePass } from '../services/gatePassApi';
+import { gatePassApi } from '@services/vmsApi';
 import '../styles/kiosk.css';
 
 const GatePassAssignmentPage = () => {
@@ -32,9 +32,21 @@ const GatePassAssignmentPage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const passes = getAvailablePasses(orgId);
-    setAvailablePasses(passes);
-    setIsLoading(false);
+    const loadPasses = async () => {
+      setIsLoading(true);
+      try {
+        const res = await gatePassApi.getGatePasses(orgId, 'available');
+        if (res.success && Array.isArray(res.data)) {
+          setAvailablePasses(res.data.filter(p => p.status === 'available'));
+        }
+      } catch (err) {
+        console.error('Failed to load gate passes:', err);
+        setAvailablePasses([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPasses();
   }, [orgId]);
 
   const handleSelectPass = (pass) => {
@@ -47,7 +59,8 @@ const GatePassAssignmentPage = () => {
       setError('Please select a gate pass to continue.');
       return;
     }
-    assignGatePass(orgId, selectedPass.id, visitor.visitId);
+    // Store selected pass in kiosk context — actual DB assignment happens
+    // atomically when the visitor is registered (POST /visitors with gatePassId)
     updateVisitor({ assignedPass: selectedPass });
     navigate(`/kiosk/${orgId}/pass`);
   };

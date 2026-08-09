@@ -9,27 +9,32 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ShieldCheck, CheckCircle2, Key, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import Button from '@components/ui/Button';
 import { useOrganizations } from '@contexts/OrganizationContext';
+import { authApi } from '@services/vmsApi';
 
 const FirstLoginPasswordPage = () => {
   const navigate = useNavigate();
   const { orgId } = useParams();
-  const { organizations, activeOrg, updateOrganizationBranding } = useOrganizations();
+  const { organizations, activeOrg } = useOrganizations();
 
-  const targetOrg = organizations.find((o) => o.id === parseInt(orgId, 10)) || activeOrg || organizations[0];
-  const id = targetOrg.id;
-  const primaryColor = targetOrg.primaryColor || '#1565C0';
-  const orgName = targetOrg.displayName || targetOrg.name;
-  const logo = targetOrg.logo;
+  const targetOrg = organizations.find(
+    (o) => String(o.id) === String(orgId) || String(o.internalId) === String(orgId)
+  ) || activeOrg || (organizations.length > 0 ? organizations[0] : null);
 
-  const [currentPassword, setCurrentPassword] = useState('TempPassword@2026');
+  const id = targetOrg?.id || orgId;
+  const primaryColor = targetOrg?.primaryColor || '#1565C0';
+  const orgName = targetOrg?.displayName || targetOrg?.name || 'Organization';
+  const logo = targetOrg?.logo;
+
+  const [currentPassword, setCurrentPassword] = useState('GtmSmartGate@2026');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [enableMFA, setEnableMFA] = useState(true);
   const [acceptPolicy, setAcceptPolicy] = useState(true);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newPassword || newPassword.length < 8) {
       setError('Password must be at least 8 characters long.');
@@ -44,11 +49,21 @@ const FirstLoginPasswordPage = () => {
       return;
     }
 
-    // Save first login completion in context & localStorage
-    updateOrganizationBranding(id, { isFirstLoginDone: true });
-
-    // Navigate to operational dashboard
-    navigate(`/org/${id}/dashboard`);
+    setLoading(true);
+    setError('');
+    try {
+      // Execute PostgreSQL DB password change & clear first_login flag
+      const res = await authApi.changePassword(currentPassword, newPassword);
+      if (res.success) {
+        navigate(`/org/${id}/dashboard`);
+      } else {
+        setError(res.error?.message || 'Failed to update password in database.');
+      }
+    } catch (err) {
+      setError(err?.error?.message || err?.message || 'Failed to update password.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

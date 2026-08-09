@@ -7,8 +7,8 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Settings, Bell, Shield, Palette, Globe, Mail, Save, ToggleLeft, ToggleRight, Upload, Image as ImageIcon, Tag, Plus, Trash2, Edit2, CheckCircle, XCircle } from 'lucide-react';
-import { getGatePasses, createGatePass, updateGatePass, deleteGatePass, releaseGatePass } from '../modules/kiosk/services/gatePassApi';
-import { getVisitors, updateVisitor } from '@utils/orgStorage';
+import { gatePassApi, visitorApi, companyApi } from '@services/vmsApi';
+
 import OrganizationLayout from '@layouts/OrganizationLayout';
 import Card from '@components/data-display/Card';
 import Button from '@components/ui/Button';
@@ -55,87 +55,93 @@ const CorporatePortalSettingsPage = () => {
 
   // Gate Pass Management state
   const [gatePasses, setGatePasses] = React.useState([]);
-  const [allVisitors, setAllVisitors] = React.useState([]);
   const [newPassName, setNewPassName] = React.useState('');
   const [newPassGate, setNewPassGate] = React.useState('Gate A');
   const [editingPassId, setEditingPassId] = React.useState(null);
   const [editPassName, setEditPassName] = React.useState('');
   const [editPassGate, setEditPassGate] = React.useState('');
 
-  React.useEffect(() => {
-    if (id) {
-      setGatePasses(getGatePasses(id));
-      setAllVisitors(getVisitors(id));
+  const refreshPasses = React.useCallback(async () => {
+    if (!id) return;
+    try {
+      const res = await gatePassApi.getGatePasses(id);
+      if (res.success && Array.isArray(res.data)) setGatePasses(res.data);
+    } catch (err) {
+      console.error('Failed to load gate passes:', err);
     }
-  }, [id, activeTab]);
+  }, [id]);
+
+  React.useEffect(() => {
+    if (id) refreshPasses();
+  }, [id, activeTab, refreshPasses]);
 
   // Live poll when gate pass tab is active
   React.useEffect(() => {
     if (activeTab !== 'gatePasses') return;
-    const interval = setInterval(() => {
-      setGatePasses(getGatePasses(id));
-      setAllVisitors(getVisitors(id));
-    }, 3000);
+    const interval = setInterval(refreshPasses, 5000);
     return () => clearInterval(interval);
-  }, [id, activeTab]);
+  }, [id, activeTab, refreshPasses]);
 
-  // Resolve visitor name from visitId stored in pass.assignedTo
-  const resolveVisitorName = (visitId) => {
-    if (!visitId) return null;
-    const v = allVisitors.find(x => x.id === visitId);
-    return v ? v.name : visitId;
-  };
+  // resolveVisitorName not needed — assignedToName comes directly from API
 
-  const refreshPasses = () => {
-    setGatePasses(getGatePasses(id));
-    setAllVisitors(getVisitors(id));
-  };
-
-  const handleAddPass = () => {
+  const handleAddPass = async () => {
     if (!newPassName.trim()) return;
-    createGatePass(id, { name: newPassName.trim(), gate: newPassGate.trim() || 'Gate A' });
-    setNewPassName('');
-    setNewPassGate('Gate A');
-    refreshPasses();
-    showToast('Gate pass created successfully!', 'success');
-  };
-
-  const handleUpdatePass = (passId) => {
-    updateGatePass(id, passId, { name: editPassName, gate: editPassGate });
-    setEditingPassId(null);
-    refreshPasses();
-    showToast('Gate pass updated!', 'success');
-  };
-
-  const handleTogglePassStatus = (pass) => {
-    const nextStatus = pass.status === 'inactive' ? 'available' : 'inactive';
-    updateGatePass(id, pass.id, { status: nextStatus });
-    refreshPasses();
-    showToast(`Gate pass ${nextStatus === 'inactive' ? 'disabled' : 'enabled'}.`, 'success');
-  };
-
-  const handleReleasePass = (pass) => {
-    // Release pass back to available
-    releaseGatePass(id, pass.id);
-    // Mark the corresponding visitor as Checked Out
-    if (pass.assignedTo) {
-      const visitor = allVisitors.find(v => v.id === pass.assignedTo);
-      if (visitor && visitor.status !== 'Checked Out') {
-        updateVisitor(id, pass.assignedTo, {
-          status: 'Checked Out',
-          checkout: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
-        });
-      }
+    try {
+      await gatePassApi.createGatePass({ companyId: id, name: newPassName.trim(), gate: newPassGate.trim() || 'Gate A' });
+      setNewPassName('');
+      setNewPassGate('Gate A');
+      await refreshPasses();
+      showToast('Gate pass created successfully!', 'success');
+    } catch (err) {
+      showToast('Failed to create gate pass.', 'danger');
     }
-    refreshPasses();
-    showToast(`${pass.name} released — now available.`, 'success');
   };
 
-  const handleDeletePass = (passId) => {
+  const handleUpdatePass = async (passId) => {
+    try {
+      await gatePassApi.updateGatePass(passId, { name: editPassName, gate: editPassGate });
+      setEditingPassId(null);
+      await refreshPasses();
+      showToast('Gate pass updated!', 'success');
+    } catch (err) {
+      showToast('Failed to update gate pass.', 'danger');
+    }
+  };
+
+  const handleTogglePassStatus = async (pass) => {
+    const nextActive = pass.status === 'inactive' ? true : false;
+    try {
+      await gatePassApi.updateGatePass(pass.id, { active: nextActive });
+      await refreshPasses();
+      showToast(`Gate pass ${nextActive ? 'enabled' : 'disabled'}.`, 'success');
+    } catch (err) {
+      showToast('Failed to update gate pass status.', 'danger');
+    }
+  };
+
+  const handleReleasePass = async (pass) => {
+    if (!pass.assignedToVisitId) {
+      showToast('No visitor assigned to this pass.', 'warning');
+      return;
+    }
+    try {
+      await visitorApi.checkoutVisitor(pass.assignedToVisitId);
+      await refreshPasses();
+      showToast(`${pass.name} released — visitor checked out.`, 'success');
+    } catch (err) {
+      showToast('Failed to release gate pass.', 'danger');
+    }
+  };
+
+  const handleDeletePass = async (passId) => {
     if (!window.confirm('Delete this gate pass permanently?')) return;
-    deleteGatePass(id, passId);
-    refreshPasses();
-    showToast('Gate pass deleted.', 'success');
+    try {
+      await gatePassApi.deleteGatePass(passId);
+      await refreshPasses();
+      showToast('Gate pass deleted.', 'success');
+    } catch (err) {
+      showToast(err?.message || 'Failed to delete gate pass.', 'danger');
+    }
   };
 
   // Branding Form State
@@ -204,22 +210,34 @@ const CorporatePortalSettingsPage = () => {
     }
   };
 
-  // Save Branding Updates Live
-  const handleSaveBranding = () => {
-    updateOrganizationBranding(id, {
-      displayName,
-      primaryColor,
-      secondaryColor,
-      accentColor,
-      loginTagline,
-      welcomeTitle,
-      welcomeSubtitle,
-      kioskBackground,
-      watermark,
-      logo: logoPreview,
-    });
-    showToast('Branding updated! Applied live to Portal, Kiosk & Visitor Passes.', 'success');
+  // Save Branding Updates Live to PostgreSQL
+  const handleSaveBranding = async () => {
+    try {
+      await companyApi.updateCompany(id, {
+        name: displayName,
+        logo: logoPreview,
+        primaryColor,
+        secondaryColor,
+        welcomeMessage: welcomeTitle,
+      });
+      updateOrganizationBranding(id, {
+        displayName,
+        primaryColor,
+        secondaryColor,
+        accentColor,
+        loginTagline,
+        welcomeTitle,
+        welcomeSubtitle,
+        kioskBackground,
+        watermark,
+        logo: logoPreview,
+      });
+      showToast('Branding updated & saved to PostgreSQL! Applied live to Portal, Kiosk & Visitor Passes.', 'success');
+    } catch (err) {
+      showToast('Failed to save branding to PostgreSQL.', 'danger');
+    }
   };
+
 
   // Save Visitor Pass Configuration Live
   const handleSavePassConfig = () => {
@@ -657,7 +675,7 @@ const CorporatePortalSettingsPage = () => {
                       };
                       const sc = statusColors[pass.status] || statusColors.inactive;
                       const isEditing = editingPassId === pass.id;
-                      const assignedVisitorName = resolveVisitorName(pass.assignedTo);
+                      const assignedVisitorName = pass.assignedToName || null;
                       const assignedAt = pass.assignedAt
                         ? new Date(pass.assignedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
                         : null;

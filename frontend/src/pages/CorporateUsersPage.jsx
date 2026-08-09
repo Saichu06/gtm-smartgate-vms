@@ -1,55 +1,67 @@
 /**
- * CorporateUsersPage — Screen 4: Organization Users Management
- * Manage all portal users (Admins, Receptionists, Gate Operators, Security Leads).
- * Route: /org/users
+ * CorporateUsersPage — Organization Users Management (smartgate.user_details)
+ * Full CRUD connected to Express REST API / PostgreSQL.
+ * Route: /org/:orgId/users
  */
-import React, { useState, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import {
-  Plus, Search, Download, RefreshCw, SlidersHorizontal, Users,
-  ChevronLeft, ChevronRight, X, Eye, Edit3, Key, PauseCircle, PlayCircle, Trash2
+  Plus, Search, RefreshCw, Users, AlertTriangle, ToggleLeft, ToggleRight, PlusCircle
 } from 'lucide-react';
 import OrganizationLayout from '@layouts/OrganizationLayout';
 import Button from '@components/ui/Button';
 import Avatar from '@components/ui/Avatar';
 import Badge from '@components/ui/Badge';
+import Drawer from '@components/navigation/Drawer';
+import Input from '@components/forms/Input';
 import Toast from '@components/feedback/Toast';
-import initialUsers from '@mock/corporate_users.json';
+import { useOrganizations } from '@contexts/OrganizationContext';
+import { userApi } from '@services/vmsApi';
 
-const PAGE_SIZE = 6;
-
-const SEED_USERS = [
-  { id: 'USR-001', name: 'Rajesh Kumar', email: 'rajesh.kumar@apollotyres.com', role: 'Corporate Admin', site: 'HQ Main Gate', status: 'Active', employeeId: 'EMP-1001', lastLogin: '10 mins ago', phone: '+91 98400 10023' },
-  { id: 'USR-002', name: 'Gate Officer Vikram', email: 'vikram.security@apollotyres.com', role: 'Gate Security Lead', site: 'Gate A — Main Entrance', status: 'Active', employeeId: 'EMP-2004', lastLogin: '1 hour ago', phone: '+91 98400 20044' },
-];
+const PAGE_SIZE = 10;
 
 const CorporateUsersPage = () => {
-  const navigate = useNavigate();
+  const { activeOrg } = useOrganizations();
   const { orgId } = useParams();
-  const id = orgId || 1;
+  const currentOrgId = orgId || activeOrg?.id || 1;
 
-  const [users, setUsers] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(`gtm_corp_users_${id}`) || '[]');
-      return saved.length > 0 ? saved : SEED_USERS;
-    } catch {
-      return SEED_USERS;
-    }
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [toast, setToast] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    roleCode: 'GU',
+    password: '',
   });
 
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [siteFilter, setSiteFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState(new Set());
-  const [toast, setToast] = useState(null);
-
-  React.useEffect(() => {
+  const fetchUsers = useCallback(async () => {
     try {
-      localStorage.setItem(`gtm_corp_users_${id}`, JSON.stringify(users));
-    } catch (e) {}
-  }, [users, id]);
+      setLoading(true);
+      setError(null);
+      const res = await userApi.getUsers(currentOrgId);
+      if (res.success && Array.isArray(res.data)) {
+        setUsers(res.data);
+      } else {
+        setError('Unable to connect to backend');
+      }
+    } catch (err) {
+      console.error('Failed to load users from API:', err);
+      setError('Unable to connect to backend');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentOrgId]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const showToast = (msg, type = 'success') => {
     setToast({ message: msg, type });
@@ -60,157 +72,172 @@ const CorporateUsersPage = () => {
     let data = [...users];
     if (search) {
       const q = search.toLowerCase();
-      data = data.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.employeeId.toLowerCase().includes(q));
+      data = data.filter(u =>
+        (u.name || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q) ||
+        (u.userCode || '').toLowerCase().includes(q)
+      );
     }
-    if (roleFilter) data = data.filter(u => u.role === roleFilter);
-    if (siteFilter) data = data.filter(u => u.site === siteFilter);
-    if (statusFilter) data = data.filter(u => u.status === statusFilter);
     return data;
-  }, [users, search, roleFilter, siteFilter, statusFilter]);
+  }, [users, search]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const toggleAll = () => {
-    if (selected.size === paged.length) setSelected(new Set());
-    else setSelected(new Set(paged.map(u => u.id)));
+  const handleToggleStatus = async (user) => {
+    try {
+      const targetStatus = user.status !== 'Active';
+      const res = await userApi.toggleStatus(user.id, targetStatus);
+      if (res.success) {
+        showToast(`User ${user.name} ${targetStatus ? 'Activated' : 'Deactivated'} in PostgreSQL.`);
+        await fetchUsers();
+      }
+    } catch (err) {
+      showToast('Failed to toggle user status on backend', 'error');
+    }
   };
 
-  const toggleOne = (id) => {
-    const s = new Set(selected);
-    s.has(id) ? s.delete(id) : s.add(id);
-    setSelected(s);
-  };
-
-  const handleDeactivate = (user) => {
-    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u));
-    showToast(`User ${user.name} ${user.status === 'Active' ? 'Deactivated' : 'Activated'}`);
+  const handleCreateUser = async () => {
+    if (!form.name || !form.email) return;
+    try {
+      const res = await userApi.createUser({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        roleCode: form.roleCode,
+        password: form.password || 'User@2026',
+        companyId: currentOrgId,
+      });
+      if (res.success) {
+        showToast(`User "${form.name}" created and saved to PostgreSQL!`, 'success');
+        setDrawerOpen(false);
+        setForm({ name: '', email: '', phone: '', roleCode: 'GU', password: '' });
+        await fetchUsers();
+      }
+    } catch (err) {
+      showToast('Failed to create user on backend', 'error');
+    }
   };
 
   return (
-    <OrganizationLayout
-      title="User Management"
-      subtitle="Manage organization users, role permissions, and site gate accessibility."
-      actions={
-        <Button variant="primary" onClick={() => navigate(`/org/${id}/users/new`)}>
-          <Plus size={14} /> Create User
-        </Button>
-      }
-    >
-      <div className="table-wrapper">
-        <div className="table-toolbar flex-between gap-2 flex-wrap">
-          <div className="d-flex align-items-center gap-2 flex-wrap">
-            <div className="global-search" style={{ width: 280 }}>
-              <Search size={14} className="text-secondary" />
-              <input 
-                type="text" 
-                placeholder="Search users by name, email, or EMP ID..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+    <OrganizationLayout title="Users & Access Control">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            <select className="form-control" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} style={{ width: 150, height: 34, padding: '0 8px', fontSize: 13 }}>
-              <option value="">All Roles</option>
-              <option value="Corporate Admin">Corporate Admin</option>
-              <option value="Site Admin">Site Admin</option>
-              <option value="Receptionist">Receptionist</option>
-              <option value="HR Manager">HR Manager</option>
-              <option value="Gate Operator">Gate Operator</option>
-              <option value="Security Manager">Security Manager</option>
-            </select>
-
-            <select className="form-control" value={siteFilter} onChange={(e) => setSiteFilter(e.target.value)} style={{ width: 160, height: 34, padding: '0 8px', fontSize: 13 }}>
-              <option value="">All Sites</option>
-              <option value="Head Office Chennai">Head Office Chennai</option>
-              <option value="Limda Plant 1">Limda Plant 1</option>
-              <option value="Perambra Unit">Perambra Unit</option>
-            </select>
-
-            <select className="form-control" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ width: 130, height: 34, padding: '0 8px', fontSize: 13 }}>
-              <option value="">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+      <div className="org-page-container space-y-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Portal Users</h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Portal user accounts stored in smartgate.user_details PostgreSQL table.
+            </p>
           </div>
-
-          <div className="d-flex align-items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={() => showToast('Exporting portal users list...', 'info')}>
-              <Download size={12} /> Export
+          <div className="flex items-center gap-3">
+            <Button onClick={fetchUsers} variant="outline" className="flex items-center gap-2">
+              <RefreshCw size={16} /> Refresh
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => window.location.reload()}>
-              <RefreshCw size={12} />
+            <Button onClick={() => setDrawerOpen(true)} className="bg-primary text-white flex items-center gap-2">
+              <PlusCircle size={18} /> Add User
             </Button>
           </div>
         </div>
 
-        <div className="table-responsive" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th style={{ width: 40 }}>
-                  <input type="checkbox" checked={selected.size === paged.length && paged.length > 0} onChange={toggleAll} />
-                </th>
-                <th>Full Name</th>
-                <th>Work Email</th>
-                <th>Phone</th>
-                <th>Assigned Site</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Last Login</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paged.map((user) => (
-                <tr key={user.id} onClick={() => navigate(`/org/${id}/users/${user.id}`)} style={{ cursor: 'pointer' }}>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" checked={selected.has(user.id)} onChange={() => toggleOne(user.id)} />
-                  </td>
-                  <td>
-                    <div className="d-flex align-items-center gap-2">
-                      <Avatar name={user.name} size="sm" />
-                      <div>
-                        <div className="fw-semibold text-dark">{user.name}</div>
-                        <div className="text-secondary small">{user.employeeId} • {user.department}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{user.email}</td>
-                  <td>{user.phone}</td>
-                  <td><span className="small text-secondary">{user.site}</span></td>
-                  <td><Badge variant={user.role === 'Corporate Admin' ? 'primary' : user.role === 'Site Admin' ? 'info' : 'neutral'}>{user.role}</Badge></td>
-                  <td><Badge variant={user.status === 'Active' ? 'success' : 'danger'}>{user.status}</Badge></td>
-                  <td><span className="small text-secondary">{user.lastLogin}</span></td>
-                  <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
-                    <div className="d-flex align-items-center justify-content-end gap-1">
-                      <button className="btn btn-sm btn-light border p-1" title="View Details" onClick={() => navigate(`/org/${id}/users/${user.id}`)}>
-                        <Eye size={14} />
-                      </button>
-                      <button className="btn btn-sm btn-light border p-1 text-primary" title="Reset Password" onClick={() => showToast(`Password reset link emailed to ${user.email}`, 'info')}>
-                        <Key size={14} />
-                      </button>
-                      <button className="btn btn-sm btn-light border p-1 text-warning" title={user.status === 'Active' ? 'Deactivate User' : 'Activate User'} onClick={() => handleDeactivate(user)}>
-                        {user.status === 'Active' ? <PauseCircle size={14} /> : <PlayCircle size={14} />}
-                      </button>
-                    </div>
-                  </td>
+        {error && (
+          <div className="p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-3 border border-red-200">
+            <AlertTriangle size={20} />
+            <span className="font-semibold">{error}</span>
+          </div>
+        )}
+
+        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search by name, email, or user code..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="p-8 text-center text-slate-500">Loading users from PostgreSQL...</div>
+        ) : (
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="p-4">User Code</th>
+                  <th className="p-4">User Name</th>
+                  <th className="p-4">Email</th>
+                  <th className="p-4">Role</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="table-pagination">
-          <div>Showing <strong>{paged.length}</strong> of <strong>{filtered.length}</strong> Portal Users</div>
-          <div className="d-flex gap-2">
-            <Button variant="secondary" size="xs" disabled={page === 1} onClick={() => setPage(page - 1)}><ChevronLeft size={13} /> Previous</Button>
-            <Button variant="secondary" size="xs" disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next <ChevronRight size={13} /></Button>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {paged.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-slate-500">
+                      No users found.
+                    </td>
+                  </tr>
+                ) : (
+                  paged.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50">
+                      <td className="p-4 font-mono text-xs font-bold text-slate-700">{u.userCode}</td>
+                      <td className="p-4 font-medium text-slate-900 flex items-center gap-3">
+                        <Avatar name={u.name} size="sm" />
+                        {u.name}
+                      </td>
+                      <td className="p-4 text-slate-600">{u.email}</td>
+                      <td className="p-4">
+                        <Badge variant="info">{u.role || u.roleCode}</Badge>
+                      </td>
+                      <td className="p-4">
+                        <Badge variant={u.status === 'Active' ? 'success' : 'danger'}>{u.status}</Badge>
+                      </td>
+                      <td className="p-4 text-right">
+                        <button
+                          onClick={() => handleToggleStatus(u)}
+                          className="p-2 text-slate-600 hover:text-primary transition-colors"
+                          title={u.status === 'Active' ? 'Deactivate User' : 'Activate User'}
+                        >
+                          {u.status === 'Active' ? <ToggleRight size={20} className="text-green-600" /> : <ToggleLeft size={20} className="text-slate-400" />}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        </div>
+        )}
       </div>
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="Create Portal User">
+        <div className="space-y-4 p-4">
+          <Input label="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Vikram Sharma" />
+          <Input label="Email Address" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="e.g. vikram@company.in" />
+          <Input label="Mobile Number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="e.g. 9876543210" />
+          <Input label="Initial Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Default: User@2026" />
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">Role</label>
+            <select
+              value={form.roleCode}
+              onChange={(e) => setForm({ ...form, roleCode: e.target.value })}
+              className="w-full p-2 border border-slate-200 rounded-lg text-sm"
+            >
+              <option value="CORP_ADMIN">Corporate Admin</option>
+              <option value="RA">Security Desk (RA)</option>
+              <option value="GU">Gate User (GU)</option>
+              <option value="EMP">Employee (EMP)</option>
+            </select>
+          </div>
+          <Button onClick={handleCreateUser} className="w-full bg-primary text-white mt-4">Save User to PostgreSQL</Button>
+        </div>
+      </Drawer>
     </OrganizationLayout>
   );
 };

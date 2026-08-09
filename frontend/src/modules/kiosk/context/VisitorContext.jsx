@@ -44,10 +44,11 @@ const DEFAULT_VISITOR = {
   timeline: [],
 };
 
-export const VisitorProvider = ({ children, orgId = '1' }) => {
+export const VisitorProvider = ({ children, orgId }) => {
   const { organizations, activeOrg } = useOrganizations();
-  const numericId = parseInt(orgId, 10) || activeOrg?.id || 1;
-  const org = organizations.find(o => o.id === numericId) || activeOrg || organizations[0];
+  const org = organizations.find(
+    (o) => String(o.id) === String(orgId) || String(o.internalId) === String(orgId)
+  ) || activeOrg || organizations[0];
   const [visitor, setVisitor] = useState(() => ({
     ...DEFAULT_VISITOR,
     visitId: generateVisitId(),
