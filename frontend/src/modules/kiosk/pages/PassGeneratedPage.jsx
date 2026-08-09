@@ -15,7 +15,8 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle, Printer, Home, Sparkles, Zap, ShieldCheck, QrCode, User, Building2, Tag } from 'lucide-react';
+import { CheckCircle, Printer, Home, Sparkles, Zap, ShieldCheck, User, Building2, Tag } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import KioskHeader from '../components/Common/KioskHeader';
 import KioskFooter from '../components/Common/KioskFooter';
 import { useVisitor } from '../context/VisitorContext';
@@ -102,6 +103,19 @@ const PassGeneratedPage = () => {
   const visitorName = visitor.name || `${visitor.firstName || ''} ${visitor.lastName || ''}`.trim() || 'Visitor';
   const currentDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const currentTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+  // Build structured QR payload for gate officer validation
+  const qrPayload = JSON.stringify({
+    visitId: visitor.visitId || 'VIS-000000',
+    orgId,
+    visitorName,
+    gatePass: assignedPass?.name || null,
+    gatePassId: assignedPass?.id || null,
+    gate: assignedPass?.gate || 'Gate A',
+    status: 'VALID TODAY',
+    date: new Date().toISOString().slice(0, 10),
+    checkinTime: currentTime,
+  });
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary, '--kiosk-secondary': secondary }}>
@@ -300,8 +314,16 @@ const PassGeneratedPage = () => {
                       border: '2px solid #0F172A', borderRadius: 10,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                      flexShrink: 0,
                     }}>
-                      <QrCode size={52} color="#0F172A" />
+                      <QRCodeSVG
+                        value={qrPayload}
+                        size={58}
+                        level="M"
+                        includeMargin={false}
+                        bgColor="#ffffff"
+                        fgColor="#0F172A"
+                      />
                     </div>
                     <div>
                       <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 800, color: '#0F172A', letterSpacing: 1 }}>

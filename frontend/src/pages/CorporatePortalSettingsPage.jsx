@@ -7,7 +7,8 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Settings, Bell, Shield, Palette, Globe, Mail, Save, ToggleLeft, ToggleRight, Upload, Image as ImageIcon, Tag, Plus, Trash2, Edit2, CheckCircle, XCircle } from 'lucide-react';
-import { getGatePasses, createGatePass, updateGatePass, deleteGatePass } from '../modules/kiosk/services/gatePassApi';
+import { getGatePasses, createGatePass, updateGatePass, deleteGatePass, releaseGatePass } from '../modules/kiosk/services/gatePassApi';
+import { getVisitors, updateVisitor } from '@utils/orgStorage';
 import OrganizationLayout from '@layouts/OrganizationLayout';
 import Card from '@components/data-display/Card';
 import Button from '@components/ui/Button';
@@ -54,6 +55,7 @@ const CorporatePortalSettingsPage = () => {
 
   // Gate Pass Management state
   const [gatePasses, setGatePasses] = React.useState([]);
+  const [allVisitors, setAllVisitors] = React.useState([]);
   const [newPassName, setNewPassName] = React.useState('');
   const [newPassGate, setNewPassGate] = React.useState('Gate A');
   const [editingPassId, setEditingPassId] = React.useState(null);
@@ -61,10 +63,33 @@ const CorporatePortalSettingsPage = () => {
   const [editPassGate, setEditPassGate] = React.useState('');
 
   React.useEffect(() => {
-    if (id) setGatePasses(getGatePasses(id));
+    if (id) {
+      setGatePasses(getGatePasses(id));
+      setAllVisitors(getVisitors(id));
+    }
   }, [id, activeTab]);
 
-  const refreshPasses = () => setGatePasses(getGatePasses(id));
+  // Live poll when gate pass tab is active
+  React.useEffect(() => {
+    if (activeTab !== 'gatePasses') return;
+    const interval = setInterval(() => {
+      setGatePasses(getGatePasses(id));
+      setAllVisitors(getVisitors(id));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [id, activeTab]);
+
+  // Resolve visitor name from visitId stored in pass.assignedTo
+  const resolveVisitorName = (visitId) => {
+    if (!visitId) return null;
+    const v = allVisitors.find(x => x.id === visitId);
+    return v ? v.name : visitId;
+  };
+
+  const refreshPasses = () => {
+    setGatePasses(getGatePasses(id));
+    setAllVisitors(getVisitors(id));
+  };
 
   const handleAddPass = () => {
     if (!newPassName.trim()) return;
@@ -87,6 +112,23 @@ const CorporatePortalSettingsPage = () => {
     updateGatePass(id, pass.id, { status: nextStatus });
     refreshPasses();
     showToast(`Gate pass ${nextStatus === 'inactive' ? 'disabled' : 'enabled'}.`, 'success');
+  };
+
+  const handleReleasePass = (pass) => {
+    // Release pass back to available
+    releaseGatePass(id, pass.id);
+    // Mark the corresponding visitor as Checked Out
+    if (pass.assignedTo) {
+      const visitor = allVisitors.find(v => v.id === pass.assignedTo);
+      if (visitor && visitor.status !== 'Checked Out') {
+        updateVisitor(id, pass.assignedTo, {
+          status: 'Checked Out',
+          checkout: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        });
+      }
+    }
+    refreshPasses();
+    showToast(`${pass.name} released — now available.`, 'success');
   };
 
   const handleDeletePass = (passId) => {
@@ -615,20 +657,25 @@ const CorporatePortalSettingsPage = () => {
                       };
                       const sc = statusColors[pass.status] || statusColors.inactive;
                       const isEditing = editingPassId === pass.id;
+                      const assignedVisitorName = resolveVisitorName(pass.assignedTo);
+                      const assignedAt = pass.assignedAt
+                        ? new Date(pass.assignedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+                        : null;
 
                       return (
                         <div
                           key={pass.id}
                           style={{
                             padding: '14px 18px',
-                            background: '#FAFAFA',
-                            border: '1px solid #E2E8F0',
+                            background: pass.status === 'assigned' ? '#F0F7FF' : '#FAFAFA',
+                            border: `1px solid ${pass.status === 'assigned' ? '#BFDBFE' : '#E2E8F0'}`,
                             borderRadius: 12,
                             display: 'flex',
                             alignItems: 'center',
                             gap: 12,
                             flexWrap: 'wrap',
                             opacity: pass.status === 'inactive' ? 0.6 : 1,
+                            transition: 'all 0.2s ease',
                           }}
                         >
                           <div style={{ width: 36, height: 36, borderRadius: 8, background: sc.bg, border: `1px solid ${sc.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -656,14 +703,42 @@ const CorporatePortalSettingsPage = () => {
                             </>
                           ) : (
                             <>
-                              <div style={{ flex: 1 }}>
+                              <div style={{ flex: 1, minWidth: 120 }}>
                                 <div style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>{pass.name}</div>
                                 <div style={{ fontSize: 12, color: '#64748B' }}>{pass.gate}</div>
                               </div>
-                              <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
+
+                              {/* Assigned Visitor Info */}
+                              {pass.status === 'assigned' && assignedVisitorName ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 140 }}>
+                                  <div style={{ fontSize: 12, fontWeight: 700, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <span style={{ fontSize: 10 }}>👤</span> {assignedVisitorName}
+                                  </div>
+                                  {assignedAt && (
+                                    <div style={{ fontSize: 11, color: '#64748B' }}>Assigned {assignedAt}</div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div style={{ minWidth: 140 }}>
+                                  <span style={{ fontSize: 12, color: '#94A3B8' }}>—</span>
+                                </div>
+                              )}
+
+                              <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}`, whiteSpace: 'nowrap' }}>
                                 {sc.label}
                               </span>
-                              <div style={{ display: 'flex', gap: 6 }}>
+
+                              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                                {/* Release button — only for assigned passes */}
+                                {pass.status === 'assigned' && (
+                                  <button
+                                    className="btn btn-sm btn-outline-primary"
+                                    title="Release pass back to available"
+                                    onClick={() => handleReleasePass(pass)}
+                                  >
+                                    ↩ Release
+                                  </button>
+                                )}
                                 {pass.status !== 'assigned' && (
                                   <button
                                     className="btn btn-outline-secondary btn-sm"

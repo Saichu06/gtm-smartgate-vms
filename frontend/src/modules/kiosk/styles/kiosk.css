@@ -16,25 +16,63 @@
 
 .kiosk-shell * { box-sizing: border-box; }
 
-/* ─── PRINT ONLY VISITOR BADGE MEDIA QUERY ───────────────── */
+/* ─── PRINT ONLY VISITOR BADGE MEDIA QUERY (A6 Badge) ──────── */
+@page {
+  size: A6 portrait;
+  margin: 0;
+}
+
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  .printable-visitor-badge, .printable-visitor-badge * {
-    visibility: visible;
-  }
-  .printable-visitor-badge {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    max-width: 100% !important;
-    border: 2px solid #000 !important;
-    box-shadow: none !important;
-  }
-  .kiosk-header, .kiosk-footer, .kiosk-btn, button, nav {
+  /* Hide everything by default */
+  body > * {
+    visibility: hidden !important;
     display: none !important;
+  }
+
+  /* Show ONLY the badge */
+  .printable-visitor-badge {
+    display: block !important;
+    visibility: visible !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    page-break-inside: avoid;
+    z-index: 99999;
+  }
+
+  /* Ensure all badge children are visible */
+  .printable-visitor-badge,
+  .printable-visitor-badge * {
+    visibility: visible !important;
+    display: revert !important;
+  }
+
+  /* Remove color stripping in print */
+  .printable-visitor-badge * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Hide nav, buttons, everything else */
+  .kiosk-header,
+  .kiosk-footer,
+  .kiosk-btn,
+  button,
+  nav,
+  .kiosk-shell > *:not(.kiosk-page),
+  .kiosk-page > *:not(.kiosk-content),
+  [class*="action"],
+  [class*="countdown"] {
+    display: none !important;
+    visibility: hidden !important;
   }
 }
 
@@ -590,4 +628,26 @@
   .kiosk-form-grid     { grid-template-columns: 1fr; }
   .kiosk-review-grid   { grid-template-columns: 1fr; }
   .kiosk-emp-grid      { grid-template-columns: 1fr; }
+
+  /* Camera capture responsive */
+  .kiosk-camera-wrap   { max-width: 100% !important; }
+
+  /* Gate pass tile responsive */
+  .kiosk-section-card  { padding: 20px 16px !important; }
+
+  /* Visitor badge responsive (stacks photo and info vertically) */
+  .printable-visitor-badge .badge-body-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .printable-visitor-badge .badge-photo {
+    width: 100px !important;
+    height: 120px !important;
+  }
+
+  /* ID type grid wraps on mobile */
+  .kiosk-id-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
 }

@@ -10,6 +10,7 @@ import {
   UserCheck, PlusCircle, Search, Download, Eye, CheckCircle2,
   Clock, XCircle, Filter, RefreshCw, QrCode, Shield, Phone, Mail, Car, MapPin, Tag, ChevronDown, ChevronUp, Printer
 } from 'lucide-react';
+import { releaseGatePass } from '../modules/kiosk/services/gatePassApi';
 import OrganizationLayout from '@layouts/OrganizationLayout';
 import Card from '@components/data-display/Card';
 import Badge from '@components/ui/Badge';
@@ -95,13 +96,18 @@ const CorporateVisitorsPage = () => {
   };
 
   const handleCheckOut = (id, name) => {
+    const visitor = allVisitors.find(v => v.id === id);
+    // Release the physical gate pass back to available pool
+    if (visitor?.gatePassId) {
+      releaseGatePass(currentOrgId, visitor.gatePassId);
+    }
     const updated = allVisitors.map(v => v.id === id ? {
       ...v,
       status: 'Checked Out',
       checkout: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
     } : v);
     saveVisitorsLocal(updated);
-    showToast(`${name} has checked out successfully.`, 'neutral');
+    showToast(`${name} has checked out. Gate pass released.`, 'neutral');
   };
 
   const hostLabel = (h) => (typeof h === 'object' ? h?.name : h) || '—';
@@ -190,6 +196,7 @@ const CorporateVisitorsPage = () => {
                 <th>Visitor</th>
                 <th>Category</th>
                 <th>Host Employee</th>
+                <th style={{ whiteSpace: 'nowrap' }}><Tag size={12} style={{ marginRight: 4 }} />Gate Pass</th>
                 <th>Gate / Site</th>
                 <th>Check-In</th>
                 <th>Check-Out</th>
@@ -234,6 +241,13 @@ const CorporateVisitorsPage = () => {
                         </td>
                         <td><Badge variant="neutral">{v.type}</Badge></td>
                         <td className="text-secondary small">{hostLabel(v.host)}</td>
+                        <td>
+                          {v.gatePass ? (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, background: '#EFF6FF', color: '#1E40AF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '3px 9px', whiteSpace: 'nowrap' }}>
+                              <Tag size={11} /> {v.gatePass}
+                            </span>
+                          ) : <span className="text-secondary small">—</span>}
+                        </td>
                         <td className="text-secondary small">{v.site}</td>
                         <td className="small">{v.checkin}</td>
                         <td className="small">{v.checkout || '—'}</td>
@@ -297,6 +311,14 @@ const CorporateVisitorsPage = () => {
                                     <div><strong>Host Employee:</strong> {hostLabel(v.host)}</div>
                                     <div><strong>Vehicle Number:</strong> {v.vehicle || 'None'}</div>
                                     <div><strong>Entry Gate / Site:</strong> {v.site}</div>
+                                    {v.gatePass && (
+                                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                         <strong>Gate Pass:</strong>
+                                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, background: '#EFF6FF', color: '#1E40AF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '2px 8px' }}>
+                                           <Tag size={11} /> {v.gatePass}
+                                         </span>
+                                       </div>
+                                     )}
                                     <div><strong>Registration Mode:</strong> <Badge variant="info">{v.registeredVia || 'Visitor Kiosk'}</Badge></div>
                                   </div>
                                 </div>
@@ -357,6 +379,14 @@ const CorporateVisitorsPage = () => {
                   <h6 className="fw-bold mb-2">Visit Details</h6>
                   <div className="small d-flex flex-column gap-1">
                     <div><strong>Pass ID:</strong> <code>{selectedVisitor.passId || selectedVisitor.id}</code></div>
+                    {selectedVisitor.gatePass && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <strong>Gate Pass:</strong>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, background: '#EFF6FF', color: '#1E40AF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '2px 8px' }}>
+                          <Tag size={11} /> {selectedVisitor.gatePass}
+                        </span>
+                      </div>
+                    )}
                     <div><strong>Phone:</strong> {selectedVisitor.phone}</div>
                     <div><strong>Email:</strong> {selectedVisitor.email}</div>
                     <div><strong>Host:</strong> {hostLabel(selectedVisitor.host)}</div>

@@ -8,7 +8,8 @@
  * - Print-ready CSS (@media print) hiding shell navigation, buttons, and footers.
  */
 import React from 'react';
-import { QrCode, ShieldCheck, Zap, User, MapPin, Clock, Calendar, Building2, CheckCircle2 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { ShieldCheck, Zap, User, MapPin, Clock, Calendar, Building2, CheckCircle2 } from 'lucide-react';
 import { useVisitor } from '../../context/VisitorContext';
 import gtmLogo from '../../../../assets/icons/logo.png';
 
@@ -22,13 +23,16 @@ const VisitorPass = ({ passData, template }) => {
   const displayPassNumber = passData?.displayPassNumber || `Gate Pass #${(passData?.passId || '').slice(-4) || '0043'}`;
   const fullPassId = passData?.passId || 'APL-GP-20260807-0043';
 
-  // Encrypted / Structured QR payload string
+  // Structured QR payload matching kiosk pass generation
   const qrPayload = JSON.stringify({
     passId: fullPassId,
-    visitorId: passData?.visitId || 'VIS-9982',
+    visitId: passData?.id || passData?.visitId || 'VIS-000000',
     orgId: org?.id || 1,
-    date: new Date().toISOString().slice(0, 10),
+    visitorName: passData?.name || 'Visitor',
+    gatePass: passData?.gatePass || passData?.displayPassNumber || null,
+    gate: passData?.gate || passData?.gatePassGate || 'Gate A',
     status: 'VALID TODAY',
+    date: new Date().toISOString().slice(0, 10),
   });
 
   const currentDateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -210,9 +214,16 @@ const VisitorPass = ({ passData, template }) => {
               <div style={{
                 width: 76, height: 76, background: '#FFFFFF', border: '2px solid #0F172A',
                 borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.06)', flexShrink: 0,
               }}>
-                <QrCode size={56} style={{ color: '#0F172A' }} />
+                <QRCodeSVG
+                  value={qrPayload}
+                  size={62}
+                  level="M"
+                  includeMargin={false}
+                  bgColor="#ffffff"
+                  fgColor="#0F172A"
+                />
               </div>
 
               <div>
