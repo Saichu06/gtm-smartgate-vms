@@ -158,93 +158,82 @@ const WelcomePage = () => {
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary, '--kiosk-secondary': secondary }}>
-      <KioskHeader currentStep={1} />
+      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
+        <div className="kiosk-content" style={{ maxWidth: 580, width: '100%', padding: 0 }}>
 
-      <div className="kiosk-page" style={{ background: `linear-gradient(160deg, #F8FAFC 0%, ${primary}0F 100%)` }}>
-        <div className="kiosk-welcome" style={{ maxWidth: 680, margin: '0 auto', width: '100%' }}>
+          {/* SINGLE ENCLOSING CARD BOX FOR EVERYTHING */}
+          <div className="kiosk-section-card" style={{ padding: '24px 28px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
 
-          {/* Dual Brand Logos */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 36, marginBottom: 20 }}>
-            {org?.logo ? (
-              <img src={org.logo} alt={orgName} style={{ height: 64, objectFit: 'contain' }} />
-            ) : (
-              <div style={{ fontSize: 24, fontWeight: 800, color: primary }}>{orgName}</div>
-            )}
-            <div style={{ width: 2, height: 48, background: '#E2E8F0', borderRadius: 999 }} />
-            <img src={gtmLogo} alt="GTM Smart Gate" style={{ height: 64, objectFit: 'contain' }} />
-          </div>
+            {/* In-Box Header (Dual Logos + Step 1/4 Counter) */}
+            <KioskHeader currentStep={1} />
 
-          {/* Welcome Text */}
-          <div className="kiosk-welcome-text" style={{ textAlign: 'center' }}>
-            <h1 style={{ fontSize: 36, fontWeight: 800, color: '#0F172A', margin: '0 0 8px' }}>
-              Welcome to {orgName}
-            </h1>
-            <p style={{ fontSize: 16, color: '#64748B', margin: '0 auto', maxWidth: 520 }}>
-              Enter your mobile number to identify yourself and receive your digital visitor access pass.
-            </p>
-          </div>
-
-          {/* Returning Visitor Welcome Back Card */}
-          {returningVisitor && (
-            <div style={{
-              background: '#F0FDF4', border: '2px solid #BBF7D0',
-              borderRadius: 18, padding: '16px 22px',
-              display: 'flex', alignItems: 'center', gap: 16, width: '100%',
-              boxShadow: '0 4px 16px rgba(46,125,50,0.08)',
-              animation: 'kioskFadeUp 0.3s ease',
-            }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#2E7D32', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <User size={26} />
-              </div>
-              <div style={{ flex: 1, textAlignment: 'left' }}>
-                <div style={{ fontWeight: 800, fontSize: 18, color: '#0F172A' }}>
-                  Welcome Back, {returningVisitor.firstName} {returningVisitor.lastName}!
-                </div>
-                <div style={{ fontSize: 13, color: '#64748B' }}>
-                  {returningVisitor.company} · {returningVisitor.email || 'Registered Visitor'}
-                </div>
-              </div>
+            {/* Welcome Text */}
+            <div className="kiosk-welcome-text" style={{ textAlign: 'center', marginBottom: 20 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
+                Welcome to {orgName}
+              </h1>
+              <p style={{ fontSize: 13, color: '#64748B', margin: '0 auto', maxWidth: 480 }}>
+                Enter your mobile number to identify yourself and receive your digital visitor access pass.
+              </p>
             </div>
-          )}
 
-          {/* Direct Input Mobile Card */}
-          <div className="kiosk-section-card" style={{ width: '100%', padding: 24, margin: 0 }}>
-            <label className="kiosk-input-label" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
-              ENTER YOUR 10-DIGIT MOBILE NUMBER *
-            </label>
+            {/* Returning Visitor Welcome Back Card */}
+            {returningVisitor && (
+              <div style={{
+                background: '#F0FDF4', border: '1.5px solid #BBF7D0',
+                borderRadius: 14, padding: '12px 16px',
+                display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                marginBottom: 16, animation: 'kioskFadeUp 0.3s ease',
+              }}>
+                <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#2E7D32', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User size={20} />
+                </div>
+                <div style={{ flex: 1, textAlignment: 'left' }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: '#0F172A' }}>
+                    Welcome Back, {returningVisitor.firstName} {returningVisitor.lastName}!
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748B' }}>
+                    {returningVisitor.company} · {returningVisitor.email || 'Registered Visitor'}
+                  </div>
+                </div>
+              </div>
+            )}
 
-            <div className="kiosk-input-card" style={{ borderColor: phoneError ? '#D32F2F' : primary, padding: '8px 16px', minHeight: 64 }}>
-              <select
-                value={countryCode}
-                onChange={e => setCountryCode(e.target.value)}
-                style={{ border: 'none', background: 'transparent', fontSize: 18, fontWeight: 700, outline: 'none', cursor: 'pointer' }}
-              >
-                {COUNTRY_CODES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+            {/* Direct Input Mobile Section */}
+            <div>
+              <label className="kiosk-input-label" style={{ fontSize: 11, marginBottom: 6, display: 'block' }}>
+                ENTER YOUR 10-DIGIT MOBILE NUMBER *
+              </label>
 
-              <div style={{ height: 28, width: 1, background: '#E2E8F0', margin: '0 12px' }} />
+              <div className="kiosk-input-card" style={{ borderColor: phone.length === 10 ? '#2E7D32' : phoneError ? '#D32F2F' : primary, padding: '4px 14px', minHeight: 46 }}>
+                <Phone size={18} style={{ color: primary, flexShrink: 0, marginRight: 8 }} />
+                <input
+                  ref={phoneInputRef}
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Enter 10-digit mobile number"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  onKeyDown={handleKeyDownPhone}
+                  style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1, border: 'none', outline: 'none', width: '100%', minHeight: 40 }}
+                  autoFocus
+                />
 
-              <input
-                ref={phoneInputRef}
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="98765 43210"
-                value={phone}
-                onChange={handlePhoneChange}
-                onKeyDown={handleKeyDownPhone}
-                style={{ fontSize: 24, fontWeight: 800, letterSpacing: 2, border: 'none', outline: 'none', width: '100%' }}
-                autoFocus
-              />
+                {/* GREEN TICK ICON WHEN 10 DIGITS ENTERED */}
+                {phone.length === 10 && !searching && (
+                  <CheckCircle2 size={20} style={{ color: '#2E7D32', flexShrink: 0 }} />
+                )}
 
-              {searching && (
-                <div style={{ width: 22, height: 22, borderRadius: '50%', border: `3px solid ${primary}30`, borderTopColor: primary, animation: 'spin 0.8s linear infinite' }} />
+                {searching && (
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2.5px solid ${primary}30`, borderTopColor: primary, animation: 'spin 0.8s linear infinite' }} />
+                )}
+              </div>
+
+              {phoneError && (
+                <p style={{ color: '#D32F2F', fontSize: 12, fontWeight: 600, marginTop: 6, textAlign: 'left' }}>{phoneError}</p>
               )}
             </div>
-
-            {phoneError && (
-              <p style={{ color: '#D32F2F', fontSize: 13, fontWeight: 600, marginTop: 8, textAlign: 'left' }}>{phoneError}</p>
-            )}
 
             {!otpGenerated ? (
               <button
@@ -253,9 +242,12 @@ const WelcomePage = () => {
                 disabled={phone.length < 10}
                 style={{
                   marginTop: 20,
-                  background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                  color: '#FFFFFF',
-                  boxShadow: `0 8px 24px ${primary}40`,
+                  minHeight: 48,
+                  fontSize: 16,
+                  borderRadius: 14,
+                  background: phone.length === 10 ? `linear-gradient(135deg, ${primary}, ${secondary})` : '#E2E8F0',
+                  color: phone.length === 10 ? '#FFFFFF' : '#94A3B8',
+                  boxShadow: phone.length === 10 ? `0 8px 24px ${primary}40` : 'none',
                 }}
               >
                 Generate OTP <ArrowRight size={22} />
@@ -306,7 +298,6 @@ const WelcomePage = () => {
                 {otpError && (
                   <p style={{ color: '#D32F2F', fontSize: 13, fontWeight: 600, textAlign: 'center', marginBottom: 12 }}>{otpError}</p>
                 )}
-
                 <button
                   className="kiosk-btn kiosk-btn-primary kiosk-btn-full"
                   onClick={() => verifyOtp(otpValues.join(''))}
@@ -314,23 +305,25 @@ const WelcomePage = () => {
                   style={{
                     background: `linear-gradient(135deg, ${primary}, #2E7D32)`,
                     color: '#FFFFFF',
+                    minHeight: 48,
+                    fontSize: 16,
+                    borderRadius: 14
                   }}
                 >
-                  Verify OTP & Continue <CheckCircle2 size={22} />
+                  Verify OTP & Continue <CheckCircle2 size={20} />
                 </button>
               </div>
             )}
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#94A3B8', fontSize: 13 }}>
-            <ShieldCheck size={16} style={{ color: primary }} />
-            Touch-screen self-service terminal · Fast 45–60 sec registration
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#94A3B8', fontSize: 11, marginTop: 16 }}>
+              <ShieldCheck size={14} style={{ color: primary }} />
+              Self-service terminal · Fast 45 sec check-in
+            </div>
+
           </div>
 
         </div>
       </div>
-
-      <KioskFooter />
     </div>
   );
 };

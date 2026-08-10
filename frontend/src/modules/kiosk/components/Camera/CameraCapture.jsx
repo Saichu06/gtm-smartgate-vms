@@ -154,7 +154,8 @@ const CameraCapture = ({
       <div className="kiosk-camera-wrap" style={{
         borderColor: primary,
         aspectRatio: mode === 'document' ? '16 / 10' : mode === 'badge' ? '1 / 1' : '4 / 3',
-        maxWidth: mode === 'badge' ? 360 : 560,
+        maxWidth: mode === 'badge' ? 240 : 300,
+        borderRadius: 14,
       }}>
 
         {cameraState === 'captured' ? (
@@ -164,8 +165,8 @@ const CameraCapture = ({
               src={capturedImage}
               alt="Captured Frame"
             />
-            <div className="kiosk-camera-success-badge">
-              <CheckCircle size={16} /> {mode === 'document' ? 'ID Document Captured' : 'Photo Captured'}
+            <div className="kiosk-camera-success-badge" style={{ fontSize: 12, padding: '4px 12px' }}>
+              <CheckCircle size={14} /> {mode === 'document' ? 'ID Captured' : 'Photo Captured'}
             </div>
           </>
         ) : (
@@ -186,34 +187,34 @@ const CameraCapture = ({
             {cameraState === 'initializing' && (
               <div className="kiosk-camera-placeholder">
                 <div style={{
-                  width: 50, height: 50, borderRadius: '50%',
-                  border: `4px solid ${primary}30`,
+                  width: 36, height: 36, borderRadius: '50%',
+                  border: `3px solid ${primary}30`,
                   borderTopColor: primary,
                   animation: 'spin 0.8s linear infinite',
                 }} />
-                <p style={{ color: '#94A3B8', fontSize: 14, margin: 0 }}>
+                <p style={{ color: '#94A3B8', fontSize: 12, margin: 0 }}>
                   Initializing camera feed...
                 </p>
               </div>
             )}
 
             {cameraState === 'error' && (
-              <div className="kiosk-camera-placeholder" style={{ background: '#0F172A' }}>
-                <VideoOff size={44} style={{ color: '#EF4444' }} />
-                <p style={{ color: '#F8FAFC', fontSize: 15, fontWeight: 700, margin: '4px 0' }}>
+              <div className="kiosk-camera-placeholder" style={{ background: '#0F172A', padding: 12 }}>
+                <VideoOff size={32} style={{ color: '#EF4444' }} />
+                <p style={{ color: '#F8FAFC', fontSize: 13, fontWeight: 700, margin: '2px 0' }}>
                   Camera Feed Unavailable
                 </p>
-                <p style={{ color: '#94A3B8', fontSize: 12, margin: 0 }}>
+                <p style={{ color: '#94A3B8', fontSize: 11, margin: 0 }}>
                   {errorMessage}
                 </p>
                 <button
                   className="kiosk-btn kiosk-btn-sm"
                   onClick={handleTakeSnapshot}
                   style={{
-                    marginTop: 12, background: primary, color: '#fff', fontSize: 13, minHeight: 40, padding: '0 18px',
+                    marginTop: 8, background: primary, color: '#fff', fontSize: 12, minHeight: 34, padding: '0 14px', borderRadius: 8
                   }}
                 >
-                  <Camera size={15} /> Capture Sample Frame
+                  <Camera size={13} /> Sample Frame
                 </button>
               </div>
             )}
@@ -222,21 +223,21 @@ const CameraCapture = ({
             {cameraState === 'streaming' && (
               <div className="kiosk-camera-overlay">
                 {mode === 'visitor' && (
-                  <div className="kiosk-face-guide" style={{ borderColor: primary }} />
+                  <div className="kiosk-face-guide" style={{ borderColor: primary, width: 140, height: 180, borderRadius: 90 }} />
                 )}
                 {mode === 'document' && (
                   <div style={{
                     width: '85%', height: '70%',
-                    border: `3px dashed ${primary}`,
-                    borderRadius: 14,
+                    border: `2px dashed ${primary}`,
+                    borderRadius: 10,
                     boxShadow: '0 0 0 9999px rgba(15,23,42,0.5)',
                   }} />
                 )}
                 {mode === 'badge' && (
                   <div style={{
                     width: '65%', height: '65%',
-                    border: `3px solid ${primary}`,
-                    borderRadius: 16,
+                    border: `2px solid ${primary}`,
+                    borderRadius: 12,
                     boxShadow: '0 0 0 9999px rgba(15,23,42,0.6)',
                   }} />
                 )}
@@ -246,54 +247,34 @@ const CameraCapture = ({
         )}
       </div>
 
-      {/* AI Hooks Analysis Status Chip */}
-      {aiAnalysis && (
-        <div style={{
-          background: '#F0FDF4', border: '1px solid #BBF7D0',
-          borderRadius: 12, padding: '8px 16px', fontSize: 12, color: '#166534',
-          display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600,
-          animation: 'kioskFadeUp 0.3s ease',
-        }}>
-          <Sparkles size={16} style={{ color: '#16A34A' }} />
-          <span>AI Gate Scanner: {Object.values(aiAnalysis).join(' · ')}</span>
-        </div>
-      )}
-
       {/* Helper Text */}
       {cameraState === 'streaming' && (
-        <p style={{ fontSize: 14, color: '#64748B', textAlign: 'center', margin: 0, fontWeight: 500 }}>
+        <p style={{ fontSize: 12, color: '#64748B', textAlign: 'center', margin: 0, fontWeight: 500 }}>
           {activeLabel}
         </p>
       )}
 
-      {/* Buttons */}
-      <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+      {/* Buttons — Only Retake (when captured) or Capture (when streaming) */}
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
         {cameraState === 'captured' ? (
-          <>
-            <button className="kiosk-btn kiosk-btn-secondary" onClick={handleRetake}>
-              <RefreshCw size={18} /> Retake
-            </button>
-            <button
-              className="kiosk-btn kiosk-btn-primary"
-              style={{ background: '#2E7D32', color: '#fff' }}
-              onClick={() => {}}
-            >
-              <CheckCircle size={18} /> Confirm Frame
-            </button>
-          </>
+          <button className="kiosk-btn kiosk-btn-secondary kiosk-btn-sm" onClick={handleRetake} style={{ minHeight: 38, fontSize: 13, padding: '0 16px' }}>
+            <RefreshCw size={15} /> Retake
+          </button>
         ) : (
           <button
-            className="kiosk-btn kiosk-btn-primary"
+            className="kiosk-btn kiosk-btn-primary kiosk-btn-sm"
             onClick={handleTakeSnapshot}
             disabled={cameraState === 'initializing'}
             style={{
               background: `linear-gradient(135deg, ${primary}, #0F172A)`,
               color: '#FFFFFF',
-              boxShadow: `0 8px 24px ${primary}40`,
-              minWidth: 220,
+              boxShadow: `0 6px 18px ${primary}35`,
+              minWidth: 160,
+              minHeight: 40,
+              fontSize: 14
             }}
           >
-            <Camera size={20} /> Capture
+            <Camera size={16} /> Capture
           </button>
         )}
       </div>

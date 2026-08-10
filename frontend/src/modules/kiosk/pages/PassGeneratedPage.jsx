@@ -119,9 +119,7 @@ const PassGeneratedPage = () => {
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary, '--kiosk-secondary': secondary }}>
-      <KioskHeader currentStep={4} />
-
-      <div className="kiosk-page">
+      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
 
         {/* ── STATE A: GENERATING ANIMATION ─────────────────────────────── */}
         {passState === 'generating' ? (
@@ -158,12 +156,16 @@ const PassGeneratedPage = () => {
           <div
             className="kiosk-content"
             style={{
-              margin: '0 auto', maxWidth: 820,
+              margin: '0 auto', maxWidth: 760,
               display: 'flex', flexDirection: 'column', alignItems: 'center',
-              padding: '24px 16px 40px',
+              padding: 0,
               animation: 'kioskFadeUp 0.4s ease',
             }}
           >
+            {/* In-Box Header (Dual Logos + Step 4/4 Counter) */}
+            <div className="kiosk-section-card" style={{ width: '100%', padding: '20px 24px', marginBottom: 16 }}>
+              <KioskHeader currentStep={4} />
+            </div>
             {/* Success header */}
             <div className="kiosk-success-icon" style={{ marginBottom: 12 }}>
               <CheckCircle size={52} strokeWidth={2.5} />

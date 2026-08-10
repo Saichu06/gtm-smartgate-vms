@@ -113,86 +113,74 @@ const VisitorDetailsPage = () => {
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary, '--kiosk-secondary': secondary }}>
-      <KioskHeader currentStep={2} />
-
-      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '24px 16px' }}>
-        <div className="kiosk-content" style={{ maxWidth: 760, width: '100%', padding: 0 }}>
-
-          {/* Top Bar Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <button
-              className="kiosk-btn kiosk-btn-ghost kiosk-btn-sm"
-              onClick={() => navigate(`/kiosk/${orgId}`)}
-              style={{ minHeight: 48, padding: '0 20px' }}
-            >
-              <ArrowLeft size={18} /> Back
-            </button>
-            <div style={{ fontSize: 13, fontWeight: 700, color: primary, background: `${primary}15`, padding: '6px 16px', borderRadius: 999 }}>
-              Fast Terminal Check-in
-            </div>
-          </div>
+      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
+        <div className="kiosk-content" style={{ maxWidth: 680, width: '100%', padding: 0 }}>
 
           {/* Single Clean Enterprise Terminal Card */}
-          <div className="kiosk-section-card" style={{ padding: '36px 40px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
-            <div style={{ marginBottom: 28, textAlignment: 'left' }}>
-              <h2 style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
+          <div className="kiosk-section-card" style={{ padding: '24px 28px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
+            
+            {/* In-Box Header (Dual Logos + Step 2/4 Counter) */}
+            <KioskHeader currentStep={2} />
+
+            <div style={{ marginBottom: 20, textAlignment: 'left' }}>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0F172A', margin: '0 0 4px' }}>
                 Visitor Registration
               </h2>
-              <p style={{ fontSize: 15, color: '#64748B', margin: 0 }}>
-                Please fill in the 4 key details below to continue.
+              <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>
+                Please fill in the details below to continue.
               </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
               {/* 1. VISITOR NAME (REQUIRED) */}
               <div className="kiosk-field">
-                <label className="kiosk-input-label" style={{ fontSize: 12, fontWeight: 800, color: '#475569' }}>
+                <label className="kiosk-input-label" style={{ fontSize: 11, fontWeight: 800, color: '#475569' }}>
                   1. VISITOR NAME *
                 </label>
-                <div className="kiosk-input-card" style={{ borderColor: errors.visitorName ? '#D32F2F' : primary, minHeight: 64, padding: '0 20px' }}>
-                  <div className="kiosk-input-icon"><User size={24} style={{ color: primary }} /></div>
+                <div className="kiosk-input-card" style={{ borderColor: errors.visitorName ? '#D32F2F' : primary, minHeight: 46, padding: '0 14px' }}>
+                  <div className="kiosk-input-icon"><User size={18} style={{ color: primary }} /></div>
                   <input
                     type="text"
                     placeholder="Enter your full name"
                     value={visitorName}
                     onChange={(e) => { setVisitorName(e.target.value); setErrors(prev => ({ ...prev, visitorName: '' })); }}
-                    style={{ fontSize: 20, fontWeight: 700 }}
+                    style={{ fontSize: 15, fontWeight: 700, minHeight: 40 }}
                     autoFocus
                   />
                 </div>
-                {errors.visitorName && <span style={{ color: '#D32F2F', fontSize: 12, fontWeight: 600 }}>{errors.visitorName}</span>}
+                {errors.visitorName && <span style={{ color: '#D32F2F', fontSize: 11, fontWeight: 600 }}>{errors.visitorName}</span>}
               </div>
 
               {/* 2. COMING FROM (REQUIRED) */}
               <div className="kiosk-field">
-                <label className="kiosk-input-label" style={{ fontSize: 12, fontWeight: 800, color: '#475569' }}>
+                <label className="kiosk-input-label" style={{ fontSize: 11, fontWeight: 800, color: '#475569' }}>
                   2. COMING FROM (COMPANY / ORGANIZATION) *
                 </label>
-                <div className="kiosk-input-card" style={{ borderColor: errors.comingFrom ? '#D32F2F' : '#E2E8F0', minHeight: 64, padding: '0 20px' }}>
-                  <div className="kiosk-input-icon"><Building2 size={24} style={{ color: primary }} /></div>
+                <div className="kiosk-input-card" style={{ borderColor: errors.comingFrom ? '#D32F2F' : '#E2E8F0', minHeight: 46, padding: '0 14px' }}>
+                  <div className="kiosk-input-icon"><Building2 size={18} style={{ color: primary }} /></div>
                   <input
                     type="text"
                     placeholder="Company or Organization Name"
                     value={comingFrom}
                     onChange={(e) => { setComingFrom(e.target.value); setErrors(prev => ({ ...prev, comingFrom: '' })); }}
-                    style={{ fontSize: 20, fontWeight: 700 }}
+                    style={{ fontSize: 15, fontWeight: 700, minHeight: 40 }}
                   />
                 </div>
-                {errors.comingFrom && <span style={{ color: '#D32F2F', fontSize: 12, fontWeight: 600 }}>{errors.comingFrom}</span>}
+                {errors.comingFrom && <span style={{ color: '#D32F2F', fontSize: 11, fontWeight: 600 }}>{errors.comingFrom}</span>}
               </div>
 
               {/* 3. PERSON TO MEET (OPTIONAL SEARCHABLE DROPDOWN) */}
               <div className="kiosk-field" style={{ position: 'relative' }}>
-                <label className="kiosk-input-label" style={{ fontSize: 12, fontWeight: 800, color: '#475569' }}>
+                <label className="kiosk-input-label" style={{ fontSize: 11, fontWeight: 800, color: '#475569' }}>
                   3. PERSON TO MEET <span style={{ color: '#94A3B8', fontWeight: 500 }}>(Optional — Defaults to "Reception Desk")</span>
                 </label>
                 <div
                   className="kiosk-input-card"
-                  style={{ borderColor: selectedHost ? '#2E7D32' : '#E2E8F0', minHeight: 64, padding: '0 20px' }}
+                  style={{ borderColor: selectedHost ? '#2E7D32' : '#E2E8F0', minHeight: 46, padding: '0 14px' }}
                   onClick={() => setShowHostDropdown(true)}
                 >
-                  <div className="kiosk-input-icon"><Search size={24} style={{ color: primary }} /></div>
+                  <div className="kiosk-input-icon"><Search size={18} style={{ color: primary }} /></div>
                   <input
                     type="text"
                     placeholder="Search employee by name..."
@@ -202,10 +190,10 @@ const VisitorDetailsPage = () => {
                       setHostQuery(e.target.value);
                       setShowHostDropdown(true);
                     }}
-                    style={{ fontSize: 20, fontWeight: 700 }}
+                    style={{ fontSize: 15, fontWeight: 700, minHeight: 40 }}
                   />
                   {selectedHost && (
-                    <CheckCircle size={22} style={{ color: '#2E7D32', flexShrink: 0 }} />
+                    <CheckCircle size={18} style={{ color: '#2E7D32', flexShrink: 0 }} />
                   )}
                 </div>
 
@@ -213,8 +201,8 @@ const VisitorDetailsPage = () => {
                 {showHostDropdown && hostResults.length > 0 && (
                   <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-                    background: '#fff', border: '2px solid #E2E8F0', borderRadius: 16,
-                    boxShadow: '0 12px 36px rgba(0,0,0,0.15)', maxHeight: 240, overflowY: 'auto', marginTop: 4
+                    background: '#fff', border: '2px solid #E2E8F0', borderRadius: 12,
+                    boxShadow: '0 10px 28px rgba(0,0,0,0.12)', maxHeight: 200, overflowY: 'auto', marginTop: 4
                   }}>
                     {hostResults.map(emp => (
                       <div
@@ -225,16 +213,16 @@ const VisitorDetailsPage = () => {
                           setShowHostDropdown(false);
                         }}
                         style={{
-                          padding: '14px 20px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer',
+                          padding: '10px 14px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           background: selectedHost?.id === emp.id ? '#F0F9FF' : '#fff'
                         }}
                       >
                         <div>
-                          <div style={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>{emp.name}</div>
-                          <div style={{ fontSize: 13, color: '#64748B' }}>{emp.designation} · {emp.department}</div>
+                          <div style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>{emp.name}</div>
+                          <div style={{ fontSize: 12, color: '#64748B' }}>{emp.designation} · {emp.department}</div>
                         </div>
-                        <span style={{ fontSize: 12, background: '#F1F5F9', padding: '4px 10px', borderRadius: 8, fontWeight: 700, color: '#475569' }}>
+                        <span style={{ fontSize: 11, background: '#F1F5F9', padding: '2px 8px', borderRadius: 6, fontWeight: 700, color: '#475569' }}>
                           {emp.floor}
                         </span>
                       </div>
@@ -245,15 +233,15 @@ const VisitorDetailsPage = () => {
 
               {/* 4. VISITOR TYPE (REQUIRED DROPDOWN) */}
               <div className="kiosk-field">
-                <label className="kiosk-input-label" style={{ fontSize: 12, fontWeight: 800, color: '#475569' }}>
+                <label className="kiosk-input-label" style={{ fontSize: 11, fontWeight: 800, color: '#475569' }}>
                   4. VISITOR TYPE *
                 </label>
-                <div className="kiosk-input-card" style={{ borderColor: '#E2E8F0', minHeight: 64, padding: '0 20px' }}>
-                  <div className="kiosk-input-icon"><Tag size={24} style={{ color: primary }} /></div>
+                <div className="kiosk-input-card" style={{ borderColor: '#E2E8F0', minHeight: 46, padding: '0 14px' }}>
+                  <div className="kiosk-input-icon"><Tag size={18} style={{ color: primary }} /></div>
                   <select
                     value={visitorType}
                     onChange={(e) => setVisitorType(e.target.value)}
-                    style={{ fontSize: 20, fontWeight: 700, cursor: 'pointer' }}
+                    style={{ fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 40 }}
                   >
                     {VISITOR_TYPE_OPTIONS.map(t => (
                       <option key={t} value={t}>{t}</option>
@@ -264,23 +252,33 @@ const VisitorDetailsPage = () => {
 
             </div>
 
-            {/* Next CTA Button */}
-            <button
-              className="kiosk-btn kiosk-btn-primary kiosk-btn-full"
-              onClick={handleNext}
-              style={{
-                marginTop: 32,
-                minHeight: 68,
-                borderRadius: 18,
-                fontSize: 22,
-                fontWeight: 800,
-                background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                color: '#FFFFFF',
-                boxShadow: `0 10px 32px ${primary}40`,
-              }}
-            >
-              Continue to Identity Verification <ArrowRight size={24} />
-            </button>
+            {/* Bottom Action Bar inside Box */}
+            <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+              <button
+                className="kiosk-btn kiosk-btn-ghost kiosk-btn-sm"
+                onClick={() => navigate(`/kiosk/${orgId}`)}
+                style={{ flex: 1, minHeight: 48 }}
+              >
+                <ArrowLeft size={18} /> Back
+              </button>
+
+              <button
+                className="kiosk-btn kiosk-btn-primary"
+                onClick={handleNext}
+                style={{
+                  flex: 2,
+                  minHeight: 48,
+                  borderRadius: 14,
+                  fontSize: 16,
+                  fontWeight: 800,
+                  background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+                  color: '#FFFFFF',
+                  boxShadow: `0 8px 24px ${primary}35`,
+                }}
+              >
+                Continue to Identity Verification <ArrowRight size={18} />
+              </button>
+            </div>
 
           </div>
 

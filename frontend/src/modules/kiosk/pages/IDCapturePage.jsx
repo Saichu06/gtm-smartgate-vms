@@ -1,14 +1,15 @@
 /**
  * IdentityVerificationPage — Screen 3: Identity Verification (4-Screen Kiosk Flow)
  * Features:
- * - Section A: Visitor Face webcam live preview -> Capture -> Preview -> Retake / Accept
- * - Section B: ID Document capture (Aadhaar, PAN, DL, Passport, Other) -> Preview -> Retake / Accept
- * - Continue button enables ONLY after both face and ID images are explicitly accepted.
- * - Step 3 of 4 Header Progress
+ * - Single combined box with Visitor Photo (Left) and Identity Camera (Right)
+ * - Verification category dropdown without emojis
+ * - Small camera spaces
+ * - After capture: Retake and Next options only
+ * - Back button at bottom inside the box
  */
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Shield, Camera, CheckCircle, RefreshCw, Sparkles, User, FileText } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Shield, User, FileText } from 'lucide-react';
 import KioskHeader from '../components/Common/KioskHeader';
 import KioskFooter from '../components/Common/KioskFooter';
 import CameraCapture from '../components/Camera/CameraCapture';
@@ -24,50 +25,36 @@ const IdentityVerificationPage = () => {
 
   // Section A: Face Capture State
   const [faceUrl, setFaceUrl] = useState(visitor.photoDataUrl || null);
-  const [faceAccepted, setFaceAccepted] = useState(Boolean(visitor.photoDataUrl));
 
   // Section B: ID Capture State
   const [selectedIdType, setSelectedIdType] = useState(visitor.idType || 'aadhaar');
   const [idUrl, setIdUrl] = useState(visitor.idImageUrl || null);
-  const [idAccepted, setIdAccepted] = useState(Boolean(visitor.idImageUrl));
 
   const [error, setError] = useState('');
 
   const handleFaceCapture = (url) => {
     setFaceUrl(url);
-    setFaceAccepted(false);
-  };
-
-  const handleFaceAccept = () => {
-    setFaceAccepted(true);
-    updateVisitor({ photoDataUrl: faceUrl });
+    setError('');
   };
 
   const handleFaceRetake = () => {
     setFaceUrl(null);
-    setFaceAccepted(false);
     updateVisitor({ photoDataUrl: null });
   };
 
   const handleIdCapture = (url) => {
     setIdUrl(url);
-    setIdAccepted(false);
-  };
-
-  const handleIdAccept = () => {
-    setIdAccepted(true);
-    updateVisitor({ idType: selectedIdType, idImageUrl: idUrl });
+    setError('');
   };
 
   const handleIdRetake = () => {
     setIdUrl(null);
-    setIdAccepted(false);
     updateVisitor({ idImageUrl: null });
   };
 
   const handleContinue = () => {
-    if (!faceAccepted || !idAccepted) {
-      setError('Please capture and ACCEPT both your Face Photo and ID Proof before continuing.');
+    if (!faceUrl || !idUrl) {
+      setError('Please capture both your Photo and ID Proof before continuing.');
       return;
     }
     updateVisitor({
@@ -80,155 +67,141 @@ const IdentityVerificationPage = () => {
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary }}>
-      <KioskHeader currentStep={3} />
+      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
+        <div className="kiosk-content" style={{ margin: '0 auto', maxWidth: 840, padding: 0 }}>
 
-      <div className="kiosk-page">
-        <div className="kiosk-content kiosk-content-md" style={{ margin: '0 auto', maxWidth: 880 }}>
+          {/* Single Container Box for Both Cameras */}
+          <div className="kiosk-section-card" style={{ padding: '24px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <button
-              className="kiosk-btn kiosk-btn-ghost kiosk-btn-sm"
-              onClick={() => navigate(`/kiosk/${orgId}/details`)}
-            >
-              <ArrowLeft size={18} /> Back
-            </button>
-            <div style={{ fontSize: 14, fontWeight: 700, color: primary, background: `${primary}15`, padding: '6px 14px', borderRadius: 999 }}>
-              Identity & Photo Verification
-            </div>
-          </div>
+            {/* In-Box Header (Dual Logos + Step 3/4 Counter) */}
+            <KioskHeader currentStep={3} />
 
-          <div className="kiosk-page-title">
-            <Shield size={32} style={{ color: primary, verticalAlign: 'middle', marginRight: 10 }} />
-            Identity Verification
-          </div>
-          <p className="kiosk-page-sub">Capture your photo and scan your ID document. Confirm both images to continue.</p>
-
-          {/* ── SECTION A: VISITOR FACE CAPTURE ──────────────────────────────── */}
-          <div className="kiosk-section-card" style={{ marginBottom: 28 }}>
-            <div className="kiosk-section-card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <User size={20} style={{ color: primary }} />
-                <span style={{ fontWeight: 700, fontSize: 16 }}>SECTION A — Visitor Face Photo</span>
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Shield size={22} style={{ color: primary }} />
+                Identity & Photo Verification
               </div>
-              {faceAccepted && (
-                <span style={{ background: '#F0FDF4', color: '#2E7D32', border: '1px solid #BBF7D0', padding: '4px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <CheckCircle size={14} /> FACE CONFIRMED
-                </span>
-              )}
+              <p style={{ fontSize: 13, color: '#64748B', margin: '4px 0 0' }}>
+                Capture your photo and scan your ID document below.
+              </p>
             </div>
-            <div className="kiosk-section-card-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <CameraCapture
-                mode="visitor"
-                onCapture={handleFaceCapture}
-                onRetake={handleFaceRetake}
-                capturedUrl={faceUrl}
-                label="Look directly at the webcam inside the oval frame"
-              />
 
-              {faceUrl && !faceAccepted && (
-                <div style={{ display: 'flex', gap: 14, marginTop: 16, width: '100%', maxWidth: 440 }}>
-                  <button
-                    className="kiosk-btn kiosk-btn-secondary"
-                    onClick={handleFaceRetake}
-                    style={{ flex: 1 }}
-                  >
-                    <RefreshCw size={18} /> Retake Face Photo
-                  </button>
-                  <button
-                    className="kiosk-btn kiosk-btn-primary"
-                    onClick={handleFaceAccept}
-                    style={{ flex: 1, background: '#2E7D32' }}
-                  >
-                    <CheckCircle size={18} /> Accept Photo
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── SECTION B: IDENTITY DOCUMENT CAPTURE ────────────────────────── */}
-          <div className="kiosk-section-card" style={{ marginBottom: 28 }}>
-            <div className="kiosk-section-card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <FileText size={20} style={{ color: primary }} />
-                <span style={{ fontWeight: 700, fontSize: 16 }}>SECTION B — Identity Document Verification</span>
-              </div>
-              {idAccepted && (
-                <span style={{ background: '#F0FDF4', color: '#2E7D32', border: '1px solid #BBF7D0', padding: '4px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <CheckCircle size={14} /> ID CONFIRMED
-                </span>
-              )}
-            </div>
-            <div className="kiosk-section-card-body">
-              {/* ID Type Selection */}
-              <div style={{ marginBottom: 20 }}>
-                <label className="kiosk-input-label" style={{ marginBottom: 10, display: 'block' }}>Select Document Type</label>
-                <div className="kiosk-id-grid">
+            {/* Verification Category Dropdown (No Emojis) */}
+            <div className="kiosk-field" style={{ maxWidth: 380, margin: '0 auto 20px' }}>
+              <label className="kiosk-input-label" style={{ fontSize: 11, fontWeight: 800, color: '#475569', textAlign: 'center', display: 'block' }}>
+                VERIFICATION CATEGORY / DOCUMENT TYPE *
+              </label>
+              <div className="kiosk-input-card" style={{ borderColor: '#E2E8F0', minHeight: 44, padding: '0 12px' }}>
+                <FileText size={18} style={{ color: primary, flexShrink: 0 }} />
+                <select
+                  value={selectedIdType}
+                  onChange={(e) => { setSelectedIdType(e.target.value); setError(''); }}
+                  style={{ fontSize: 14, fontWeight: 700, cursor: 'pointer', minHeight: 38 }}
+                >
                   {ID_TYPES.map(id => (
-                    <div
-                      key={id.id}
-                      className={`kiosk-id-card ${selectedIdType === id.id ? 'selected' : ''}`}
-                      onClick={() => { setSelectedIdType(id.id); setError(''); }}
-                    >
-                      <div className="kiosk-id-icon" style={{ background: `${id.color}18`, fontSize: 24 }}>
-                        {id.icon}
-                      </div>
-                      <div className="kiosk-id-label">{id.label}</div>
-                    </div>
+                    <option key={id.id} value={id.id}>
+                      {id.label}
+                    </option>
                   ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Side by Side Dual Camera Box (Left: Visitor Face, Right: ID Camera) */}
+            <div className="kiosk-camera-dual-box" style={{
+              display: 'flex',
+              gap: 20,
+              justifyContent: 'center',
+              alignItems: 'stretch',
+              flexWrap: 'wrap',
+              marginBottom: 20
+            }}>
+
+              {/* LEFT: VISITOR PHOTO CAMERA */}
+              <div style={{
+                flex: 1,
+                minWidth: 260,
+                maxWidth: 360,
+                background: '#F8FAFC',
+                border: '1.5px solid #E2E8F0',
+                borderRadius: 16,
+                padding: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#0F172A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <User size={16} style={{ color: primary }} /> Visitor Photo
                 </div>
+                <CameraCapture
+                  mode="visitor"
+                  onCapture={handleFaceCapture}
+                  onRetake={handleFaceRetake}
+                  capturedUrl={faceUrl}
+                  label="Position face inside oval frame"
+                />
               </div>
 
-              {/* ID Camera Scanner */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {/* RIGHT: IDENTITY DOCUMENT CAMERA */}
+              <div style={{
+                flex: 1,
+                minWidth: 260,
+                maxWidth: 360,
+                background: '#F8FAFC',
+                border: '1.5px solid #E2E8F0',
+                borderRadius: 16,
+                padding: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#0F172A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <FileText size={16} style={{ color: primary }} /> ID Document Scan
+                </div>
                 <CameraCapture
                   mode="document"
                   onCapture={handleIdCapture}
                   onRetake={handleIdRetake}
                   capturedUrl={idUrl}
-                  label={`Hold ${ID_TYPES.find(t => t.id === selectedIdType)?.label || 'ID'} flat inside the camera frame`}
+                  label={`Hold ${ID_TYPES.find(t => t.id === selectedIdType)?.label || 'ID'} flat inside frame`}
                 />
-
-                {idUrl && !idAccepted && (
-                  <div style={{ display: 'flex', gap: 14, marginTop: 16, width: '100%', maxWidth: 440 }}>
-                    <button
-                      className="kiosk-btn kiosk-btn-secondary"
-                      onClick={handleIdRetake}
-                      style={{ flex: 1 }}
-                    >
-                      <RefreshCw size={18} /> Retake ID Scan
-                    </button>
-                    <button
-                      className="kiosk-btn kiosk-btn-primary"
-                      onClick={handleIdAccept}
-                      style={{ flex: 1, background: '#2E7D32' }}
-                    >
-                      <CheckCircle size={18} /> Accept ID Scan
-                    </button>
-                  </div>
-                )}
               </div>
+
             </div>
-          </div>
 
-          {error && (
-            <p style={{ color: '#D32F2F', fontSize: 14, fontWeight: 600, textAlign: 'center', marginBottom: 20 }}>{error}</p>
-          )}
+            {error && (
+              <p style={{ color: '#D32F2F', fontSize: 12, fontWeight: 600, textAlign: 'center', marginBottom: 16 }}>{error}</p>
+            )}
 
-          {/* Continue CTA */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 32 }}>
-            <button
-              className="kiosk-btn kiosk-btn-primary"
-              onClick={handleContinue}
-              disabled={!faceAccepted || !idAccepted}
-              style={{
-                background: faceAccepted && idAccepted ? `linear-gradient(135deg, ${primary}, #0F172A)` : undefined,
-                color: '#FFFFFF',
-                minWidth: 260,
-              }}
-            >
-              Generate Visitor Pass <ArrowRight size={22} />
-            </button>
+            {/* Bottom Action Bar inside Box */}
+            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+              <button
+                className="kiosk-btn kiosk-btn-ghost kiosk-btn-sm"
+                onClick={() => navigate(`/kiosk/${orgId}/details`)}
+                style={{ flex: 1, minHeight: 48 }}
+              >
+                <ArrowLeft size={18} /> Back
+              </button>
+
+              <button
+                className="kiosk-btn kiosk-btn-primary"
+                onClick={handleContinue}
+                disabled={!faceUrl || !idUrl}
+                style={{
+                  flex: 2,
+                  minHeight: 48,
+                  borderRadius: 14,
+                  fontSize: 16,
+                  fontWeight: 800,
+                  background: faceUrl && idUrl ? `linear-gradient(135deg, ${primary}, #0F172A)` : '#E2E8F0',
+                  color: faceUrl && idUrl ? '#FFFFFF' : '#94A3B8',
+                  boxShadow: faceUrl && idUrl ? `0 8px 24px ${primary}35` : 'none',
+                }}
+              >
+                Generate Visitor Pass <ArrowRight size={18} />
+              </button>
+            </div>
+
           </div>
 
         </div>

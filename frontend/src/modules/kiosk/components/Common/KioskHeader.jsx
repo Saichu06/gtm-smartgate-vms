@@ -1,21 +1,21 @@
 /**
- * KioskHeader — Enterprise Dual-Branding Header & Stepper for GTM Smart Gate Kiosk.
- * Features:
- * - LEFT: Organization Logo & Organization Name
- * - RIGHT: GTM Smart Gate Logo, Current Date, Live Clock
- * - CENTER: 4-Step Progress Indicator
+ * KioskHeader — In-Box Header & Stepper for GTM Smart Gate Kiosk.
+ * Rendered INSIDE the main container card box.
+ * Displays:
+ * - Dual Logos (Org Logo + GTM Smart Gate Logo)
+ * - Mobile view step counter: "Step 1/4"
+ * - Desktop view stepper
  */
-import React, { useState, useEffect } from 'react';
-import { Building2, Shield, CheckCircle2 } from 'lucide-react';
+import React from 'react';
+import { Building2, CheckCircle2 } from 'lucide-react';
 import { useVisitor } from '../../context/VisitorContext';
-
 import gtmLogo from '../../../../assets/icons/logo.png';
 
 const STEPS = [
-  { step: 1, key: 'mobile',   label: 'Mobile Verification' },
-  { step: 2, key: 'details',  label: 'Visitor Details' },
-  { step: 3, key: 'identity', label: 'Identity Verification' },
-  { step: 4, key: 'pass',     label: 'Visitor Pass' },
+  { step: 1, key: 'mobile',   label: 'Mobile' },
+  { step: 2, key: 'details',  label: 'Details' },
+  { step: 3, key: 'identity', label: 'Identity' },
+  { step: 4, key: 'pass',     label: 'Pass' },
 ];
 
 const KioskHeader = ({ currentStep = 1 }) => {
@@ -24,76 +24,57 @@ const KioskHeader = ({ currentStep = 1 }) => {
   const orgLogo   = org?.logo || org?.logoLight;
   const orgName   = org?.displayName || org?.name || 'Apollo Tyres';
 
-  const [timeStr, setTimeStr] = useState('');
-  const [dateStr, setDateStr] = useState('');
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTimeStr(now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
-      setDateStr(now.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <header className="kiosk-header" style={{ borderBottom: `4px solid ${primary}` }}>
+    <div className="kiosk-inbox-header" style={{ marginBottom: 20 }}>
       
-      {/* ── TOP LEFT: ORGANIZATION LOGO & NAME ────────────────────────────── */}
-      <div className="kiosk-header-brand">
-        {orgLogo ? (
-          <img
-            src={orgLogo}
-            alt={orgName}
-            style={{
-              height: 48,
-              maxHeight: 48,
-              maxWidth: 160,
-              objectFit: 'contain',
-              display: 'block',
-            }}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.style.display = 'none';
-            }}
-          />
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: primary }}>
-            <Building2 size={28} />
-          </div>
-        )}
-        <div>
-          <div className="kiosk-header-org">{orgName}</div>
-          <div className="kiosk-header-powered">
-            <span>Terminal Gate Access</span>
-          </div>
+      {/* ── DUAL LOGOS AT TOP OF CARD ─────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {orgLogo ? (
+            <img
+              src={orgLogo}
+              alt={orgName}
+              style={{ height: 36, maxHeight: 36, maxWidth: 120, objectFit: 'contain' }}
+              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+            />
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: primary, fontWeight: 800, fontSize: 16 }}>
+              <Building2 size={20} /> {orgName}
+            </div>
+          )}
         </div>
+
+        {/* Mobile Step Badge: Step X/4 */}
+        <div className="kiosk-mobile-step-badge">
+          Step {currentStep}/4
+        </div>
+
+        <img
+          src={gtmLogo}
+          alt="GTM Smart Gate"
+          style={{ height: 32, maxHeight: 32, maxWidth: 120, objectFit: 'contain' }}
+        />
       </div>
 
-      {/* ── CENTER: 4-STEP PROGRESS STEPPER ────────────────────────────────── */}
-      <div className="kiosk-stepper-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: primary, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 4 }}>
-          Step {currentStep} of 4
-        </div>
-        <div className="kiosk-stepper">
+      {/* ── DESKTOP/TABLET STEPPER ───────────────────────────── */}
+      <div className="kiosk-desktop-stepper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className="kiosk-stepper" style={{ border: 'none', background: 'transparent', padding: '4px 0' }}>
           {STEPS.map((s, idx) => {
             const isDone = s.step < currentStep;
             const isActive = s.step === currentStep;
 
             return (
               <React.Fragment key={s.key}>
-                <div className="kiosk-step-item">
-                  <div className={`kiosk-step-circle ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}>
-                    {isDone ? <CheckCircle2 size={18} /> : s.step}
+                <div className="kiosk-step-item" style={{ minWidth: 54 }}>
+                  <div className={`kiosk-step-circle ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`} style={{ width: 24, height: 24, fontSize: 11 }}>
+                    {isDone ? <CheckCircle2 size={13} /> : s.step}
                   </div>
-                  <span className={`kiosk-step-label ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}>
+                  <span className={`kiosk-step-label ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`} style={{ fontSize: 9 }}>
                     {s.label}
                   </span>
                 </div>
                 {idx < STEPS.length - 1 && (
-                  <div className={`kiosk-step-connector ${s.step < currentStep ? 'done' : ''}`} />
+                  <div className={`kiosk-step-connector ${s.step < currentStep ? 'done' : ''}`} style={{ width: 20 }} />
                 )}
               </React.Fragment>
             );
@@ -101,20 +82,8 @@ const KioskHeader = ({ currentStep = 1 }) => {
         </div>
       </div>
 
-      {/* ── TOP RIGHT: GTM SMART GATE LOGO & LIVE CLOCK ────────────────────── */}
-      <div className="kiosk-header-right" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <div style={{ textAlign: 'right' }}>
-          <div className="kiosk-header-time">{timeStr || '10:00 AM'}</div>
-          <div className="kiosk-header-date">{dateStr || 'Fri, 7 Aug 2026'}</div>
-        </div>
-        <img
-          src={gtmLogo}
-          alt="GTM Smart Gate"
-          style={{ height: 48, maxHeight: 48, maxWidth: 160, objectFit: 'contain', display: 'block' }}
-        />
-      </div>
-
-    </header>
+      <div style={{ height: 1, background: '#F1F5F9', marginTop: 12 }} />
+    </div>
   );
 };
 

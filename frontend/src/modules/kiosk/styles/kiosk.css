@@ -79,10 +79,14 @@
 /* ─── Page Transition ─────────────────────────────────────── */
 .kiosk-page {
   flex: 1;
-  min-height: 0;          /* critical for flex-child scrolling */
-  overflow-y: auto;       /* allow page content to scroll */
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 16px;
+  overflow-y: auto;
   animation: kioskFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -303,17 +307,27 @@
   background: #fff;
   border-radius: 20px;
   border: 1px solid #E5E7EB;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
   overflow: hidden;
-  margin-bottom: 20px;
+  margin: 0 auto;
+  width: 100%;
 }
 .kiosk-section-card-header { padding: 22px 28px 18px; border-bottom: 1px solid #F1F5F9; }
 .kiosk-section-card-body   { padding: 28px; }
 
 /* ─── Content Container ───────────────────────────────────── */
-.kiosk-content    { flex: 1; padding: 32px 24px; max-width: 960px; margin: 0 auto; width: 100%; }
-.kiosk-content-sm { max-width: 560px; }
-.kiosk-content-md { max-width: 720px; }
+.kiosk-content {
+  flex: 1;
+  padding: 16px;
+  max-width: 960px;
+  margin: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.kiosk-content-sm { max-width: 540px; }
+.kiosk-content-md { max-width: 680px; }
 
 .kiosk-page-title { font-size: 30px; font-weight: 800; color: #0F172A; margin: 0 0 6px; line-height: 1.2; }
 .kiosk-page-sub   { font-size: 16px; color: #64748B; margin: 0 0 28px; }
@@ -605,44 +619,70 @@
 .kiosk-badge-info    { background: #F0F9FF; color: #0369A1; border: 1px solid #BAE6FD; }
 .kiosk-badge-neutral { background: #F8FAFC; color: #64748B; border: 1px solid #E5E7EB; }
 
+/* ─── In-Card Box Header & Mobile Stepper Badge ────────────── */
+.kiosk-header { display: none !important; } /* Navbar completely removed */
+
+.kiosk-mobile-step-badge {
+  display: none;
+}
+
+.kiosk-desktop-stepper {
+  display: flex;
+}
+
 /* ─── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .kiosk-header        { padding: 12px 16px; }
-  .kiosk-header-org    { font-size: 16px; }
-  .kiosk-header-logo   { width: 42px; height: 42px; font-size: 17px; border-radius: 10px; }
-  .kiosk-header-time   { font-size: 20px; }
-  .kiosk-stepper       { padding: 10px 16px; }
-  .kiosk-step-connector { width: 20px; }
-  .kiosk-step-item     { min-width: 56px; }
-  .kiosk-step-circle   { width: 28px; height: 28px; font-size: 11px; }
-  .kiosk-step-label    { font-size: 9px; }
-  .kiosk-content       { padding: 20px 16px; }
-  .kiosk-content-md    { max-width: 100%; }
-  .kiosk-welcome-text h1 { font-size: 28px; }
-  .kiosk-welcome-inner   { width: 130px; height: 130px; }
-  .kiosk-btn           { min-height: 56px; font-size: 16px; padding: 0 28px; }
-  .kiosk-btn-lg        { min-height: 64px; font-size: 18px; padding: 0 36px; }
-  .kiosk-input-card input, .kiosk-input-card select { font-size: 16px; }
-  .kiosk-footer        { padding: 12px 16px; }
-  .kiosk-page-title    { font-size: 24px; }
+  .kiosk-mobile-step-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: rgba(21,101,192,0.12);
+    color: var(--kiosk-primary, #1565C0);
+    font-weight: 800;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+
+  .kiosk-desktop-stepper {
+    display: none !important;
+  }
+
+  .kiosk-header        { display: none !important; }
+  .kiosk-content       { padding: 12px 8px; max-width: 100% !important; }
+  .kiosk-content-md    { max-width: 100% !important; }
+  .kiosk-welcome-text h1 { font-size: 22px; }
+  .kiosk-welcome-inner   { width: 100px; height: 100px; }
+  .kiosk-btn           { min-height: 44px; font-size: 14px; padding: 0 16px; border-radius: 12px; }
+  .kiosk-btn-lg        { min-height: 50px; font-size: 15px; padding: 0 24px; }
+  .kiosk-input-card    { min-height: 44px; padding: 0 12px; }
+  .kiosk-input-card input, .kiosk-input-card select { font-size: 15px; min-height: 38px; }
+  .kiosk-footer        { padding: 10px 12px; justify-content: center; text-align: center; }
+  .kiosk-page-title    { font-size: 20px; }
   .kiosk-form-grid     { grid-template-columns: 1fr; }
   .kiosk-review-grid   { grid-template-columns: 1fr; }
   .kiosk-emp-grid      { grid-template-columns: 1fr; }
 
+  /* Dual camera stacked on mobile */
+  .kiosk-camera-dual-box {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
   /* Camera capture responsive */
   .kiosk-camera-wrap   { max-width: 100% !important; }
 
-  /* Gate pass tile responsive */
-  .kiosk-section-card  { padding: 20px 16px !important; }
+  /* Gate pass section card responsive */
+  .kiosk-section-card  { padding: 16px 14px !important; border-radius: 16px !important; }
 
-  /* Visitor badge responsive (stacks photo and info vertically) */
+  /* Visitor badge responsive */
   .printable-visitor-badge .badge-body-flex {
     flex-direction: column !important;
     align-items: center !important;
   }
   .printable-visitor-badge .badge-photo {
-    width: 100px !important;
-    height: 120px !important;
+    width: 90px !important;
+    height: 110px !important;
   }
 
   /* ID type grid wraps on mobile */

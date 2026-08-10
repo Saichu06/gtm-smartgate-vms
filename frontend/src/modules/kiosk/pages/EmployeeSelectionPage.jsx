@@ -71,120 +71,109 @@ const EmployeeSelectionPage = () => {
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary }}>
-      <KioskHeader />
-      <ProgressStepper currentStep={2} />
+      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
+        <div className="kiosk-content" style={{ margin: '0 auto', maxWidth: 740, padding: 0 }}>
 
-      <div className="kiosk-page">
-        <div className="kiosk-content" style={{ margin: '0 auto' }}>
+          <div className="kiosk-section-card" style={{ padding: '24px 28px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
 
-          <button
-            className="kiosk-btn kiosk-btn-ghost kiosk-btn-sm"
-            onClick={() => navigate(`/kiosk/${orgId}/details`)}
-            style={{ marginBottom: 24 }}
-          >
-            <ArrowLeft size={18} /> Back
-          </button>
+            {/* In-Box Header (Dual Logos + Step 2/4 Counter) */}
+            <KioskHeader currentStep={2} />
 
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 8 }}>
-            <div>
-              <div className="kiosk-page-title">
-                <Users size={30} style={{ color: primary, verticalAlign: 'middle', marginRight: 10 }} />
+            <div style={{ marginBottom: 16 }}>
+              <div className="kiosk-page-title" style={{ fontSize: 22, margin: '0 0 4px' }}>
+                <Users size={24} style={{ color: primary, verticalAlign: 'middle', marginRight: 8 }} />
                 Who are you visiting?
               </div>
-              <p className="kiosk-page-sub">
+              <p className="kiosk-page-sub" style={{ fontSize: 13, margin: 0 }}>
                 Optionally select a host from <strong>{org?.displayName || org?.name}</strong> employee directory, or skip for walk-in visits.
               </p>
             </div>
+
+            <div className="kiosk-input-card" style={{ marginBottom: 16, minHeight: 44, padding: '0 12px' }}>
+              <div className="kiosk-input-icon"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Search by name, department..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                style={{ fontSize: 15, fontWeight: 700, minHeight: 38 }}
+                autoFocus
+              />
+            </div>
+
             {selected && (
-              <button
-                className="kiosk-btn kiosk-btn-primary"
-                onClick={handleNext}
-                style={{ flexShrink: 0 }}
-              >
-                Continue <ArrowRight size={22} />
-              </button>
+              <div style={{
+                background: '#F0FDF4', border: '1.5px solid #BBF7D0',
+                borderRadius: 12, padding: '10px 16px',
+                display: 'flex', alignItems: 'center', gap: 10,
+                marginBottom: 16, animation: 'kioskFadeUp 0.3s ease',
+              }}>
+                <CheckCircle size={18} style={{ color: '#2E7D32', flexShrink: 0 }} />
+                <span style={{ fontWeight: 700, color: '#0F172A', fontSize: 14 }}>
+                  Selected: <span style={{ color: '#2E7D32' }}>{selected.name}</span>
+                  <span style={{ color: '#64748B', fontWeight: 500, fontSize: 12 }}> · {selected.designation} · {selected.floor}</span>
+                </span>
+              </div>
             )}
-          </div>
 
-          <div className="kiosk-input-card" style={{ marginBottom: 24 }}>
-            <div className="kiosk-input-icon"><Search size={22} /></div>
-            <input
-              type="text"
-              placeholder="Search by name, department..."
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              autoFocus
-            />
-          </div>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: '#94A3B8', fontSize: 14 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #E5E7EB', borderTopColor: primary, animation: 'spin 0.9s linear infinite', margin: '0 auto 10px' }} />
+                Loading {org?.displayName || 'organization'} employees...
+              </div>
+            ) : results.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '36px 0', color: '#94A3B8', fontSize: 14 }}>
+                <AlertCircle size={40} style={{ opacity: 0.4, marginBottom: 10, color: '#F57C00' }} />
+                <p style={{ fontWeight: 600, color: '#334155', margin: 0 }}>No employees found</p>
+                <p style={{ fontSize: 13, marginTop: 6 }}>
+                  {query
+                    ? `No match for "${query}" in directory.`
+                    : 'No active employees in directory. Continue as walk-in.'}
+                </p>
+              </div>
+            ) : (
+              <div className="kiosk-emp-grid" style={{ gap: 12 }}>
+                {results.map(emp => (
+                  <EmployeeCard
+                    key={emp.id}
+                    emp={emp}
+                    selected={selected?.id === emp.id}
+                    onSelect={setSelected}
+                  />
+                ))}
+              </div>
+            )}
 
-          {selected && (
-            <div style={{
-              background: '#F0FDF4', border: '2px solid #BBF7D0',
-              borderRadius: 14, padding: '14px 20px',
-              display: 'flex', alignItems: 'center', gap: 12,
-              marginBottom: 20, animation: 'kioskFadeUp 0.3s ease',
-            }}>
-              <CheckCircle size={20} style={{ color: '#2E7D32', flexShrink: 0 }} />
-              <span style={{ fontWeight: 700, color: '#0F172A', fontSize: 15 }}>
-                Selected: <span style={{ color: '#2E7D32' }}>{selected.name}</span>
-                <span style={{ color: '#64748B', fontWeight: 500, fontSize: 13 }}> · {selected.designation} · {selected.floor}</span>
-              </span>
-            </div>
-          )}
-
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#94A3B8', fontSize: 16 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #E5E7EB', borderTopColor: primary, animation: 'spin 0.9s linear infinite', margin: '0 auto 12px' }} />
-              Loading {org?.displayName || 'organization'} employees...
-            </div>
-          ) : results.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 0', color: '#94A3B8', fontSize: 16 }}>
-              <AlertCircle size={48} style={{ opacity: 0.4, marginBottom: 12, color: '#F57C00' }} />
-              <p style={{ fontWeight: 600, color: '#334155' }}>No employees found</p>
-              <p style={{ fontSize: 14, marginTop: 8 }}>
-                {query
-                  ? `No match for "${query}" in this organization's directory.`
-                  : 'No active employees in this organization. You can continue as a walk-in visitor.'}
-              </p>
-              {!query && (
+            {/* Bottom Action Bar inside Box */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, gap: 12, flexWrap: 'wrap' }}>
+              <button
+                className="kiosk-btn kiosk-btn-ghost kiosk-btn-sm"
+                onClick={() => navigate(`/kiosk/${orgId}/details`)}
+                style={{ minHeight: 44, padding: '0 16px' }}
+              >
+                <ArrowLeft size={18} /> Back
+              </button>
+              <div style={{ display: 'flex', gap: 10 }}>
                 <button
-                  className="kiosk-btn kiosk-btn-secondary"
+                  className="kiosk-btn kiosk-btn-secondary kiosk-btn-sm"
                   onClick={handleSkip}
-                  style={{ marginTop: 16 }}
+                  style={{ minHeight: 44, fontSize: 14 }}
                 >
-                  Continue without host <ArrowRight size={18} />
+                  Skip — Walk-in
                 </button>
-              )}
+                <button
+                  className="kiosk-btn kiosk-btn-primary kiosk-btn-sm"
+                  onClick={handleNext}
+                  disabled={!selected}
+                  style={{ minHeight: 44, fontSize: 14, minWidth: 160 }}
+                >
+                  Continue <ArrowRight size={18} />
+                </button>
+              </div>
             </div>
-          ) : (
-            <div className="kiosk-emp-grid">
-              {results.map(emp => (
-                <EmployeeCard
-                  key={emp.id}
-                  emp={emp}
-                  selected={selected?.id === emp.id}
-                  onSelect={setSelected}
-                />
-              ))}
-            </div>
-          )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 28, gap: 12 }}>
-            <button
-              className="kiosk-btn kiosk-btn-secondary kiosk-btn-sm"
-              onClick={handleSkip}
-            >
-              Skip — Walk-in / No Host
-            </button>
-            <button
-              className="kiosk-btn kiosk-btn-primary"
-              onClick={handleNext}
-              disabled={!selected}
-              style={{ minWidth: 200 }}
-            >
-              Continue with Host <ArrowRight size={22} />
-            </button>
           </div>
+
         </div>
       </div>
 
