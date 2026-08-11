@@ -156,7 +156,7 @@ const PassGeneratedPage = () => {
           <div
             className="kiosk-content"
             style={{
-              margin: '0 auto', maxWidth: 760,
+              margin: '0 auto', maxWidth: 820, width: '100%',
               display: 'flex', flexDirection: 'column', alignItems: 'center',
               padding: 0,
               animation: 'kioskFadeUp 0.4s ease',

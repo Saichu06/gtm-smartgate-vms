@@ -159,7 +159,7 @@ const WelcomePage = () => {
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary, '--kiosk-secondary': secondary }}>
       <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
-        <div className="kiosk-content" style={{ maxWidth: 580, width: '100%', padding: 0 }}>
+        <div className="kiosk-content" style={{ maxWidth: 820, width: '100%', padding: 0 }}>
 
           {/* SINGLE ENCLOSING CARD BOX FOR EVERYTHING */}
           <div className="kiosk-section-card" style={{ padding: '24px 28px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>

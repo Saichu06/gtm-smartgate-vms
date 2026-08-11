@@ -22,10 +22,10 @@ const RejectedPage = () => {
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary }}>
-      <KioskHeader />
-
-      <div className="kiosk-page">
-        <div className="kiosk-content" style={{ margin: '0 auto', maxWidth: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px' }}>
+      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
+        <div className="kiosk-content" style={{ margin: '0 auto', maxWidth: 820, width: '100%', padding: 0 }}>
+          <div className="kiosk-section-card" style={{ padding: '24px 28px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <KioskHeader currentStep={4} />
 
           {/* Error Animated Icon */}
           <div className="kiosk-error-icon" style={{ marginBottom: 24 }}>
@@ -76,9 +76,8 @@ const RejectedPage = () => {
           </button>
         </div>
       </div>
-
-      <KioskFooter />
     </div>
+  </div>
   );
 };
 

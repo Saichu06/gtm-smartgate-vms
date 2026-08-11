@@ -59,7 +59,7 @@ const GatePassAssignmentPage = () => {
           justifyContent: 'center',
         }}
       >
-        <div style={{ maxWidth: 640, width: '100%' }}>
+        <div className="kiosk-content" style={{ margin: '0 auto', maxWidth: 820, width: '100%', padding: 0 }}>
 
           {/* Main Card */}
           <div
