@@ -75,6 +75,8 @@ import ReviewPage from '../modules/kiosk/pages/ReviewPage';
 import WaitingApprovalPage from '../modules/kiosk/pages/WaitingApprovalPage';
 import PassGeneratedPage from '../modules/kiosk/pages/PassGeneratedPage';
 import GatePassAssignmentPage from '../modules/kiosk/pages/GatePassAssignmentPage';
+import LuggagePage from '../modules/kiosk/pages/LuggagePage';
+import VehiclePage from '../modules/kiosk/pages/VehiclePage';
 import RejectedPage from '../modules/kiosk/pages/RejectedPage';
 
 /**
@@ -134,11 +136,15 @@ const AppRoutes = () => {
           <Route path="/kiosk/:orgId/mobile"        element={<KioskRoute element={<WelcomePage />} />} />
           {/* Screen 2: Visitor Details */}
           <Route path="/kiosk/:orgId/details"       element={<KioskRoute element={<VisitorDetailsPage />} />} />
-          {/* Screen 3: Identity Verification */}
+          {/* Screen 3: Identity Verification (face + ID + laptop Y/N) */}
           <Route path="/kiosk/:orgId/identity"      element={<KioskRoute element={<IDCapturePage />} />} />
-          {/* Screen 4A: Gate Pass Assignment (Physical Pass Selector) */}
+          {/* Screen 4: Luggage (only when laptop=YES) */}
+          <Route path="/kiosk/:orgId/luggage"       element={<KioskRoute element={<LuggagePage />} />} />
+          {/* Screen 4 or 5: Vehicle Details */}
+          <Route path="/kiosk/:orgId/vehicle"       element={<KioskRoute element={<VehiclePage />} />} />
+          {/* Screen 5 or 6: Gate Pass Assignment */}
           <Route path="/kiosk/:orgId/gate-pass"     element={<KioskRoute element={<GatePassAssignmentPage />} />} />
-          {/* Screen 4B: Visitor Badge + Print */}
+          {/* Final: Visitor Badge + Print */}
           <Route path="/kiosk/:orgId/pass"          element={<KioskRoute element={<PassGeneratedPage />} />} />
           {/* Legacy route aliases (backward compat) */}
           <Route path="/kiosk/:orgId/employee"      element={<KioskRoute element={<VisitorDetailsPage />} />} />

@@ -1,24 +1,15 @@
 /**
- * PassGeneratedPage — Screen 4B: Visitor Badge (4-Screen Kiosk Flow)
- *
- * Displays the Visitor Badge after a physical gate pass has been assigned.
- * The pass was chosen on the GatePassAssignmentPage (/gate-pass) and is
- * already stored in visitor.assignedPass.
- *
- * Dual-State UX (single page, no navigation):
- *   State A: "Preparing Visitor Badge..." (1.2s animation)
- *   State B: Full Visitor Badge appears
- *
- * On Finish:
- *   - Releases the physical gate pass back to "available" (prototype behaviour)
- *   - 5-second countdown → clears VisitorContext → returns to Welcome screen
+ * PassGeneratedPage — Registration Complete + Visitor Badge
+ * - Brief "Generating..." state (1 second)
+ * - Visitor badge with real QR code
+ * - Print button (window.print())
+ * - Auto-reset countdown after Finish
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle, Printer, Home, Sparkles, Zap, ShieldCheck, User, Building2, Tag } from 'lucide-react';
+import { CheckCircle2, Printer, Home, ShieldCheck, User, Loader2, Zap } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import KioskHeader from '../components/Common/KioskHeader';
-import KioskFooter from '../components/Common/KioskFooter';
 import { useVisitor } from '../context/VisitorContext';
 import { submitRegistration } from '../services/kioskApi';
 import { releaseGatePass } from '../services/gatePassApi';
@@ -35,35 +26,33 @@ const PassGeneratedPage = () => {
   const orgLogo   = org?.logo || org?.logoLight;
   const orgName   = org?.displayName || org?.name || 'Organization';
 
+  const isLaptop    = visitor.laptop === 'YES';
+  const totalSteps  = isLaptop ? 6 : 5;
+
   const assignedPass = visitor.assignedPass;
 
-  const [passState, setPassState]     = useState('generating');
-  const [printing, setPrinting]       = useState(false);
-  const [printed, setPrinted]         = useState(false);
+  const [passState, setPassState]           = useState('generating');
+  const [printing, setPrinting]             = useState(false);
+  const [printed, setPrinted]               = useState(false);
   const [resetCountdown, setResetCountdown] = useState(null);
   const countdownRef = useRef(null);
 
-  // Brief 1.2-second animation then reveal badge
   useEffect(() => {
-    let isMounted = true;
-
-    // Submit registration record to localStorage / backend
+    let mounted = true;
     submitRegistration(visitor, orgId, {
       approvalRequired: false,
-      siteName: assignedPass?.gate || 'Gate A — Self-Service Kiosk',
+      siteName: assignedPass?.gate || 'Gate — Self-Service Kiosk',
       orgCode: org?.code || 'ORG',
-    }).then((result) => {
-      if (isMounted) {
-        updateVisitor({ passInfo: result, submitted: true });
-      }
+    }).then(result => {
+      if (mounted) updateVisitor({ passInfo: result, submitted: true });
     });
 
     const timer = setTimeout(() => {
-      if (isMounted) setPassState('ready');
-    }, 1200);
+      if (mounted) setPassState('ready');
+    }, 1000);
 
     return () => {
-      isMounted = false;
+      mounted = false;
       clearTimeout(timer);
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
@@ -75,20 +64,15 @@ const PassGeneratedPage = () => {
       window.print();
       setPrinting(false);
       setPrinted(true);
-    }, 300);
+    }, 200);
   };
 
   const handleFinish = () => {
     if (resetCountdown !== null) return;
-
-    // Prototype behaviour: release gate pass back to available on Finish
-    if (assignedPass) {
-      releaseGatePass(orgId, assignedPass.id);
-    }
-
+    if (assignedPass) releaseGatePass(orgId, assignedPass.id);
     setResetCountdown(5);
     countdownRef.current = setInterval(() => {
-      setResetCountdown((prev) => {
+      setResetCountdown(prev => {
         if (prev <= 1) {
           clearInterval(countdownRef.current);
           resetFlow();
@@ -100,322 +84,185 @@ const PassGeneratedPage = () => {
     }, 1000);
   };
 
-  const visitorName = visitor.name || `${visitor.firstName || ''} ${visitor.lastName || ''}`.trim() || 'Visitor';
-  const currentDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  const currentTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const visitorName  = visitor.visitorName || `${visitor.firstName || ''} ${visitor.lastName || ''}`.trim() || 'Visitor';
+  const personToMeet = visitor.personToMeet || visitor.host?.name || 'Reception Desk';
+  const comingFrom   = visitor.comingFrom   || visitor.company || 'Walk-in';
+  const currentDate  = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const currentTime  = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
-  // Build structured QR payload for gate officer validation
   const qrPayload = JSON.stringify({
-    visitId: visitor.visitId || 'VIS-000000',
+    visitId:     visitor.visitId || 'VIS-000000',
     orgId,
     visitorName,
-    gatePass: assignedPass?.name || null,
-    gatePassId: assignedPass?.id || null,
-    gate: assignedPass?.gate || 'Gate A',
-    status: 'VALID TODAY',
-    date: new Date().toISOString().slice(0, 10),
+    gatePass:    assignedPass?.name || null,
+    gatePassId:  assignedPass?.id   || null,
+    gate:        assignedPass?.gate || 'Gate A',
+    status:      'VALID TODAY',
+    date:        new Date().toISOString().slice(0, 10),
     checkinTime: currentTime,
   });
 
+  if (passState === 'generating') {
+    return (
+      <div className="kiosk-shell" style={{ '--kiosk-primary': primary }}>
+        <div className="kiosk-page" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center', animation: 'kioskFadeIn 0.3s ease' }}>
+            <div style={{ width: 64, height: 64, margin: '0 auto 16px', position: 'relative' }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `5px solid ${primary}20`, borderTopColor: primary, animation: 'spin 0.9s linear infinite' }} />
+              <div style={{ position: 'absolute', inset: 12, borderRadius: '50%', background: `${primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Loader2 size={22} style={{ color: primary, animation: 'spin 0.8s linear infinite' }} />
+              </div>
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', marginBottom: 6 }}>Generating Visitor Pass...</div>
+            <div style={{ fontSize: 13, color: '#64748B' }}>Registering your visit and creating QR code</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary, '--kiosk-secondary': secondary }}>
-      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
+      <div className="kiosk-page" style={{ padding: '12px', overflowY: 'auto' }}>
+        <div className="kiosk-panel" style={{ maxWidth: 700 }}>
+          <KioskHeader currentStep={totalSteps} />
 
-        {/* ── STATE A: GENERATING ANIMATION ─────────────────────────────── */}
-        {passState === 'generating' ? (
-          <div style={{
-            flex: 1, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            padding: 48, textAlign: 'center', animation: 'kioskFadeIn 0.3s ease',
-          }}>
-            <div style={{ position: 'relative', width: 140, height: 140, marginBottom: 32 }}>
-              <div style={{
-                position: 'absolute', inset: 0, borderRadius: '50%',
-                border: `6px solid ${primary}20`, borderTopColor: primary,
-                animation: 'spin 1s linear infinite',
-              }} />
-              <div style={{
-                position: 'absolute', inset: 18, borderRadius: '50%',
-                background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', boxShadow: '0 12px 32px rgba(0,0,0,0.2)',
-              }}>
-                <Sparkles size={46} />
-              </div>
+          {/* Success heading */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+            <CheckCircle2 size={24} style={{ color: '#2E7D32', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', lineHeight: 1.2 }}>Registration Complete</div>
+              <div style={{ fontSize: 12, color: '#64748B' }}>Collect your physical gate pass from the security desk.</div>
             </div>
-            <h2 style={{ fontSize: 30, fontWeight: 800, color: '#0F172A', margin: '0 0 10px' }}>
-              Preparing Visitor Badge...
-            </h2>
-            <p style={{ fontSize: 16, color: '#64748B', maxWidth: 420, margin: 0 }}>
-              Registering your visit and generating your secure QR code.
-            </p>
           </div>
 
-        ) : (
-          /* ── STATE B: VISITOR BADGE ──────────────────────────────────── */
+          {/* Visitor Badge — printable */}
           <div
-            className="kiosk-content"
+            className="printable-visitor-badge"
             style={{
-              margin: '0 auto', maxWidth: 820, width: '100%',
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              padding: 0,
-              animation: 'kioskFadeUp 0.4s ease',
+              width: '100%',
+              background: '#FFFFFF',
+              borderRadius: 16,
+              border: `2px solid ${primary}`,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+              overflow: 'hidden',
+              marginBottom: 14,
             }}
           >
-            {/* In-Box Header (Dual Logos + Step 4/4 Counter) */}
-            <div className="kiosk-section-card" style={{ width: '100%', padding: '20px 24px', marginBottom: 16 }}>
-              <KioskHeader currentStep={4} />
+            {/* Badge header */}
+            <div style={{ background: '#0F172A', padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `3px solid ${primary}` }}>
+              <div>
+                {orgLogo ? (
+                  <img src={orgLogo} alt={orgName} style={{ height: 32, maxWidth: 130, objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
+                ) : (
+                  <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>{orgName}</span>
+                )}
+              </div>
+              <div style={{ background: '#F0FDF4', color: '#2E7D32', fontWeight: 800, fontSize: 10, letterSpacing: 1, padding: '4px 10px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+                <ShieldCheck size={11} /> Valid Today
+              </div>
+              <img src={gtmLogo} alt="GTM Smart Gate" style={{ height: 28, maxWidth: 100, objectFit: 'contain', background: '#fff', padding: '3px 8px', borderRadius: 6 }} />
             </div>
-            {/* Success header */}
-            <div className="kiosk-success-icon" style={{ marginBottom: 12 }}>
-              <CheckCircle size={52} strokeWidth={2.5} />
-            </div>
-            <h2 style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', margin: '0 0 4px', textAlign: 'center' }}>
-              Registration Complete!
-            </h2>
-            <p style={{ fontSize: 15, color: '#64748B', margin: '0 0 28px', textAlign: 'center' }}>
-              Your visitor badge is ready. Please collect your physical gate pass from the security desk.
-            </p>
 
-            {/* ── VISITOR BADGE ──────────────────────────────────────────── */}
-            <div
-              className="printable-visitor-badge"
-              style={{
-                width: '100%', maxWidth: 680,
-                background: '#FFFFFF',
-                borderRadius: 24,
-                border: `3px solid ${primary}`,
-                boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
-                overflow: 'hidden',
-              }}
-            >
-              {/* Badge Header — Dual Logos */}
-              <div style={{
-                background: '#0F172A',
-                padding: '16px 24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: `4px solid ${primary}`,
-              }}>
-                {/* Org Logo Left */}
-                <div>
-                  {orgLogo ? (
-                    <img
-                      src={orgLogo}
-                      alt={orgName}
-                      style={{ height: 40, maxWidth: 160, objectFit: 'contain' }}
-                      onError={e => { e.target.onerror = null; e.target.style.display = 'none'; }}
-                    />
-                  ) : (
-                    <div style={{ fontWeight: 800, fontSize: 18, color: '#fff' }}>{orgName}</div>
-                  )}
+            {/* Title strip */}
+            <div style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, color: '#fff', textAlign: 'center', padding: '7px 0', fontSize: 12, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
+              VISITOR PASS
+            </div>
+
+            {/* Badge body */}
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+
+                {/* Photo */}
+                <div style={{ flexShrink: 0 }}>
+                  <div style={{ width: 110, height: 132, borderRadius: 10, overflow: 'hidden', border: `2px solid ${primary}`, background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {visitor.photoDataUrl ? (
+                      <img src={visitor.photoDataUrl} alt="Visitor" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <User size={42} color="#CBD5E1" />
+                    )}
+                  </div>
+                  <div style={{ marginTop: 6, background: '#EFF6FF', color: primary, border: `1.5px solid ${primary}40`, borderRadius: 8, padding: '4px 8px', fontSize: 11, fontWeight: 800, textAlign: 'center' }}>
+                    {assignedPass?.name || 'Gate Pass'}
+                  </div>
                 </div>
 
-                {/* VALID TODAY pill */}
-                <div style={{
-                  background: '#F0FDF4', color: '#2E7D32', fontWeight: 800,
-                  fontSize: 11, letterSpacing: '1.5px', padding: '6px 14px',
-                  borderRadius: 999, border: '1px solid #BBF7D0',
-                  textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 5,
-                }}>
-                  <ShieldCheck size={13} /> VALID TODAY
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', lineHeight: 1.2 }}>{visitorName}</div>
+                  <div style={{ fontSize: 12, color: primary, fontWeight: 700, marginTop: 2 }}>{comingFrom}</div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12, background: '#F8FAFC', padding: '10px 12px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                    {[
+                      ['Visitor Type', visitor.visitorType || 'Business Visitor'],
+                      ['Person To Meet', personToMeet],
+                      ['Vehicle', visitor.vehicleNumber || '—'],
+                      ['Date', currentDate],
+                      ['Time', currentTime],
+                      ['Gate', assignedPass?.gate || '—'],
+                    ].map(([label, val]) => (
+                      <div key={label}>
+                        <span style={{ fontSize: 9, color: '#64748B', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>{label}</span>
+                        <strong style={{ fontSize: 12, color: '#0F172A' }}>{val}</strong>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
-                {/* GTM Smart Gate Logo Right */}
-                <img
-                  src={gtmLogo}
-                  alt="GTM Smart Gate"
-                  style={{ height: 40, maxWidth: 150, objectFit: 'contain', background: '#fff', padding: '4px 10px', borderRadius: 8 }}
-                />
               </div>
 
-              {/* VISITOR PASS Title Strip */}
-              <div style={{
-                background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                color: '#fff', textAlign: 'center',
-                padding: '10px 0', fontSize: 16, fontWeight: 900,
-                letterSpacing: 2, textTransform: 'uppercase',
-              }}>
-                VISITOR PASS
-              </div>
-
-              {/* Badge Body */}
-              <div style={{ padding: '24px 28px' }}>
-                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-
-                  {/* Visitor Photo */}
+              {/* QR Strip */}
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1.5px dashed #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ background: '#fff', border: '1.5px solid #0F172A', borderRadius: 8, padding: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <QRCodeSVG value={qrPayload} size={56} level="M" bgColor="#ffffff" fgColor="#0F172A" />
+                  </div>
                   <div>
-                    <div style={{
-                      width: 130, height: 156, borderRadius: 14,
-                      overflow: 'hidden', border: `3px solid ${primary}`,
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
-                      background: '#F8FAFC',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {visitor.photoDataUrl ? (
-                        <img src={visitor.photoDataUrl} alt="Visitor" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        <User size={52} color="#CBD5E1" />
-                      )}
-                    </div>
-                    {/* Physical Gate Pass Number */}
-                    <div style={{
-                      marginTop: 8, background: '#EFF6FF', color: primary,
-                      border: `2px solid ${primary}40`, borderRadius: 10,
-                      padding: '6px 10px', fontSize: 13, fontWeight: 800,
-                      textAlign: 'center',
-                    }}>
-                      {assignedPass?.name || 'Gate Pass'}
-                    </div>
-                  </div>
-
-                  {/* Visitor Info Grid */}
-                  <div style={{ flex: 1, minWidth: 200 }}>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', lineHeight: 1.2 }}>
-                      {visitorName}
-                    </div>
-                    <div style={{ fontSize: 14, color: primary, fontWeight: 700, marginTop: 4 }}>
-                      {visitor.company || 'Walk-in Visitor'}
-                    </div>
-
-                    <div style={{
-                      display: 'grid', gridTemplateColumns: '1fr 1fr',
-                      gap: 12, marginTop: 16,
-                      background: '#F8FAFC', padding: 14, borderRadius: 14,
-                      border: '1px solid #E2E8F0',
-                    }}>
-                      <div>
-                        <span style={{ fontSize: 10, color: '#64748B', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>Visitor Type</span>
-                        <strong style={{ fontSize: 13, color: '#0F172A' }}>{visitor.visitorType || 'Business Visitor'}</strong>
-                      </div>
-                      <div>
-                        <span style={{ fontSize: 10, color: '#64748B', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>Person To Meet</span>
-                        <strong style={{ fontSize: 13, color: '#0F172A' }}>{visitor.host?.name || 'Reception Desk'}</strong>
-                      </div>
-                      <div>
-                        <span style={{ fontSize: 10, color: '#64748B', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>Visit Date</span>
-                        <strong style={{ fontSize: 13, color: '#0F172A' }}>{currentDate}</strong>
-                      </div>
-                      <div>
-                        <span style={{ fontSize: 10, color: '#64748B', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>Visit Time</span>
-                        <strong style={{ fontSize: 13, color: '#0F172A' }}>{currentTime}</strong>
-                      </div>
-                    </div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 800, color: '#0F172A', letterSpacing: 1 }}>{visitor.visitId || 'VIS-XXXXX'}</div>
+                    <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>Scan at gate officer device</div>
                   </div>
                 </div>
-
-                {/* QR Strip */}
-                <div style={{
-                  marginTop: 20, paddingTop: 16, borderTop: '2px dashed #E2E8F0',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{
-                      width: 70, height: 70, background: '#fff',
-                      border: '2px solid #0F172A', borderRadius: 10,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                      flexShrink: 0,
-                    }}>
-                      <QRCodeSVG
-                        value={qrPayload}
-                        size={58}
-                        level="M"
-                        includeMargin={false}
-                        bgColor="#ffffff"
-                        fgColor="#0F172A"
-                      />
-                    </div>
-                    <div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 800, color: '#0F172A', letterSpacing: 1 }}>
-                        {visitor.visitId || 'VIS-XXXXX'}
-                      </div>
-                      <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
-                        Scan at turnstile or gate officer device
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase' }}>Status</div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#2E7D32' }}>VALID TODAY</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Badge Footer */}
-              <div style={{
-                background: '#0F172A', padding: '10px 24px', color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 600 }}>
-                  <ShieldCheck size={13} style={{ color: '#38BDF8' }} /> Authorized Enterprise Visitor Badge
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Zap size={12} style={{ color: '#38BDF8' }} /> Powered by <strong>GTM Smart Gate</strong>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 9, color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase' }}>Status</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#2E7D32' }}>VALID TODAY</div>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: 16, marginTop: 28, width: '100%', maxWidth: 560 }}>
-              <button
-                className="kiosk-btn kiosk-btn-secondary"
-                onClick={handlePrint}
-                disabled={printing}
-                style={{ flex: 1, minHeight: 60 }}
-              >
-                {printing ? (
-                  <><div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #64748B', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} /> Printing...</>
-                ) : printed ? (
-                  <><CheckCircle size={18} style={{ color: '#2E7D32' }} /> Printed</>
-                ) : (
-                  <><Printer size={18} /> Print Pass</>
-                )}
-              </button>
-
-              <button
-                className="kiosk-btn kiosk-btn-primary"
-                onClick={handleFinish}
-                disabled={resetCountdown !== null}
-                style={{
-                  flex: 1, minHeight: 60,
-                  background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                  color: '#fff',
-                }}
-              >
-                {resetCountdown !== null ? (
-                  <>Returning in {resetCountdown}s...</>
-                ) : (
-                  <><Home size={18} /> Finish</>
-                )}
-              </button>
-            </div>
-
-            {/* Countdown notice */}
-            {resetCountdown !== null && (
-              <div style={{
-                marginTop: 16, background: '#F0F9FF', border: '1px solid #BAE6FD',
-                borderRadius: 12, padding: '10px 20px', color: '#0369A1',
-                fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8,
-                animation: 'kioskFadeIn 0.3s ease',
-              }}>
-                <Zap size={15} />
-                Terminal will reset for the next visitor in <strong>{resetCountdown} seconds</strong>...
+            {/* Badge footer */}
+            <div style={{ background: '#0F172A', padding: '8px 18px', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                <ShieldCheck size={11} style={{ color: '#38BDF8' }} /> Authorized Enterprise Visitor Badge
               </div>
-            )}
-
-            {!resetCountdown && (
-              <p style={{ textAlign: 'center', fontSize: 13, color: '#94A3B8', marginTop: 12 }}>
-                Please collect your physical gate pass from the security desk and wear it visibly at all times.
-              </p>
-            )}
-
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <Zap size={10} style={{ color: '#38BDF8' }} /> Powered by <strong style={{ marginLeft: 3 }}>GTM Smart Gate</strong>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
 
-      <KioskFooter />
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+            <button className="kiosk-btn kiosk-btn-back" style={{ flex: 1, minHeight: 44, fontSize: 13 }} onClick={handlePrint} disabled={printing}>
+              {printing ? <><Loader2 size={15} style={{ animation: 'spin 0.8s linear infinite' }} /> Printing...</>
+                : printed ? <><CheckCircle2 size={15} style={{ color: '#2E7D32' }} /> Printed</>
+                : <><Printer size={15} /> Print Pass</>}
+            </button>
+            <button
+              className="kiosk-btn kiosk-btn-primary"
+              style={{ flex: 2, minHeight: 44, fontSize: 14, fontWeight: 800 }}
+              onClick={handleFinish}
+              disabled={resetCountdown !== null}
+            >
+              {resetCountdown !== null ? `Returning in ${resetCountdown}s...` : <><Home size={15} /> Finish</>}
+            </button>
+          </div>
+
+          {resetCountdown !== null && (
+            <div style={{ textAlign: 'center', fontSize: 12, color: '#94A3B8' }}>
+              Terminal resets for next visitor in <strong>{resetCountdown}s</strong>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

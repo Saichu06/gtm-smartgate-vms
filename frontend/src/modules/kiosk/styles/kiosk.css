@@ -690,4 +690,266 @@
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
   }
+
+  /* Compact panel on mobile */
+  .kiosk-panel { padding: 16px 14px !important; border-radius: 16px !important; }
+  .kiosk-camera-grid { flex-direction: column !important; }
+  .kiosk-camera-grid .kiosk-camera-section { width: 100% !important; }
 }
+
+/* =================================================================
+   COMPACT DESIGN SYSTEM — New 6-Step Kiosk Pages
+   Classes referenced by: IDCapturePage, LuggagePage, VehiclePage,
+   GatePassAssignmentPage, VisitorDetailsPage, PassGeneratedPage
+   ================================================================= */
+
+/* ─── kiosk-panel: Main content card ──────────────────────── */
+.kiosk-panel {
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  padding: 24px 28px;
+  max-width: 820px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: kioskFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Section title row ────────────────────────────────────── */
+.kiosk-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 4px;
+  margin-top: 16px;
+}
+
+.kiosk-section-sub {
+  font-size: 12px;
+  color: #64748B;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+/* ─── Form Stack ──────────────────────────────────────────── */
+.kiosk-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+/* ─── Compact Input Wrap ──────────────────────────────────── */
+.kiosk-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.kiosk-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 0 14px;
+  min-height: 46px;
+  transition: all 0.2s;
+}
+
+.kiosk-input-wrap:focus-within {
+  border-color: var(--kiosk-primary, #1565C0);
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.10);
+}
+
+.kiosk-input-wrap.error {
+  border-color: #D32F2F;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.08);
+}
+
+.kiosk-input-wrap.success {
+  border-color: #2E7D32;
+}
+
+.kiosk-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', -apple-system, sans-serif;
+  color: #0F172A;
+  min-height: 42px;
+}
+
+.kiosk-input::placeholder { color: #CBD5E1; font-weight: 400; }
+select.kiosk-input         { cursor: pointer; }
+
+/* ─── Field Error ─────────────────────────────────────────── */
+.kiosk-field-error {
+  font-size: 11px;
+  color: #D32F2F;
+  font-weight: 600;
+  margin-top: 3px;
+  display: block;
+}
+
+/* ─── Error Banner ────────────────────────────────────────── */
+.kiosk-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #D32F2F;
+  margin-top: 10px;
+}
+
+/* ─── Action Row (Back + Next buttons) ────────────────────── */
+.kiosk-action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.kiosk-btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  background: #F8FAFC;
+  color: #475569;
+  border: 1.5px solid #E2E8F0;
+  cursor: pointer;
+  transition: all 0.18s;
+  flex: 1;
+}
+.kiosk-btn-back:hover { background: #F1F5F9; border-color: #CBD5E1; }
+
+.kiosk-btn.kiosk-btn-primary {
+  flex: 2;
+  min-height: 44px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  background: var(--kiosk-primary, #1565C0);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(21,101,192,0.26);
+  transition: all 0.18s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.kiosk-btn.kiosk-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(21,101,192,0.36);
+}
+.kiosk-btn.kiosk-btn-primary.disabled,
+.kiosk-btn.kiosk-btn-primary:disabled {
+  opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none;
+}
+
+/* ─── Segment Buttons (YES / NO) ──────────────────────────── */
+.kiosk-segment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  border: 1.5px solid #E2E8F0;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.kiosk-segment-btn.active { box-shadow: 0 4px 12px rgba(21,101,192,0.22); }
+
+/* ─── Dual Camera Grid ────────────────────────────────────── */
+.kiosk-camera-grid {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.kiosk-camera-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kiosk-camera-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+/* ─── Dropdown (host search) ─────────────────────────────── */
+.kiosk-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.kiosk-dropdown-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #F1F5F9;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.kiosk-dropdown-item:last-child { border-bottom: none; }
+.kiosk-dropdown-item:hover { background: #F0F9FF; }
+
+/* ─── Pass Tile Buttons ───────────────────────────────────── */
+.kiosk-pass-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  border: 1.5px solid #E2E8F0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.kiosk-pass-tile:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+

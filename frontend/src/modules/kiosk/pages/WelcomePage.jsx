@@ -250,7 +250,7 @@ const WelcomePage = () => {
                   boxShadow: phone.length === 10 ? `0 8px 24px ${primary}40` : 'none',
                 }}
               >
-                Generate OTP <ArrowRight size={22} />
+                Send OTP <ArrowRight size={20} />
               </button>
             ) : (
               /* ON-PAGE OTP VERIFICATION SECTION */

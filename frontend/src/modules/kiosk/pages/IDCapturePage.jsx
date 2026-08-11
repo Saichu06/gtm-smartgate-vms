@@ -1,216 +1,161 @@
 /**
- * IdentityVerificationPage — Screen 3: Identity Verification (4-Screen Kiosk Flow)
- * Features:
- * - Single combined box with Visitor Photo (Left) and Identity Camera (Right)
- * - Verification category dropdown without emojis
- * - Small camera spaces
- * - After capture: Retake and Next options only
- * - Back button at bottom inside the box
+ * IDCapturePage (Identity Capture) — Step 3.
+ * Compact layout: Visitor Photo + ID Proof side-by-side.
+ * Laptop Question (YES/NO) included here.
+ * Camera is OFF by default — starts only on Capture click.
  */
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Shield, User, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Shield, Laptop, AlertCircle } from 'lucide-react';
 import KioskHeader from '../components/Common/KioskHeader';
-import KioskFooter from '../components/Common/KioskFooter';
 import CameraCapture from '../components/Camera/CameraCapture';
 import { useVisitor } from '../context/VisitorContext';
-import { ID_TYPES } from '../services/kioskApi';
 import '../styles/kiosk.css';
 
-const IdentityVerificationPage = () => {
+const ID_TYPES = [
+  { value: 'Aadhaar',          label: 'Aadhaar Card' },
+  { value: 'PAN',              label: 'PAN Card' },
+  { value: 'Driving License',  label: 'Driving License' },
+  { value: 'Passport',         label: 'Passport' },
+  { value: 'Other',            label: 'Other ID' },
+];
+
+const IdentityCapturePage = () => {
   const navigate = useNavigate();
   const { orgId } = useParams();
   const { org, visitor, updateVisitor } = useVisitor();
   const primary = org?.primaryColor || '#1565C0';
 
-  // Section A: Face Capture State
-  const [faceUrl, setFaceUrl] = useState(visitor.photoDataUrl || null);
+  const [photoUrl, setPhotoUrl]   = useState(visitor.photoDataUrl || null);
+  const [idUrl, setIdUrl]         = useState(visitor.idImageUrl || null);
+  const [idType, setIdType]       = useState(visitor.idType || 'Aadhaar');
+  const [laptop, setLaptop]       = useState(visitor.laptop || 'NO');
+  const [error, setError]         = useState('');
 
-  // Section B: ID Capture State
-  const [selectedIdType, setSelectedIdType] = useState(visitor.idType || 'aadhaar');
-  const [idUrl, setIdUrl] = useState(visitor.idImageUrl || null);
+  const canContinue = !!photoUrl && !!idUrl;
 
-  const [error, setError] = useState('');
+  const handleNext = () => {
+    if (!photoUrl) { setError('Please capture your photo.'); return; }
+    if (!idUrl)    { setError('Please capture your ID proof.'); return; }
 
-  const handleFaceCapture = (url) => {
-    setFaceUrl(url);
-    setError('');
-  };
-
-  const handleFaceRetake = () => {
-    setFaceUrl(null);
-    updateVisitor({ photoDataUrl: null });
-  };
-
-  const handleIdCapture = (url) => {
-    setIdUrl(url);
-    setError('');
-  };
-
-  const handleIdRetake = () => {
-    setIdUrl(null);
-    updateVisitor({ idImageUrl: null });
-  };
-
-  const handleContinue = () => {
-    if (!faceUrl || !idUrl) {
-      setError('Please capture both your Photo and ID Proof before continuing.');
-      return;
-    }
     updateVisitor({
-      photoDataUrl: faceUrl,
-      idType: selectedIdType,
+      photoDataUrl: photoUrl,
+      idType,
       idImageUrl: idUrl,
+      laptop,
     });
-    navigate(`/kiosk/${orgId}/gate-pass`);
+
+    if (laptop === 'YES') {
+      navigate(`/kiosk/${orgId}/luggage`);
+    } else {
+      navigate(`/kiosk/${orgId}/vehicle`);
+    }
   };
 
   return (
     <div className="kiosk-shell" style={{ '--kiosk-primary': primary }}>
-      <div className="kiosk-page" style={{ justifyContent: 'center', alignItems: 'center', padding: '16px 12px' }}>
-        <div className="kiosk-content" style={{ margin: '0 auto', maxWidth: 820, width: '100%', padding: 0 }}>
+      <div className="kiosk-page">
+        <div className="kiosk-panel">
+          <KioskHeader currentStep={3} />
 
-          {/* Single Container Box for Both Cameras */}
-          <div className="kiosk-section-card" style={{ padding: '24px', margin: 0, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
+          {/* Title */}
+          <div className="kiosk-section-title">
+            <Shield size={18} style={{ color: primary }} />
+            <span>Image &amp; Identity Capture</span>
+          </div>
+          <p className="kiosk-section-sub">Capture photo and scan ID document below. Camera activates only after clicking Capture.</p>
 
-            {/* In-Box Header (Dual Logos + Step 3/4 Counter) */}
-            <KioskHeader currentStep={3} />
-
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Shield size={22} style={{ color: primary }} />
-                Identity & Photo Verification
-              </div>
-              <p style={{ fontSize: 13, color: '#64748B', margin: '4px 0 0' }}>
-                Capture your photo and scan your ID document below.
-              </p>
-            </div>
-
-            {/* Verification Category Dropdown (No Emojis) */}
-            <div className="kiosk-field" style={{ maxWidth: 380, margin: '0 auto 20px' }}>
-              <label className="kiosk-input-label" style={{ fontSize: 11, fontWeight: 800, color: '#475569', textAlign: 'center', display: 'block' }}>
-                VERIFICATION CATEGORY / DOCUMENT TYPE *
-              </label>
-              <div className="kiosk-input-card" style={{ borderColor: '#E2E8F0', minHeight: 44, padding: '0 12px' }}>
-                <FileText size={18} style={{ color: primary, flexShrink: 0 }} />
-                <select
-                  value={selectedIdType}
-                  onChange={(e) => { setSelectedIdType(e.target.value); setError(''); }}
-                  style={{ fontSize: 14, fontWeight: 700, cursor: 'pointer', minHeight: 38 }}
-                >
-                  {ID_TYPES.map(id => (
-                    <option key={id.id} value={id.id}>
-                      {id.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Side by Side Dual Camera Box (Left: Visitor Face, Right: ID Camera) */}
-            <div className="kiosk-camera-dual-box" style={{
-              display: 'flex',
-              gap: 20,
-              justifyContent: 'center',
-              alignItems: 'stretch',
-              flexWrap: 'wrap',
-              marginBottom: 20
-            }}>
-
-              {/* LEFT: VISITOR PHOTO CAMERA */}
-              <div style={{
-                flex: 1,
-                minWidth: 260,
-                maxWidth: 360,
-                background: '#F8FAFC',
-                border: '1.5px solid #E2E8F0',
-                borderRadius: 16,
-                padding: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#0F172A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <User size={16} style={{ color: primary }} /> Visitor Photo
-                </div>
-                <CameraCapture
-                  mode="visitor"
-                  onCapture={handleFaceCapture}
-                  onRetake={handleFaceRetake}
-                  capturedUrl={faceUrl}
-                  label="Position face inside oval frame"
-                />
-              </div>
-
-              {/* RIGHT: IDENTITY DOCUMENT CAMERA */}
-              <div style={{
-                flex: 1,
-                minWidth: 260,
-                maxWidth: 360,
-                background: '#F8FAFC',
-                border: '1.5px solid #E2E8F0',
-                borderRadius: 16,
-                padding: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#0F172A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <FileText size={16} style={{ color: primary }} /> ID Document Scan
-                </div>
-                <CameraCapture
-                  mode="document"
-                  onCapture={handleIdCapture}
-                  onRetake={handleIdRetake}
-                  capturedUrl={idUrl}
-                  label={`Hold ${ID_TYPES.find(t => t.id === selectedIdType)?.label || 'ID'} flat inside frame`}
-                />
-              </div>
-
-            </div>
-
-            {error && (
-              <p style={{ color: '#D32F2F', fontSize: 12, fontWeight: 600, textAlign: 'center', marginBottom: 16 }}>{error}</p>
-            )}
-
-            {/* Bottom Action Bar inside Box */}
-            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-              <button
-                className="kiosk-btn kiosk-btn-ghost kiosk-btn-sm"
-                onClick={() => navigate(`/kiosk/${orgId}/details`)}
-                style={{ flex: 1, minHeight: 48 }}
+          {/* ID Type Selector */}
+          <div className="kiosk-field" style={{ marginBottom: 12 }}>
+            <label className="kiosk-label">ID Proof Type *</label>
+            <div className="kiosk-input-wrap">
+              <select
+                className="kiosk-input"
+                value={idType}
+                onChange={e => setIdType(e.target.value)}
+                style={{ cursor: 'pointer' }}
               >
-                <ArrowLeft size={18} /> Back
-              </button>
-
-              <button
-                className="kiosk-btn kiosk-btn-primary"
-                onClick={handleContinue}
-                disabled={!faceUrl || !idUrl}
-                style={{
-                  flex: 2,
-                  minHeight: 48,
-                  borderRadius: 14,
-                  fontSize: 16,
-                  fontWeight: 800,
-                  background: faceUrl && idUrl ? `linear-gradient(135deg, ${primary}, #0F172A)` : '#E2E8F0',
-                  color: faceUrl && idUrl ? '#FFFFFF' : '#94A3B8',
-                  boxShadow: faceUrl && idUrl ? `0 8px 24px ${primary}35` : 'none',
-                }}
-              >
-                Generate Visitor Pass <ArrowRight size={18} />
-              </button>
+                {ID_TYPES.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
             </div>
-
           </div>
 
+          {/* Dual Camera Layout */}
+          <div className="kiosk-camera-grid">
+            {/* LEFT: VISITOR PHOTO */}
+            <div className="kiosk-camera-section">
+              <div className="kiosk-camera-section-title">Visitor Photo</div>
+              <CameraCapture
+                mode="visitor"
+                onAccept={url => { setPhotoUrl(url); setError(''); }}
+                onCapture={url => { setPhotoUrl(url); setError(''); }}
+                capturedUrl={photoUrl}
+              />
+            </div>
+
+            {/* RIGHT: ID PROOF */}
+            <div className="kiosk-camera-section">
+              <div className="kiosk-camera-section-title">ID Proof — {idType}</div>
+              <CameraCapture
+                mode="document"
+                onAccept={url => { setIdUrl(url); setError(''); }}
+                onCapture={url => { setIdUrl(url); setError(''); }}
+                capturedUrl={idUrl}
+              />
+            </div>
+          </div>
+
+          {/* Laptop Question */}
+          <div style={{ marginTop: 16, marginBottom: 8 }}>
+            <label className="kiosk-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <Laptop size={15} style={{ color: primary }} /> Carrying a Laptop?
+            </label>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {['YES', 'NO'].map(val => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setLaptop(val)}
+                  className={`kiosk-segment-btn ${laptop === val ? 'active' : ''}`}
+                  style={{
+                    flex: 1,
+                    borderColor: laptop === val ? primary : '#E2E8F0',
+                    background: laptop === val ? primary : '#fff',
+                    color: laptop === val ? '#fff' : '#0F172A',
+                  }}
+                >
+                  {val}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="kiosk-error-banner">
+              <AlertCircle size={15} /> {error}
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="kiosk-action-row">
+            <button className="kiosk-btn kiosk-btn-back" onClick={() => navigate(`/kiosk/${orgId}/details`)}>
+              <ArrowLeft size={16} /> Back
+            </button>
+            <button
+              className={`kiosk-btn kiosk-btn-primary ${canContinue ? '' : 'disabled'}`}
+              onClick={handleNext}
+              disabled={!canContinue}
+            >
+              Next <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
-
-      <KioskFooter />
     </div>
   );
 };
 
-export default IdentityVerificationPage;
-
+export default IdentityCapturePage;

@@ -1,41 +1,25 @@
 /**
- * CameraCapture — Universal Multi-Mode Camera Component.
- * Supports modes:
- * - mode="visitor" : Oval face guide frame for visitor photo capture
- * - mode="document": Rectangular alignment frame for ID proof / document capture
- * - mode="badge"   : Square alignment frame for QR / barcode scanning
- *
- * Includes Future AI Hook placeholders:
- * - faceMatch()
- * - idOcr()
- * - livenessDetection()
- * - blacklistDetection()
- * - anpr()
+ * CameraCapture — Universal Multi-Mode Camera Component for Visitor Kiosk.
+ * 
+ * CAMERA LIFECYCLE REQUIREMENTS:
+ * - Camera MUST NOT start on page load (Initial state: 'idle').
+ * - Clicking 'Capture' initializes and opens camera ('requesting' -> 'streaming').
+ * - Taking snapshot stops active video tracks and shows preview ('preview').
+ * - 'Accept' finalizes capture and calls onAccept(dataUrl).
+ * - 'Retake' re-enables camera stream.
+ * - Leaving page / unmount stops ALL MediaStreamTracks (track.stop()).
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, RefreshCw, CheckCircle, VideoOff, Shield, Scan, Sparkles } from 'lucide-react';
+import { Camera, RefreshCw, Check, CheckCircle2, VideoOff, ScanLine, User, CreditCard } from 'lucide-react';
 import { useVisitor } from '../../context/VisitorContext';
 
-const FALLBACK_IMGS = {
-  visitor: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
-  document: 'https://picsum.photos/seed/idcard/600/380',
-  badge: 'https://picsum.photos/seed/badge/400/400',
-};
-
 const CameraCapture = ({
-  mode = 'visitor', // 'visitor', 'document', 'badge'
-  onCapture,
-  onRetake,
-  capturedUrl,
-  label,
-  // Future AI Hook Props (architecture placeholders)
-  aiHooks = {
-    faceMatch: false,
-    idOcr: false,
-    livenessDetection: false,
-    blacklistDetection: false,
-    anpr: false,
-  },
+  mode = 'visitor', // 'visitor' (photo) or 'document' (ID proof)
+  onCapture,        // Callback when photo/ID is accepted or captured
+  onAccept,         // Callback on explicit accept
+  onRetake,         // Callback on retake
+  capturedUrl = null,
+  label = '',
 }) => {
   const { org } = useVisitor();
   const primary = org?.primaryColor || '#1565C0';
@@ -44,31 +28,46 @@ const CameraCapture = ({
   const canvasRef = useRef(null);
 
   const [stream, setStream] = useState(null);
-  const [cameraState, setCameraState] = useState(capturedUrl ? 'captured' : 'initializing');
-  const [errorMessage, setErrorMessage] = useState('');
+  // States: 'idle' | 'requesting' | 'streaming' | 'preview' | 'accepted' | 'error'
+  const [cameraState, setCameraState] = useState(capturedUrl ? 'accepted' : 'idle');
   const [capturedImage, setCapturedImage] = useState(capturedUrl || null);
-  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Default labels based on mode
-  const defaultLabel = mode === 'document'
-    ? 'Place ID card flat inside the rectangular frame'
-    : mode === 'badge'
-      ? 'Align QR code inside the square scanner box'
-      : 'Position your face inside the oval frame and tap Capture';
+  // Stop all camera tracks
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      setStream(null);
+    }
+  };
 
-  const activeLabel = label || defaultLabel;
+  // Cleanup tracks on unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stream]);
 
-  // Request browser webcam stream
+  // Update captured image if prop changes externally
+  useEffect(() => {
+    if (capturedUrl) {
+      setCapturedImage(capturedUrl);
+      setCameraState('accepted');
+    }
+  }, [capturedUrl]);
+
+  // Request browser webcam stream ONLY when triggered by user action
   const startCamera = async () => {
-    setCameraState('initializing');
+    stopCamera();
+    setCameraState('requesting');
     setErrorMessage('');
-    setAiAnalysis(null);
 
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const facingMode = mode === 'document' ? 'environment' : 'user';
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: mode === 'document' ? 'environment' : 'user',
+            facingMode,
             width: { ideal: 1280 },
             height: { ideal: 720 },
           },
@@ -80,47 +79,18 @@ const CameraCapture = ({
         }
         setCameraState('streaming');
       } else {
-        throw new Error('Camera API not supported');
+        throw new Error('Camera API not supported in this browser environment');
       }
     } catch (err) {
-      console.warn('Camera stream error:', err);
-      setErrorMessage('Live camera feed unavailable or denied. Simulation active.');
+      console.warn('Camera access failed:', err);
+      setErrorMessage('Camera access denied or unavailable. Using sample capture simulation.');
       setCameraState('error');
     }
   };
 
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-      setStream(null);
-    }
-  };
-
-  useEffect(() => {
-    if (!capturedUrl && cameraState !== 'captured') {
-      startCamera();
-    }
-    return () => stopCamera();
-  }, [mode]);
-
-  // Future AI Hook Execution Simulation Placeholder
-  const runAiHooks = (dataUrl) => {
-    if (mode === 'visitor') {
-      setAiAnalysis({
-        liveness: '99.8% Passed',
-        faceMatch: 'Verified Unique Visitor',
-        blacklistCheck: 'Clear (0 Flags)',
-      });
-    } else if (mode === 'document') {
-      setAiAnalysis({
-        idOcr: 'Name & DOB Extracted',
-        tamperCheck: 'Authentic Document',
-      });
-    }
-  };
-
+  // Take snapshot from video element or fallback simulation
   const handleTakeSnapshot = () => {
-    let dataUrl = FALLBACK_IMGS[mode] || FALLBACK_IMGS.visitor;
+    let dataUrl = null;
 
     if (cameraState === 'streaming' && videoRef.current && canvasRef.current) {
       try {
@@ -136,153 +106,205 @@ const CameraCapture = ({
           dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         }
       } catch (err) {
-        console.error("Failed to capture snapshot from webcam canvas:", err);
+        console.error('Error drawing canvas snapshot:', err);
       }
     }
 
+    // Fallback placeholder if canvas fails or simulation active
+    if (!dataUrl) {
+      dataUrl = mode === 'document'
+        ? 'https://picsum.photos/seed/idproof/600/380'
+        : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80';
+    }
+
     setCapturedImage(dataUrl);
-    setCameraState('captured');
-    runAiHooks(dataUrl);
+    setCameraState('preview');
     stopCamera();
     if (onCapture) onCapture(dataUrl);
   };
 
+  const handleAccept = () => {
+    setCameraState('accepted');
+    stopCamera();
+    if (onAccept) onAccept(capturedImage);
+    else if (onCapture) onCapture(capturedImage);
+  };
+
   const handleRetake = () => {
     setCapturedImage(null);
-    setAiAnalysis(null);
+    setCameraState('idle');
     if (onRetake) onRetake();
     startCamera();
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-      {/* Main Camera Frame */}
-      <div className="kiosk-camera-wrap" style={{
-        borderColor: primary,
-        aspectRatio: mode === 'document' ? '16 / 10' : mode === 'badge' ? '1 / 1' : '4 / 3',
-        maxWidth: mode === 'badge' ? 240 : 300,
-        borderRadius: 14,
-      }}>
-
-        {cameraState === 'captured' ? (
-          <>
-            <img
-              className="kiosk-camera-captured-img"
-              src={capturedImage}
-              alt="Captured Frame"
-            />
-            <div className="kiosk-camera-success-badge" style={{ fontSize: 12, padding: '4px 12px' }}>
-              <CheckCircle size={14} /> {mode === 'document' ? 'ID Captured' : 'Photo Captured'}
+      {/* Camera / Image Container Card */}
+      <div
+        className="kiosk-camera-wrap"
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: mode === 'document' ? 340 : 280,
+          aspectRatio: mode === 'document' ? '16 / 10' : '4 / 3',
+          borderRadius: 14,
+          overflow: 'hidden',
+          background: '#0F172A',
+          border: `2px solid ${cameraState === 'accepted' ? '#2E7D32' : primary}`,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto',
+        }}
+      >
+        {/* IDLE STATE: CAMERA IS OFF — CLEAN LUCIDE PLACEHOLDER */}
+        {cameraState === 'idle' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: 16, textAlign: 'center', color: '#94A3B8' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#1E293B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primary }}>
+              {mode === 'document' ? <CreditCard size={28} /> : <User size={28} />}
             </div>
-          </>
-        ) : (
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#F8FAFC' }}>
+              {mode === 'document' ? 'ID Proof Document' : 'Visitor Photo'}
+            </div>
+            <div style={{ fontSize: 11, color: '#64748B' }}>
+              Tap Capture to start camera
+            </div>
+          </div>
+        )}
+
+        {/* REQUESTING / INITIALIZING STATE */}
+        {cameraState === 'requesting' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: '#F8FAFC' }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%',
+              border: `3px solid ${primary}40`, borderTopColor: primary,
+              animation: 'spin 0.8s linear infinite',
+            }} />
+            <span style={{ fontSize: 12, color: '#94A3B8' }}>Opening camera...</span>
+          </div>
+        )}
+
+        {/* LIVE STREAMING STATE */}
+        {cameraState === 'streaming' && (
           <>
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: cameraState === 'streaming' ? 'block' : 'none',
-              }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
+            <div className="kiosk-camera-overlay">
+              {mode === 'visitor' ? (
+                <div style={{ width: 130, height: 160, borderRadius: '50%', border: `2px dashed ${primary}`, boxShadow: '0 0 0 9999px rgba(15,23,42,0.4)' }} />
+              ) : (
+                <div style={{ width: '85%', height: '70%', borderRadius: 8, border: `2px dashed ${primary}`, boxShadow: '0 0 0 9999px rgba(15,23,42,0.4)' }} />
+              )}
+            </div>
+          </>
+        )}
 
-            {cameraState === 'initializing' && (
-              <div className="kiosk-camera-placeholder">
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  border: `3px solid ${primary}30`,
-                  borderTopColor: primary,
-                  animation: 'spin 0.8s linear infinite',
-                }} />
-                <p style={{ color: '#94A3B8', fontSize: 12, margin: 0 }}>
-                  Initializing camera feed...
-                </p>
-              </div>
-            )}
-
-            {cameraState === 'error' && (
-              <div className="kiosk-camera-placeholder" style={{ background: '#0F172A', padding: 12 }}>
-                <VideoOff size={32} style={{ color: '#EF4444' }} />
-                <p style={{ color: '#F8FAFC', fontSize: 13, fontWeight: 700, margin: '2px 0' }}>
-                  Camera Feed Unavailable
-                </p>
-                <p style={{ color: '#94A3B8', fontSize: 11, margin: 0 }}>
-                  {errorMessage}
-                </p>
-                <button
-                  className="kiosk-btn kiosk-btn-sm"
-                  onClick={handleTakeSnapshot}
-                  style={{
-                    marginTop: 8, background: primary, color: '#fff', fontSize: 12, minHeight: 34, padding: '0 14px', borderRadius: 8
-                  }}
-                >
-                  <Camera size={13} /> Sample Frame
-                </button>
-              </div>
-            )}
-
-            {/* Mode-Based Overlays */}
-            {cameraState === 'streaming' && (
-              <div className="kiosk-camera-overlay">
-                {mode === 'visitor' && (
-                  <div className="kiosk-face-guide" style={{ borderColor: primary, width: 140, height: 180, borderRadius: 90 }} />
-                )}
-                {mode === 'document' && (
-                  <div style={{
-                    width: '85%', height: '70%',
-                    border: `2px dashed ${primary}`,
-                    borderRadius: 10,
-                    boxShadow: '0 0 0 9999px rgba(15,23,42,0.5)',
-                  }} />
-                )}
-                {mode === 'badge' && (
-                  <div style={{
-                    width: '65%', height: '65%',
-                    border: `2px solid ${primary}`,
-                    borderRadius: 12,
-                    boxShadow: '0 0 0 9999px rgba(15,23,42,0.6)',
-                  }} />
-                )}
+        {/* PREVIEW & ACCEPTED STATES */}
+        {(cameraState === 'preview' || cameraState === 'accepted') && capturedImage && (
+          <>
+            <img
+              src={capturedImage}
+              alt="Captured"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            {cameraState === 'accepted' && (
+              <div style={{
+                position: 'absolute', bottom: 8, right: 8,
+                background: '#2E7D32', color: '#fff',
+                borderRadius: 20, padding: '4px 10px',
+                fontSize: 11, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 4,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              }}>
+                <CheckCircle2 size={13} /> {mode === 'document' ? 'ID Accepted' : 'Photo Accepted'}
               </div>
             )}
           </>
         )}
+
+        {/* ERROR STATE */}
+        {cameraState === 'error' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: 12, textAlign: 'center' }}>
+            <VideoOff size={28} style={{ color: '#EF4444' }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#F8FAFC' }}>Camera Feed Unavailable</span>
+            <span style={{ fontSize: 10, color: '#94A3B8' }}>{errorMessage}</span>
+            <button
+              type="button"
+              className="kiosk-btn kiosk-btn-sm"
+              onClick={handleTakeSnapshot}
+              style={{ marginTop: 4, minHeight: 32, padding: '0 12px', fontSize: 11, background: primary, color: '#fff' }}
+            >
+              Use Sample Capture
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Helper Text */}
-      {cameraState === 'streaming' && (
-        <p style={{ fontSize: 12, color: '#64748B', textAlign: 'center', margin: 0, fontWeight: 500 }}>
-          {activeLabel}
-        </p>
-      )}
-
-      {/* Buttons — Only Retake (when captured) or Capture (when streaming) */}
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-        {cameraState === 'captured' ? (
-          <button className="kiosk-btn kiosk-btn-secondary kiosk-btn-sm" onClick={handleRetake} style={{ minHeight: 38, fontSize: 13, padding: '0 16px' }}>
-            <RefreshCw size={15} /> Retake
-          </button>
-        ) : (
+      {/* CONTROL BUTTONS BASED ON STATE */}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+        {/* IDLE / START CAMERA BUTTON */}
+        {cameraState === 'idle' && (
           <button
+            type="button"
+            className="kiosk-btn kiosk-btn-primary kiosk-btn-sm"
+            onClick={startCamera}
+            style={{ minHeight: 40, padding: '0 20px', fontSize: 13 }}
+          >
+            <Camera size={16} /> {mode === 'document' ? 'Capture ID' : 'Capture Photo'}
+          </button>
+        )}
+
+        {/* STREAMING: TAKE SNAPSHOT BUTTON */}
+        {cameraState === 'streaming' && (
+          <button
+            type="button"
             className="kiosk-btn kiosk-btn-primary kiosk-btn-sm"
             onClick={handleTakeSnapshot}
-            disabled={cameraState === 'initializing'}
-            style={{
-              background: `linear-gradient(135deg, ${primary}, #0F172A)`,
-              color: '#FFFFFF',
-              boxShadow: `0 6px 18px ${primary}35`,
-              minWidth: 160,
-              minHeight: 40,
-              fontSize: 14
-            }}
+            style={{ minHeight: 40, padding: '0 20px', fontSize: 13, background: `linear-gradient(135deg, ${primary}, #0F172A)` }}
           >
-            <Camera size={16} /> Capture
+            <Camera size={16} /> Take Snapshot
+          </button>
+        )}
+
+        {/* PREVIEW: RETAKE & ACCEPT BUTTONS */}
+        {cameraState === 'preview' && (
+          <>
+            <button
+              type="button"
+              className="kiosk-btn kiosk-btn-secondary kiosk-btn-sm"
+              onClick={handleRetake}
+              style={{ minHeight: 38, padding: '0 14px', fontSize: 12 }}
+            >
+              <RefreshCw size={14} /> Retake
+            </button>
+            <button
+              type="button"
+              className="kiosk-btn kiosk-btn-primary kiosk-btn-sm"
+              onClick={handleAccept}
+              style={{ minHeight: 38, padding: '0 18px', fontSize: 12, background: '#2E7D32' }}
+            >
+              <Check size={14} /> Accept
+            </button>
+          </>
+        )}
+
+        {/* ACCEPTED: OPTION TO RETAKE IF NEEDED */}
+        {cameraState === 'accepted' && (
+          <button
+            type="button"
+            className="kiosk-btn kiosk-btn-secondary kiosk-btn-sm"
+            onClick={handleRetake}
+            style={{ minHeight: 32, padding: '0 12px', fontSize: 11, height: 32 }}
+          >
+            <RefreshCw size={13} /> Change
           </button>
         )}
       </div>
