@@ -75,7 +75,7 @@ const PassGeneratedPage = () => {
       window.print();
       setPrinting(false);
       setPrinted(true);
-    }, 400);
+    }, 300);
   };
 
   const handleFinish = () => {
