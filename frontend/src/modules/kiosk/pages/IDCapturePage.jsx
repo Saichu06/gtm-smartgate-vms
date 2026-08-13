@@ -80,40 +80,47 @@ const IdentityCapturePage = () => {
             </div>
           </div>
 
-          {/* Laptop Checkbox */}
+          {/* Laptop Checkboxes (YES / NO) */}
           <div style={{ marginTop: 16, marginBottom: 12 }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                cursor: 'pointer',
-                background: laptop === 'YES' ? `${primary}0D` : '#F8FAFC',
-                border: `1.5px solid ${laptop === 'YES' ? primary : '#CBD5E1'}`,
-                padding: '12px 16px',
-                borderRadius: 12,
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={laptop === 'YES'}
-                onChange={(e) => setLaptop(e.target.checked ? 'YES' : 'NO')}
-                style={{
-                  width: 20,
-                  height: 20,
-                  accentColor: primary,
-                  cursor: 'pointer',
-                  borderRadius: 4,
-                }}
-              />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                <Laptop size={18} style={{ color: primary }} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
-                  Carrying a Laptop
-                </span>
-              </div>
+            <label className="kiosk-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <Laptop size={15} style={{ color: primary }} /> Carrying a Laptop?
             </label>
+            <div style={{ display: 'flex', gap: 12 }}>
+              {['YES', 'NO'].map(val => (
+                <label
+                  key={val}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justify: 'center',
+                    gap: 10,
+                    padding: '12px 16px',
+                    borderRadius: 12,
+                    cursor: 'pointer',
+                    background: laptop === val ? `${primary}0D` : '#F8FAFC',
+                    border: `1.5px solid ${laptop === val ? primary : '#CBD5E1'}`,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    color: laptop === val ? primary : '#0F172A',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={laptop === val}
+                    onChange={() => setLaptop(val)}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      accentColor: primary,
+                      cursor: 'pointer',
+                    }}
+                  />
+                  <span>{val}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Error */}
