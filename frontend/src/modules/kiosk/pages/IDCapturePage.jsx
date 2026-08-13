@@ -81,29 +81,27 @@ const IdentityCapturePage = () => {
           </div>
 
           {/* Laptop Checkboxes (YES / NO) */}
-          <div style={{ marginTop: 16, marginBottom: 12 }}>
-            <label className="kiosk-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <Laptop size={15} style={{ color: primary }} /> Carrying a Laptop?
+          <div style={{ marginTop: 14, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', padding: '10px 14px', borderRadius: 12, border: '1px solid #E2E8F0' }}>
+            <label className="kiosk-label" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: 0, fontSize: 13 }}>
+              <Laptop size={16} style={{ color: primary }} /> Carrying a Laptop?
             </label>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               {['YES', 'NO'].map(val => (
                 <label
                   key={val}
                   style={{
-                    flex: 1,
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    justify: 'center',
-                    gap: 10,
-                    padding: '12px 16px',
-                    borderRadius: 12,
+                    gap: 6,
+                    padding: '4px 10px',
+                    borderRadius: 8,
                     cursor: 'pointer',
-                    background: laptop === val ? `${primary}0D` : '#F8FAFC',
-                    border: `1.5px solid ${laptop === val ? primary : '#CBD5E1'}`,
+                    background: laptop === val ? `${primary}12` : 'transparent',
+                    border: `1px solid ${laptop === val ? primary : '#CBD5E1'}`,
                     fontWeight: 700,
-                    fontSize: 14,
-                    color: laptop === val ? primary : '#0F172A',
-                    transition: 'all 0.2s ease',
+                    fontSize: 13,
+                    color: laptop === val ? primary : '#334155',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <input
@@ -111,8 +109,8 @@ const IdentityCapturePage = () => {
                     checked={laptop === val}
                     onChange={() => setLaptop(val)}
                     style={{
-                      width: 18,
-                      height: 18,
+                      width: 15,
+                      height: 15,
                       accentColor: primary,
                       cursor: 'pointer',
                     }}
