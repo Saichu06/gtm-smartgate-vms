@@ -80,29 +80,40 @@ const IdentityCapturePage = () => {
             </div>
           </div>
 
-          {/* Laptop Question */}
-          <div style={{ marginTop: 16, marginBottom: 8 }}>
-            <label className="kiosk-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <Laptop size={15} style={{ color: primary }} /> Carrying a Laptop?
+          {/* Laptop Checkbox */}
+          <div style={{ marginTop: 16, marginBottom: 12 }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                cursor: 'pointer',
+                background: laptop === 'YES' ? `${primary}0D` : '#F8FAFC',
+                border: `1.5px solid ${laptop === 'YES' ? primary : '#CBD5E1'}`,
+                padding: '12px 16px',
+                borderRadius: 12,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={laptop === 'YES'}
+                onChange={(e) => setLaptop(e.target.checked ? 'YES' : 'NO')}
+                style={{
+                  width: 20,
+                  height: 20,
+                  accentColor: primary,
+                  cursor: 'pointer',
+                  borderRadius: 4,
+                }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+                <Laptop size={18} style={{ color: primary }} />
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
+                  Carrying a Laptop
+                </span>
+              </div>
             </label>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {['YES', 'NO'].map(val => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => setLaptop(val)}
-                  className={`kiosk-segment-btn ${laptop === val ? 'active' : ''}`}
-                  style={{
-                    flex: 1,
-                    borderColor: laptop === val ? primary : '#E2E8F0',
-                    background: laptop === val ? primary : '#fff',
-                    color: laptop === val ? '#fff' : '#0F172A',
-                  }}
-                >
-                  {val}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Error */}
