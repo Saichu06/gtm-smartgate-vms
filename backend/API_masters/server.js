@@ -11,18 +11,18 @@ app.use(bodyparser.urlencoded({ limit: "50mb", extended: true }));
 
 // PostgreSQL connection pool
 const pool = new Pool({
-    user: 'postgres',        // your postgres username
-    host: 'localhost',             // server name or IP (use 'localhost' if running locally)
-    database: 'demoapp',     // database name
-    password: 'admin@123',// postgres password
-    port: 5432,              // default PostgreSQL port
-    options: '-c search_path=smartgate'  // 👈 sets default schema
+  user: 'postgres',        // your postgres username
+  host: 'localhost',             // server name or IP (use 'localhost' if running locally)
+  database: 'gtm_smartgate_demo',     // database name
+  password: 'admin',// postgres password
+  port: 5432,              // default PostgreSQL port
+  options: '-c search_path=smartgate'  // 👈 sets default schema
 });
 
 // Middleware to attach pool to requests
 app.use((req, res, next) => {
-    req.db = pool;
-    next();
+  req.db = pool;
+  next();
 });
 
 app.use(async (req, res, next) => {
@@ -38,13 +38,13 @@ app.use(async (req, res, next) => {
 
 // Example route to test connection
 app.get('/test', async (req, res) => {
-    try {
-        const result = await req.db.query('SELECT NOW()');
-        res.json({ message: 'Postgres connected!', time: result.rows[0].now });
-    } catch (err) {
-        console.error('Database error:', err);
-        res.status(500).json({ error: 'Database connection failed' });
-    }
+  try {
+    const result = await req.db.query('SELECT NOW()');
+    res.json({ message: 'Postgres connected!', time: result.rows[0].now });
+  } catch (err) {
+    console.error('Database error:', err);
+    res.status(500).json({ error: 'Database connection failed' });
+  }
 });
 
 // Import your routes
@@ -56,5 +56,5 @@ app.use('/master', MasterRoutes);
 
 // Start server
 app.listen(4000, () => {
-    console.log('Express server running with PostgreSQL at port 4000');
+  console.log('Express server running with PostgreSQL at port 4000');
 });
