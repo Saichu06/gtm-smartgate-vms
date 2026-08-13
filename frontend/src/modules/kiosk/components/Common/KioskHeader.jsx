@@ -61,31 +61,23 @@ const KioskHeader = ({ currentStep = 1 }) => {
   return (
     <div className="kiosk-inbox-header" style={{ marginBottom: 14 }}>
 
-      {/* ── DUAL LOGOS & CLOCK TOP BAR ─────────────────────────── */}
+      {/* ── DUAL LOGOS TOP BAR ─────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'nowrap', gap: 12 }}>
         
-        {/* LEFT: ORG LOGO + ORG NAME */}
+        {/* LEFT: ORG LOGO ONLY */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           {orgLogo ? (
             <img
               src={orgLogo}
               alt={orgName}
-              style={{ height: 28, maxHeight: 28, maxWidth: 110, objectFit: 'contain' }}
+              style={{ height: 32, maxHeight: 32, maxWidth: 140, objectFit: 'contain' }}
               onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
             />
           ) : (
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: primary, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Building2 size={16} />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: primary, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Building2 size={18} />
             </div>
           )}
-          <div style={{ lineHeight: 1.1 }}>
-            <div style={{ fontWeight: 800, fontSize: 14, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 }}>
-              {orgName}
-            </div>
-            <div style={{ fontSize: 9, color: '#64748B', fontWeight: 600 }}>
-              Terminal Gate Access
-            </div>
-          </div>
         </div>
 
         {/* CENTER: STEP BADGE FOR MOBILE/SMALL SCREEN */}
@@ -93,21 +85,12 @@ const KioskHeader = ({ currentStep = 1 }) => {
           Step {activeStep} of {totalSteps}
         </div>
 
-        {/* RIGHT: TIME/DATE + GTM SMART GATE LOGO */}
+        {/* RIGHT: GTM SMART GATE LOGO */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.1 }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Clock size={11} style={{ color: primary }} /> {timeStr}
-            </div>
-            <div style={{ fontSize: 9, color: '#64748B', fontWeight: 500 }}>
-              {dateStr}
-            </div>
-          </div>
-
           <img
             src={gtmLogo}
             alt="GTM Smart Gate"
-            style={{ height: 24, maxHeight: 24, maxWidth: 90, objectFit: 'contain' }}
+            style={{ height: 26, maxHeight: 26, maxWidth: 100, objectFit: 'contain' }}
           />
         </div>
       </div>

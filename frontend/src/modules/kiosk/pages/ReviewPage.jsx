@@ -9,7 +9,7 @@ import KioskFooter from '../components/Common/KioskFooter';
 import ProgressStepper from '../components/Common/ProgressStepper';
 import { useVisitor } from '../context/VisitorContext';
 import '../styles/kiosk.css';
-import { ID_TYPES, submitRegistration } from '../services/kioskApi';
+import { submitRegistration } from '../services/kioskApi';
 
 const ReviewRow = ({ label, value, icon: Icon }) => {
   if (!value) return null;
@@ -30,8 +30,6 @@ const ReviewPage = () => {
   const { org, visitor, updateVisitor } = useVisitor();
   const primary = org?.primaryColor || '#1565C0';
   const [submitting, setSubmitting] = useState(false);
-  const idLabel = ID_TYPES.find(t => t.id === visitor.idType)?.label;
-
   const handleSubmit = async () => {
     if (submitting || visitor.submitted) return;
     setSubmitting(true);
@@ -108,7 +106,6 @@ const ReviewPage = () => {
                 <ReviewRow label="Purpose"  value={visitor.purpose}          icon={Tag}    />
                 <ReviewRow label="Duration" value={visitor.expectedDuration} icon={Clock}  />
                 <ReviewRow label="Vehicle"  value={visitor.vehicleNumber}    icon={Car}    />
-                <ReviewRow label="ID Type"  value={idLabel}                  icon={Shield} />
               </div>
             </div>
           </div>
@@ -141,7 +138,7 @@ const ReviewPage = () => {
           {visitor.idImageUrl && (
             <div className="kiosk-section-card" style={{ marginBottom: 16 }}>
               <div className="kiosk-section-card-header" style={{ padding: '12px 20px' }}>
-                <span style={{ fontWeight: 700, fontSize: 14 }}>ID Proof — {idLabel}</span>
+                <span style={{ fontWeight: 700, fontSize: 14 }}>ID Proof</span>
               </div>
               <div className="kiosk-section-card-body" style={{ textAlign: 'center', padding: '14px' }}>
                 <img src={visitor.idImageUrl} alt="ID" style={{ maxWidth: '100%', height: 130, objectFit: 'cover', borderRadius: 10, border: '1.5px solid #E5E7EB' }} />

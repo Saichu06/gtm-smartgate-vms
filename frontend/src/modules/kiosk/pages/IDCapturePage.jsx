@@ -12,14 +12,6 @@ import CameraCapture from '../components/Camera/CameraCapture';
 import { useVisitor } from '../context/VisitorContext';
 import '../styles/kiosk.css';
 
-const ID_TYPES = [
-  { value: 'Aadhaar',          label: 'Aadhaar Card' },
-  { value: 'PAN',              label: 'PAN Card' },
-  { value: 'Driving License',  label: 'Driving License' },
-  { value: 'Passport',         label: 'Passport' },
-  { value: 'Other',            label: 'Other ID' },
-];
-
 const IdentityCapturePage = () => {
   const navigate = useNavigate();
   const { orgId } = useParams();
@@ -28,7 +20,6 @@ const IdentityCapturePage = () => {
 
   const [photoUrl, setPhotoUrl]   = useState(visitor.photoDataUrl || null);
   const [idUrl, setIdUrl]         = useState(visitor.idImageUrl || null);
-  const [idType, setIdType]       = useState(visitor.idType || 'Aadhaar');
   const [laptop, setLaptop]       = useState(visitor.laptop || 'NO');
   const [error, setError]         = useState('');
 
@@ -40,7 +31,6 @@ const IdentityCapturePage = () => {
 
     updateVisitor({
       photoDataUrl: photoUrl,
-      idType,
       idImageUrl: idUrl,
       laptop,
     });
@@ -65,23 +55,6 @@ const IdentityCapturePage = () => {
           </div>
           <p className="kiosk-section-sub">Capture photo and scan ID document below. Camera activates only after clicking Capture.</p>
 
-          {/* ID Type Selector */}
-          <div className="kiosk-field" style={{ marginBottom: 12 }}>
-            <label className="kiosk-label">ID Proof Type *</label>
-            <div className="kiosk-input-wrap">
-              <select
-                className="kiosk-input"
-                value={idType}
-                onChange={e => setIdType(e.target.value)}
-                style={{ cursor: 'pointer' }}
-              >
-                {ID_TYPES.map(t => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           {/* Dual Camera Layout */}
           <div className="kiosk-camera-grid">
             {/* LEFT: VISITOR PHOTO */}
@@ -97,7 +70,7 @@ const IdentityCapturePage = () => {
 
             {/* RIGHT: ID PROOF */}
             <div className="kiosk-camera-section">
-              <div className="kiosk-camera-section-title">ID Proof — {idType}</div>
+              <div className="kiosk-camera-section-title">ID Proof</div>
               <CameraCapture
                 mode="document"
                 onAccept={url => { setIdUrl(url); setError(''); }}
