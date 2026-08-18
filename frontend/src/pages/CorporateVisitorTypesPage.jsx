@@ -13,18 +13,18 @@ import Drawer from '@components/navigation/Drawer';
 import Input from '@components/forms/Input';
 import Select from '@components/forms/Select';
 import Toast from '@components/feedback/Toast';
+import LoadingSkeleton from '@components/feedback/LoadingSkeleton';
 import { useOrganizations } from '@contexts/OrganizationContext';
-import {
-  getVisitorTypes, saveVisitorTypes, countActiveVisitorsByType,
-} from '@utils/orgStorage';
+import masterApiService from '@services/masterApi.service';
 
 const CorporateVisitorTypesPage = () => {
   const { activeOrg } = useOrganizations();
   const { orgId } = useParams();
   const currentOrgId = orgId || activeOrg?.id || 1;
 
-  const [types, setTypes] = useState(() => getVisitorTypes(currentOrgId));
-  const [activeCounts, setActiveCounts] = useState({});
+  const [types, setTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
   const [editType, setEditType] = useState(null);
   const [toast, setToast] = useState(null);
@@ -34,10 +34,44 @@ const CorporateVisitorTypesPage = () => {
   });
 
   useEffect(() => {
-    setTypes(getVisitorTypes(currentOrgId));
-    setActiveCounts(countActiveVisitorsByType(currentOrgId));
-    const interval = setInterval(() => setActiveCounts(countActiveVisitorsByType(currentOrgId)), 3000);
-    return () => clearInterval(interval);
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
+
+    masterApiService
+      .getPassCategory()
+      .then((res) => {
+        if (!isMounted) return;
+        const rawData = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(rawData)) {
+          const mapped = rawData.map((cat, idx) => ({
+            id: cat.id || `CAT-${idx + 1}`,
+            name: cat.pass_category || cat.category_name || cat.name || `Category ${idx + 1}`,
+            code: cat.category_code || cat.code || `VT-00${idx + 1}`,
+            color: '#1565C0',
+            maxHours: 8,
+            requiresApproval: true,
+            requiresID: true,
+            zones: ['General Areas'],
+          }));
+          setTypes(mapped);
+        } else {
+          setTypes([]);
+        }
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        console.error('[CorporateVisitorTypesPage] Failed to fetch pass categories:', err);
+        setError('Unable to load visitor categories.');
+        setTypes([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [currentOrgId]);
 
   const showToast = (msg, type = 'success') => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); };

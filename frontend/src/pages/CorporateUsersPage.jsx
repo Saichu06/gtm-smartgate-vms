@@ -14,29 +14,19 @@ import Button from '@components/ui/Button';
 import Avatar from '@components/ui/Avatar';
 import Badge from '@components/ui/Badge';
 import Toast from '@components/feedback/Toast';
-import initialUsers from '@mock/corporate_users.json';
+import LoadingSkeleton from '@components/feedback/LoadingSkeleton';
+import masterApiService from '@services/masterApi.service';
 
 const PAGE_SIZE = 6;
-
-const SEED_USERS = [
-  { id: 'USR-001', name: 'Rajesh Kumar', email: 'rajesh.kumar@apollotyres.com', role: 'Corporate Admin', site: 'HQ Main Gate', status: 'Active', employeeId: 'EMP-1001', lastLogin: '10 mins ago', phone: '+91 98400 10023' },
-  { id: 'USR-002', name: 'Gate Officer Vikram', email: 'vikram.security@apollotyres.com', role: 'Gate Security Lead', site: 'Gate A — Main Entrance', status: 'Active', employeeId: 'EMP-2004', lastLogin: '1 hour ago', phone: '+91 98400 20044' },
-];
 
 const CorporateUsersPage = () => {
   const navigate = useNavigate();
   const { orgId } = useParams();
   const id = orgId || 1;
 
-  const [users, setUsers] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(`gtm_corp_users_${id}`) || '[]');
-      return saved.length > 0 ? saved : SEED_USERS;
-    } catch {
-      return SEED_USERS;
-    }
-  });
-
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [siteFilter, setSiteFilter] = useState('');
@@ -46,10 +36,46 @@ const CorporateUsersPage = () => {
   const [toast, setToast] = useState(null);
 
   React.useEffect(() => {
-    try {
-      localStorage.setItem(`gtm_corp_users_${id}`, JSON.stringify(users));
-    } catch (e) {}
-  }, [users, id]);
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
+
+    masterApiService
+      .getUserReport()
+      .then((res) => {
+        if (!isMounted) return;
+        const rawData = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(rawData)) {
+          const mappedUsers = rawData.map((u, idx) => ({
+            id: u.id || `USR-${idx + 1}`,
+            name: u.user_name || u.name || 'Portal User',
+            email: u.email || `${u.user_code || 'user'}@smartgate.com`,
+            role: u.rolename || u.role || 'Portal User',
+            site: u.site_name || 'Main Gate',
+            status: u.active !== false ? 'Active' : 'Inactive',
+            employeeId: u.user_code || `EMP-${u.id}`,
+            lastLogin: 'Active',
+            phone: u.mobile_no || '+91 9999999999',
+          }));
+          setUsers(mappedUsers);
+        } else {
+          setUsers([]);
+        }
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        console.error('[CorporateUsersPage] Master User Report error:', err);
+        setError('Unable to load portal users.');
+        setUsers([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   const showToast = (msg, type = 'success') => {
     setToast({ message: msg, type });

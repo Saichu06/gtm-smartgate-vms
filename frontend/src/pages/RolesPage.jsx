@@ -2,15 +2,51 @@
  * Roles Page Component
  * Role selection sidebar and granular module permission matrix table.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppLayout from '@layouts/AppLayout';
 import Card from '@components/data-display/Card';
 import Button from '@components/ui/Button';
 
-import rolesData from '@mock/roles.json';
+import initialRolesData from '@mock/roles.json';
+import masterApiService from '@services/masterApi.service';
 
 const RolesPage = () => {
+  const [roles, setRoles] = useState(initialRolesData);
   const [selectedRoleId, setSelectedRoleId] = useState(1);
+
+  const [gatePrivileges, setGatePrivileges] = useState([]);
+
+  useEffect(() => {
+    masterApiService
+      .getRoleList()
+      .then((res) => {
+        const rawData = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(rawData) && rawData.length > 0) {
+          const mappedRoles = rawData.map((item, idx) => ({
+            id: item.id || idx + 1,
+            name: item.name || item.role_name || `Role ${item.id}`,
+            description: item.description || item.code || 'System Role',
+          }));
+          setRoles(mappedRoles);
+          setSelectedRoleId(mappedRoles[0].id);
+        }
+      })
+      .catch((err) => {
+        console.warn('[RolesPage] Master Role List fallback:', err.message || err);
+      });
+
+    masterApiService
+      .getGatePrivileges()
+      .then((res) => {
+        const rawData = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(rawData)) {
+          setGatePrivileges(rawData);
+        }
+      })
+      .catch((err) => {
+        console.warn('[RolesPage] Master Gate Privileges GET error:', err.message || err);
+      });
+  }, []);
 
   return (
     <AppLayout
@@ -19,7 +55,7 @@ const RolesPage = () => {
     >
       <div className="grid-cols-1-2">
         <Card title="Defined Roles">
-          {rolesData.map((r) => (
+          {roles.map((r) => (
             <div
               key={r.id}
               className={`nav-item ${selectedRoleId === r.id ? 'active' : ''}`}

@@ -18,6 +18,7 @@ import Toast from '@components/feedback/Toast';
 import { useOrganizations } from '@contexts/OrganizationContext';
 
 import { getEmployeeSeeds, storageKeys } from '@utils/orgStorage';
+import masterApiService from '@services/masterApi.service';
 
 const CorporateEmployeesPage = () => {
   const { activeOrg } = useOrganizations();
@@ -42,11 +43,34 @@ const CorporateEmployeesPage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', dept: 'Technology', designation: '', site: 'Main Gate' });
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKeys.employees(currentOrgId)) || '[]');
-      if (saved.length > 0) setEmployees(saved);
-      else setEmployees(getEmployeeSeeds(currentOrgId));
-    } catch (e) {}
+    // Attempt real PostgreSQL DB query via Master API
+    masterApiService
+      .getEmployeeReport({ comp_id: currentOrgId, site_id: 1 })
+      .then((res) => {
+        const rawData = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(rawData) && rawData.length > 0) {
+          const mappedEmps = rawData.map((emp, i) => ({
+            id: emp.id || `EMP-${i + 1}`,
+            name: emp.emp_name || emp.name || 'Employee',
+            email: emp.email || emp.emp_email || 'emp@gtm.com',
+            phone: emp.phone || emp.mobile_no || '+91 9876543210',
+            dept: emp.department || emp.dept || 'General',
+            designation: emp.designation || 'Staff',
+            site: emp.site_name || 'Main Gate',
+            status: emp.active !== false ? 'Active' : 'Inactive',
+          }));
+          setEmployees(mappedEmps);
+        } else {
+          const saved = JSON.parse(localStorage.getItem(storageKeys.employees(currentOrgId)) || '[]');
+          if (saved.length > 0) setEmployees(saved);
+        }
+      })
+      .catch(() => {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKeys.employees(currentOrgId)) || '[]');
+          if (saved.length > 0) setEmployees(saved);
+        } catch (e) {}
+      });
   }, [currentOrgId]);
 
   const saveEmployees = (updated) => {

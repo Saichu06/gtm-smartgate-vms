@@ -34,6 +34,10 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
+      '/master': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
     },
   },
 });

@@ -229,6 +229,33 @@ router.get('/getCompanyReport', async (req, res) => {
 });
 
 
+
+router.get('/getEmployeeDetails', async (req, res) => {
+
+    try {
+
+        const query = `
+            SELECT *
+            FROM employee_details
+        `;
+
+        const result = await req.db.query(query);
+
+        return res.json(result.rows);
+
+    } catch (err) {
+
+        console.error('Error fetching company report:', err);
+
+        return res.status(500).json({
+            result: 'Error',
+            message: 'Database error'
+        });
+    }
+});
+
+
+
 // ==========================================
 // EDIT COMPANY
 // ==========================================
@@ -466,6 +493,8 @@ router.get('/getCompanyCode', async (req, res) => {
         `;
 
         const result = await req.db.query(query);
+
+        res.send(result.rows.length);
 
         return res.json(result.rows);
 
@@ -793,7 +822,7 @@ router.post('/setStoreDetails', async (req, res) => {
 
         const active =
             siteDetails.includestore === true ||
-            siteDetails.includestore === 'true'
+                siteDetails.includestore === 'true'
                 ? 1
                 : 0;
 
@@ -1006,7 +1035,7 @@ router.post('/updateStoreDetails', async (req, res) => {
 
         const active =
             sitedetails.includestore === true ||
-            sitedetails.includestore === 'true'
+                sitedetails.includestore === 'true'
                 ? 1
                 : 0;
 
@@ -1091,7 +1120,7 @@ router.post('/superadminupdateStoreDetails', async (req, res) => {
 
         const active =
             sitedetails.includestore === true ||
-            sitedetails.includestore === 'true'
+                sitedetails.includestore === 'true'
                 ? 1
                 : 0;
 
@@ -1399,15 +1428,15 @@ router.post('/setUserDetails', async (req, res) => {
 
         const useractive =
             userdetails.active === true ||
-            userdetails.active === 'true'
+                userdetails.active === 'true'
                 ? 1
                 : 0;
 
 
         const siteid =
             userdetails.site_code === null ||
-            userdetails.site_code === undefined ||
-            userdetails.site_code === ''
+                userdetails.site_code === undefined ||
+                userdetails.site_code === ''
                 ? null
                 : userdetails.site_code;
 
@@ -1529,7 +1558,7 @@ router.post('/updateUserDetails', async (req, res) => {
 
         const useractive =
             userdetails.active === true ||
-            userdetails.active === 'true'
+                userdetails.active === 'true'
                 ? 1
                 : 0;
 
@@ -1678,14 +1707,14 @@ router.post('/setRegionalUserDetails', async (req, res) => {
 
         const useractive =
             userdetails.active === true ||
-            userdetails.active === 'true'
+                userdetails.active === 'true'
                 ? 1
                 : 0;
 
         const siteid =
             userdetails.site_code === null ||
-            userdetails.site_code === undefined ||
-            userdetails.site_code === ''
+                userdetails.site_code === undefined ||
+                userdetails.site_code === ''
                 ? null
                 : userdetails.site_code;
 
@@ -1886,14 +1915,14 @@ router.post('/updateRegionalUserDetails', async (req, res) => {
 
         const useractive =
             userdetails.active === true ||
-            userdetails.active === 'true'
+                userdetails.active === 'true'
                 ? 1
                 : 0;
 
         const siteid =
             userdetails.site_code === null ||
-            userdetails.site_code === undefined ||
-            userdetails.site_code === ''
+                userdetails.site_code === undefined ||
+                userdetails.site_code === ''
                 ? null
                 : userdetails.site_code;
 
@@ -2250,25 +2279,25 @@ router.post('/setEmployeeDetails', async (req, res) => {
 
         const empactive =
             empdetails.active === true ||
-            empdetails.active === 'true'
+                empdetails.active === 'true'
                 ? 1
                 : 0;
 
         const vehicle =
             empdetails.vechile === true ||
-            empdetails.vechile === 'true'
+                empdetails.vechile === 'true'
                 ? 1
                 : 0;
 
         const italert =
             empdetails.italert === true ||
-            empdetails.italert === 'true'
+                empdetails.italert === 'true'
                 ? 1
                 : 0;
 
         const adminalert =
             empdetails.adminalert === true ||
-            empdetails.adminalert === 'true'
+                empdetails.adminalert === 'true'
                 ? 1
                 : 0;
 
@@ -2517,25 +2546,25 @@ router.post('/updateEmployeeDetails', async (req, res) => {
 
         const empactive =
             empdata.active === true ||
-            empdata.active === 'true'
+                empdata.active === 'true'
                 ? 1
                 : 0;
 
         const vehicle =
             empdata.vechile === true ||
-            empdata.vechile === 'true'
+                empdata.vechile === 'true'
                 ? 1
                 : 0;
 
         const italert =
             empdata.italert === true ||
-            empdata.italert === 'true'
+                empdata.italert === 'true'
                 ? 1
                 : 0;
 
         const adminalert =
             empdata.adminalert === true ||
-            empdata.adminalert === 'true'
+                empdata.adminalert === 'true'
                 ? 1
                 : 0;
 
@@ -2696,7 +2725,7 @@ router.post('/setPassDetails', async (req, res) => {
 
         const passactive =
             passdetails.active === true ||
-            passdetails.active === 'true'
+                passdetails.active === 'true'
                 ? 1
                 : 0;
 
@@ -2854,7 +2883,7 @@ router.post('/UpdatePassDetails', async (req, res) => {
 
         const passactive =
             passdetails.active === true ||
-            passdetails.active === 'true'
+                passdetails.active === 'true'
                 ? 1
                 : 0;
 

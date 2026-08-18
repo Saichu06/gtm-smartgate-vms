@@ -4,6 +4,7 @@
  */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import initialOrgsData from '@mock/organizations.json';
+import masterApiService from '@services/masterApi.service';
 
 const OrganizationContext = createContext(null);
 
@@ -19,6 +20,37 @@ export const OrganizationProvider = ({ children }) => {
   });
 
   const [activeOrgId, setActiveOrgId] = useState(1);
+
+  // Fetch real PostgreSQL company data from Master API
+  useEffect(() => {
+    masterApiService
+      .getCompanyReport()
+      .then((res) => {
+        const rawData = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(rawData) && rawData.length > 0) {
+          const mappedOrgs = rawData.map((item, idx) => ({
+            id: item.id || idx + 1,
+            name: item.company_name || item.name || `Company ${item.id}`,
+            displayName: item.company_name || item.displayName || 'Company',
+            code: item.company_code || item.code || `COMP-${item.id}`,
+            industry: item.industry || 'Enterprise',
+            description: item.description || '',
+            website: item.website || '',
+            supportEmail: item.email || item.supportEmail || 'admin@smartgate.com',
+            supportPhone: item.mobile_no || item.supportPhone || '+91 9999999999',
+            country: item.country || 'India',
+            status: item.active !== false ? 'Active' : 'Inactive',
+            plan: 'Enterprise',
+            sites: item.site_count || 1,
+            employees: item.employee_count || 0,
+          }));
+          setOrganizations(mappedOrgs);
+        }
+      })
+      .catch((err) => {
+        console.warn('[OrganizationContext] Master Company Report fallback:', err.message || err);
+      });
+  }, []);
 
   // Sync organizations state to localStorage whenever modified
   useEffect(() => {

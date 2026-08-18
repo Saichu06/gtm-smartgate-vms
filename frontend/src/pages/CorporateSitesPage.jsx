@@ -18,6 +18,7 @@ import Input from '@components/forms/Input';
 import Select from '@components/forms/Select';
 import Toast from '@components/feedback/Toast';
 import { useOrganizations } from '@contexts/OrganizationContext';
+import masterApiService from '@services/masterApi.service';
 
 const SEED_SITES = [
   {
@@ -51,13 +52,37 @@ const CorporateSitesPage = () => {
   });
 
   useEffect(() => {
-    // Sync visitor counts from localStorage
-    const visitorData = JSON.parse(localStorage.getItem(`gtm_kiosk_visitors_${currentOrgId}`) || '[]');
-    const updatedSites = sites.map(s => {
-      const siteVisitors = visitorData.filter(v => (v.site || '').includes(s.name.split('—')[0].trim())).length;
-      return { ...s, visitorsToday: siteVisitors };
-    });
-    setSites(updatedSites);
+    let isMounted = true;
+    masterApiService
+      .getSiteReport()
+      .then((res) => {
+        if (!isMounted) return;
+        const rawData = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(rawData)) {
+          const mappedSites = rawData.map((item, idx) => ({
+            id: item.id || `SITE-${idx + 1}`,
+            name: item.site_name || item.store_name || item.name || `Site ${item.id}`,
+            code: item.site_code || item.code || `SITE-${idx + 1}`,
+            location: item.location || item.address1 || 'Headquarters',
+            type: 'Main Entrance',
+            kiosks: item.kiosk_count || 1,
+            online: 1,
+            officers: 1,
+            visitorsToday: 0,
+            status: item.active !== 0 ? 'Online' : 'Offline',
+            lastSync: 'Just now',
+          }));
+          setSites(mappedSites);
+        }
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        console.warn('[CorporateSitesPage] Master Site Report GET error:', err.message || err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [currentOrgId]);
 
   const saveSites = (updated) => {

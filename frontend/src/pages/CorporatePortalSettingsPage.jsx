@@ -183,6 +183,22 @@ const CorporatePortalSettingsPage = () => {
         setPrintTemplate(activeOrg.passConfig.printTemplate || 'Standard A6 Badge');
         setQrTemplate(activeOrg.passConfig.qrTemplate || 'Encrypted JSON Payload');
       }
+
+      // Read auto-prefix configuration from PostgreSQL GET API
+      masterApiService
+        .getAutoPrefixReport()
+        .then((res) => {
+          const rawData = Array.isArray(res) ? res : res?.data;
+          if (Array.isArray(rawData) && rawData.length > 0) {
+            const currentPrefixObj = rawData.find((p) => p.comp_id === activeOrg.id) || rawData[0];
+            if (currentPrefixObj?.site_prefix) {
+              setPassPrefix(currentPrefixObj.site_prefix);
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn('[CorporatePortalSettingsPage] Master Auto Prefix Report fallback:', err.message || err);
+        });
     }
   }, [activeOrg]);
 
