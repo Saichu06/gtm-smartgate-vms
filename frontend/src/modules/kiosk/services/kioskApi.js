@@ -1,6 +1,3 @@
-/**
- * Kiosk API — org-scoped mock backend with localStorage persistence.
- */
 import {
   getOrgEmployees,
   mapEmployeeForKiosk,
@@ -8,11 +5,40 @@ import {
   updateVisitor,
   getVisitors,
 } from '@utils/orgStorage';
+import masterApiService from '@services/masterApi.service';
 
-const delay = (ms = 800) => new Promise((r) => setTimeout(r, ms));
+const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
 export const searchEmployees = async (query, orgId = '1') => {
-  await delay(400);
+  try {
+    const res = await masterApiService.getEmployeeReport({ comp_id: orgId, site_id: 1 });
+    const rawData = Array.isArray(res) ? res : res?.data;
+    if (Array.isArray(rawData) && rawData.length > 0) {
+      const employees = rawData.map((emp, i) => ({
+        id: emp.id || `EMP-${i + 1}`,
+        name: emp.emp_name || emp.name || 'Employee',
+        email: emp.email || emp.emp_email || 'emp@smartgate.com',
+        phone: emp.phone || emp.mobile_no || '+91 9876543210',
+        department: emp.department || emp.dept || 'General',
+        designation: emp.designation || 'Staff',
+        site: emp.site_name || 'Main Gate',
+      }));
+
+      if (!query.trim()) return employees;
+
+      const q = query.toLowerCase();
+      return employees.filter(
+        (e) =>
+          e.name.toLowerCase().includes(q) ||
+          e.department.toLowerCase().includes(q) ||
+          e.designation.toLowerCase().includes(q)
+      );
+    }
+  } catch (err) {
+    console.warn('[KioskAPI] Master Employee query fallback:', err.message || err);
+  }
+
+  // Fallback to local storage seeds if DB unavailable
   const employees = getOrgEmployees(orgId)
     .filter((e) => e.status !== 'Inactive' && e.status !== 'On Leave')
     .map((emp, i) => mapEmployeeForKiosk(emp, i));
@@ -28,8 +54,37 @@ export const searchEmployees = async (query, orgId = '1') => {
   );
 };
 
-export const searchVisitorByPhone = async (phone) => {
-  await delay(600);
+export const searchVisitorByPhone = async (phone, orgId = '1') => {
+  try {
+    const res = await masterApiService.getVisitorDetails({
+      mobiledata: phone,
+      siteid: 1,
+      comp: orgId,
+      usercode: 'admin',
+    });
+    const rawData = Array.isArray(res) ? res : res?.data;
+    if (Array.isArray(rawData) && rawData.length > 0) {
+      const v = rawData[0];
+      return {
+        found: true,
+        visitor: {
+          phone,
+          firstName: (v.visitor_name || '').split(' ')[0] || 'Returning',
+          lastName: (v.visitor_name || '').split(' ').slice(1).join(' ') || 'Visitor',
+          company: v.coming_from || 'Walk-in',
+          email: v.email || '',
+          purpose: v.purpose || 'Business Visit',
+          vehicleNumber: v.vehicle_no || '',
+          visitorType: v.visitors_type || 'Business Visitor',
+          expectedDuration: '2 Hours',
+          isReturning: true,
+        },
+      };
+    }
+  } catch (err) {
+    console.warn('[KioskAPI] Master Visitor details query fallback:', err.message || err);
+  }
+
   if (phone === '9876543210' || phone === '9999999999') {
     return {
       found: true,
